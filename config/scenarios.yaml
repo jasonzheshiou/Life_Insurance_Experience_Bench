@@ -1,0 +1,360 @@
+# =============================================================================
+# Scenario registry for the Data Pipeline Arena dataset.
+#
+# This is the SINGLE SOURCE OF TRUTH for the arena's scenario set. The
+# generation script (scripts/generate_scenarios.py) reads this file; it does
+# not hard-code any scenario. To add scenarios later, append entries here (or
+# drop a file into config/scenarios.d/ which is merged at load time).
+#
+# Every control's parameters are editable freely within the generator's
+# validated ranges: drift slope in [-0.9, 5.0], volatility sigma in [0, 1.0],
+# shock factors > 0, recovery factors > 0.
+#
+# Splits: optimization (training) and heldout (testing) are disjoint by
+# (benefit set x control type x window x factor). The script verifies this
+# before generating anything.
+# =============================================================================
+
+# --- scales (change `default_scale` or pass --scale on the CLI) -------------
+scales:
+  tiny:
+    n_policies: 5000
+    target_factor: 0.02        # ~100 / 240 / 160 / 300 claims
+  medium:
+    n_policies: 25000
+    target_factor: 0.1         # ~500 / 1200 / 800 / 1500 claims
+  full:
+    n_policies: 250000
+    target_factor: 1.0         # 5000 / 12000 / 8000 / 15000 claims
+default_scale: medium
+
+# --- fixed study design ------------------------------------------------------
+seed: 42
+study:
+  start: "2015-01-01"
+  end: "2024-12-31"
+base_targets: {Death: 5000, CI: 12000, TPD: 8000, IP: 15000}
+
+# --- scenario list -----------------------------------------------------------
+# family: none | drift | shock | volatility | noise_trap | recovery | mixed | systemic
+# split:  optimization (training) | heldout (testing)
+# no_op:  true for baseline/neutral scenarios (no injected anomaly)
+# controls: list of injected controls:
+#   drift:      {type: drift,      benefit: <Benefit>|all, window: [y0, y1], slope: <float>}
+#   shock:      {type: shock,      name: <str>, window: [y0, y1], factors: {<Benefit>: <float>}}
+#   volatility: {type: volatility, benefit: <Benefit>|all, window: [y0, y1], sigma: <float>}
+#   ip_recovery:{type: ip_recovery, window: [y0, y1], factors: {<Diagnosis>: <float>}}
+# Window is inclusive [start_year, end_year]. benefit=all / missing benefit
+# means the control applies to all four benefits.
+# =============================================================================
+
+scenarios:
+  # ---- none / baseline ------------------------------------------------------
+  - id: baseline
+    family: none
+    split: optimization
+    no_op: true
+    controls: []
+
+  - id: noop_neutral_controls
+    family: none
+    split: heldout
+    no_op: true
+    neutral: true          # all controls present at neutral values (exact no-op)
+    controls: []
+
+  # ---- drift ----------------------------------------------------------------
+  - id: drift_death_up_2018_2024
+    family: drift
+    split: optimization
+    controls:
+      - {type: drift, benefit: Death, window: [2018, 2024], slope: 0.15}
+
+  - id: drift_ci_down_2016_2019
+    family: drift
+    split: optimization
+    controls:
+      - {type: drift, benefit: CI, window: [2016, 2019], slope: -0.10}
+
+  - id: drift_tpd_up_2019_2021
+    family: drift
+    split: optimization
+    controls:
+      - {type: drift, benefit: TPD, window: [2019, 2021], slope: 0.08}
+
+  - id: drift_death_up_2015_2017
+    family: drift
+    split: heldout
+    controls:
+      - {type: drift, benefit: Death, window: [2015, 2017], slope: 0.15}
+
+  - id: drift_ip_down_2020_2024
+    family: drift
+    split: heldout
+    controls:
+      - {type: drift, benefit: IP, window: [2020, 2024], slope: -0.10}
+
+  - id: drift_ci_up_2021_2023
+    family: drift
+    split: heldout
+    controls:
+      - {type: drift, benefit: CI, window: [2021, 2023], slope: 0.05}
+
+  # ---- shock ----------------------------------------------------------------
+  - id: shock_covid_2020_2022
+    family: shock
+    split: optimization
+    controls:
+      - {type: shock, name: covid, window: [2020, 2022], factors: {Death: 1.5}}
+
+  - id: shock_ci_2021_2022
+    family: shock
+    split: optimization
+    controls:
+      - {type: shock, name: ci2021, window: [2021, 2022], factors: {CI: 1.4}}
+
+  - id: shock_tpd_ip_2023
+    family: shock
+    split: optimization
+    controls:
+      - {type: shock, name: tpdip2023, window: [2023, 2023], factors: {TPD: 1.3, IP: 1.2}}
+
+  - id: shock_death_2016
+    family: shock
+    split: heldout
+    controls:
+      - {type: shock, name: d2016, window: [2016, 2016], factors: {Death: 1.3}}
+
+  - id: shock_ip_2018_2019
+    family: shock
+    split: heldout
+    controls:
+      - {type: shock, name: ip1819, window: [2018, 2019], factors: {IP: 1.5}}
+
+  - id: shock_ci_tpd_2015_2016
+    family: shock
+    split: heldout
+    controls:
+      - {type: shock, name: citpd1516, window: [2015, 2016], factors: {CI: 1.2, TPD: 1.4}}
+
+  # ---- volatility -----------------------------------------------------------
+  - id: volatility_ip_sigma_03
+    family: volatility
+    split: optimization
+    controls:
+      - {type: volatility, benefit: IP, window: [2015, 2024], sigma: 0.3}
+
+  - id: volatility_death_sigma_02
+    family: volatility
+    split: optimization
+    controls:
+      - {type: volatility, benefit: Death, window: [2015, 2024], sigma: 0.2}
+
+  - id: volatility_ci_sigma_015
+    family: volatility
+    split: heldout
+    controls:
+      - {type: volatility, benefit: CI, window: [2015, 2024], sigma: 0.15}
+
+  - id: volatility_tpd_sigma_04
+    family: volatility
+    split: heldout
+    controls:
+      - {type: volatility, benefit: TPD, window: [2015, 2024], sigma: 0.4}
+
+  # ---- noise traps (random variance only; no trend/shock is true) -----------
+  - id: trap_noise_drift_lookalike
+    family: noise_trap
+    split: optimization
+    controls:
+      - {type: volatility, benefit: Death, window: [2016, 2020], sigma: 0.35}
+
+  - id: trap_noise_spike_lookalike
+    family: noise_trap
+    split: optimization
+    controls:
+      - {type: volatility, benefit: all, window: [2020, 2022], sigma: 0.4}
+
+  - id: trap_noise_drift_lookalike_b
+    family: noise_trap
+    split: heldout
+    controls:
+      - {type: volatility, benefit: CI, window: [2017, 2023], sigma: 0.3}
+
+  - id: trap_noise_spike_lookalike_b
+    family: noise_trap
+    split: heldout
+    controls:
+      - {type: volatility, benefit: IP, window: [2018, 2020], sigma: 0.45}
+
+  # ---- IP recovery ----------------------------------------------------------
+  - id: ip_recovery_mental_health_x2
+    family: recovery
+    split: optimization
+    controls:
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Mental Health": 2.0}}
+
+  - id: ip_recovery_cancer_x05
+    family: recovery
+    split: optimization
+    controls:
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Cancer": 0.5}}
+
+  - id: ip_recovery_injury_x15
+    family: recovery
+    split: heldout
+    controls:
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Injury/Accident": 1.5}}
+
+  - id: ip_recovery_cardio_x04
+    family: recovery
+    split: heldout
+    controls:
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Cardiovascular": 0.4}}
+
+  - id: ip_recovery_mh_msk
+    family: recovery
+    split: heldout
+    controls:
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Mental Health": 2.5, "Musculoskeletal": 1.5}}
+
+  # ---- mixed (independent controls on different benefits) --------------------
+  - id: mixed_drift_death_shock_ci
+    family: mixed
+    split: optimization
+    controls:
+      - {type: drift, benefit: Death, window: [2019, 2024], slope: 0.08}
+      - {type: shock, name: ci2021b, window: [2021, 2021], factors: {CI: 1.4}}
+
+  - id: mixed_drift_ip_vol_death
+    family: mixed
+    split: optimization
+    controls:
+      - {type: drift, benefit: IP, window: [2018, 2022], slope: 0.07}
+      - {type: volatility, benefit: Death, window: [2019, 2022], sigma: 0.25}
+
+  - id: mixed_shock_tpd_drift_death
+    family: mixed
+    split: heldout
+    controls:
+      - {type: shock, name: tpd2020, window: [2020, 2021], factors: {TPD: 1.3}}
+      - {type: drift, benefit: Death, window: [2016, 2019], slope: 0.06}
+
+  - id: mixed_triple_ci_ip_mh
+    family: mixed
+    split: heldout
+    controls:
+      - {type: drift, benefit: CI, window: [2020, 2024], slope: 0.05}
+      - {type: volatility, benefit: IP, window: [2015, 2024], sigma: 0.15}
+      - {type: ip_recovery, window: [2015, 2024], factors: {"Mental Health": 1.5}}
+
+  # ---- systemic (correlated cross-benefit) -----------------------------------
+  - id: sys_shock_crisis_2020_2022
+    family: systemic
+    split: optimization
+    controls:
+      - {type: shock, name: crisis, window: [2020, 2022], factors: {Death: 1.5, CI: 1.3, TPD: 1.2, IP: 1.1}}
+
+  - id: sys_drift_aging_2018_2024
+    family: systemic
+    split: optimization
+    controls:
+      - {type: drift, benefit: Death, window: [2018, 2024], slope: 0.06}
+      - {type: drift, benefit: CI, window: [2018, 2024], slope: 0.04}
+      - {type: drift, benefit: TPD, window: [2018, 2024], slope: 0.03}
+      - {type: drift, benefit: IP, window: [2018, 2024], slope: 0.02}
+
+  - id: sys_vol_macro_2019_2021
+    family: systemic
+    split: optimization
+    controls:
+      - {type: volatility, benefit: all, window: [2019, 2021], sigma: 0.25}
+
+  - id: sys_cascade_shock_drift_2020
+    family: systemic
+    split: optimization
+    controls:
+      - {type: shock, name: casc1, window: [2020, 2020], factors: {Death: 1.4, CI: 1.2}}
+      - {type: drift, benefit: Death, window: [2021, 2024], slope: 0.05}
+      - {type: drift, benefit: CI, window: [2021, 2024], slope: 0.04}
+
+  - id: sys_shock_inverse_2021_2022
+    family: systemic
+    split: optimization
+    controls:
+      - {type: shock, name: inv1, window: [2021, 2022], factors: {Death: 1.4, CI: 0.6}}
+
+  - id: sys_drift_diverge_2018_2024
+    family: systemic
+    split: optimization
+    controls:
+      - {type: drift, benefit: Death, window: [2018, 2024], slope: 0.06}
+      - {type: drift, benefit: CI, window: [2018, 2024], slope: -0.04}
+
+  - id: sys_shock_crisis_2015_2016
+    family: systemic
+    split: heldout
+    controls:
+      - {type: shock, name: crisis2, window: [2015, 2016], factors: {Death: 1.4, CI: 1.2, IP: 1.1}}
+
+  - id: sys_drift_aging_2016_2019
+    family: systemic
+    split: heldout
+    controls:
+      - {type: drift, benefit: Death, window: [2016, 2019], slope: 0.05}
+      - {type: drift, benefit: CI, window: [2016, 2019], slope: 0.03}
+      - {type: drift, benefit: IP, window: [2016, 2019], slope: 0.02}
+
+  - id: sys_vol_macro_2020_2024
+    family: systemic
+    split: heldout
+    controls:
+      - {type: volatility, benefit: all, window: [2020, 2024], sigma: 0.15}
+
+  - id: sys_cascade_drift_shock_2018
+    family: systemic
+    split: heldout
+    controls:
+      - {type: drift, benefit: Death, window: [2016, 2019], slope: 0.05}
+      - {type: drift, benefit: IP, window: [2016, 2019], slope: 0.03}
+      - {type: shock, name: casc2, window: [2020, 2020], factors: {Death: 1.3, IP: 1.2}}
+
+  - id: sys_shock_inverse_2017_2019
+    family: systemic
+    split: heldout
+    controls:
+      - {type: shock, name: inv2, window: [2017, 2019], factors: {Death: 1.3, IP: 0.7}}
+
+  - id: sys_drift_diverge_2020_2023
+    family: systemic
+    split: heldout
+    controls:
+      - {type: drift, benefit: TPD, window: [2020, 2023], slope: 0.05}
+      - {type: drift, benefit: IP, window: [2020, 2023], slope: -0.03}
+
+  # ---- systemic TPD x IP positive correlation --------------------------------
+  - id: sys_trend_tpd_ip_2019_2023
+    family: systemic
+    split: optimization
+    controls:
+      - {type: drift, benefit: TPD, window: [2019, 2023], slope: 0.05}
+      - {type: drift, benefit: IP, window: [2019, 2023], slope: 0.04}
+
+  - id: sys_shock_tpd_ip_2021_2022
+    family: systemic
+    split: optimization
+    controls:
+      - {type: shock, name: tpdip21, window: [2021, 2022], factors: {TPD: 1.4, IP: 1.3}}
+
+  - id: sys_trend_tpd_ip_2015_2018
+    family: systemic
+    split: heldout
+    controls:
+      - {type: drift, benefit: TPD, window: [2015, 2018], slope: 0.04}
+      - {type: drift, benefit: IP, window: [2015, 2018], slope: 0.03}
+
+  - id: sys_shock_tpd_ip_2022
+    family: systemic
+    split: heldout
+    controls:
+      - {type: shock, name: tpdip22, window: [2022, 2022], factors: {TPD: 1.3, IP: 1.2}}
