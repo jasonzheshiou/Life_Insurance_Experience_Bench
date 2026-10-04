@@ -24,33 +24,39 @@ result to be dependable?**
 
 ### 0 · Why this matters for governance
 
-An A/E review is a control point. It sits between a book of experience and a pricing
-or reserving decision, and it is exactly the judgement an auditor, an appointed
-actuary or a regulator will ask about. If a model is going to sit anywhere near that
-process — drafting experience commentary, flagging a line to investigate, triaging
-forty portfolios a week — then "it usually looks right" is not a sign-off. Someone has
-to be able to state, in writing, what it catches, what it misses, what it invents, and
-how all three move when the model changes.
+The question this project was built to answer is not "is A/E analysis important" — it is:
+**if an LLM is going to do experience-study work, how does anyone responsible find out
+what they actually have?** Not whether one demo looked convincing, but whether the
+model's behaviour is known, priced, and re-checkable when it changes. That is a
+governance problem, and it decomposes into four questions that a benchmark can actually
+answer:
 
-Every non-obvious design decision here follows from that requirement rather than from
-convenience:
+| what someone has to be able to ask | how this repo makes it answerable | what the answer turned out to be |
+|---|---|---|
+| **How good is the model at this?** | a generated answer key that cannot move after the exam (`data/truth/seal.json`), a held-out split mounted and scored **once**, and strict matching so a vague or mislabelled answer earns nothing | 3.8 **71.2 %**, 3.6 **65.8 %** accuracy — but precision tells the opposite story, which is why both are headline metrics |
+| **What does it miss, and what does it invent?** | accuracy (found ÷ there) and FP/claim (wrong ÷ spoken) reported separately and never blended into one score | the two fail in opposite directions: 3.8 invents (34 % precision unaided), 3.6 omits (already 60 % precise) |
+| **What does it cost?** | wall-clock, reasoning volume and completion tokens recorded per run, reported beside the score rather than in a separate budget slide | **~3× apart.** 3.6 ≈ 4.8 min/book vs 3.8 ≈ 13.5; a 72-call exam ≈ 6 h vs ≈ 16 h. 3.6 delivers ~93 % of the accuracy at a third of the cost, with better precision |
+| **Is the pipeline around it appropriate, or does it need updating — and on what evidence?** | harness bytes and prompt hashed into every corpus; the optimization-vs-heldout gap published as a metric; every edit recorded with its hypothesis, its verification and its regression check | it needed updating **per model**, and the record says which edit fixed which failure — plus one fix deliberately declined (INDEX §8) |
 
-| Governance requirement | Mechanism in this repo |
-|---|---|
-| The answer key must be knowable | Ground truth is **generated**, never hand-labelled: every planted control is recorded in `data/truth/manifests/` |
-| The answer key must not move after the exam | `data/eval/dataset.json` seals the model-facing tree; `data/truth/seal.json` is the sha256 commitment, written before any run and re-checked by the runner on every invocation |
-| The model must not be able to read the answer | Opaque `sc-<6hex>` ids on the model-facing side; descriptive names and manifests live in a separate zone; a byte-level leak scan (`scripts/leakcheck.py`) runs at build time and again before the first prompt |
-| Every model must sit the same exam | `dataset.json` hashes every model-facing file, so identical inputs are provable, not assumed |
-| Tuning must not contaminate the reported number | `optimization` (23 books) and `heldout` (24 books) are disjoint by benefit × control × window × factor; the held-out split is mounted once and scored once |
-| A score must be attributable to exact code | Every corpus ships `harness_snapshot/` + `MANIFEST.txt` with full sha256 of the pack, runner and prompt that produced it |
-| Failures must stay visible | `sc-e6ffa4` is published as a **recorded failure** with a declined fix (INDEX §8), not patched into silence |
+The unit being governed is therefore **the model and its harness as one assembly**, not
+the model alone. A vendor change letter saying "we upgraded the model" is not enough to
+re-assess, because what changed is behaviour: how the model reasons, how much it
+verifies before asserting, whether it reaches for a tool at all. Re-measure the pair.
 
-Governance is also why the unflattering numbers are in this README instead of a
-footnote. The frozen harnesses scored **97.7 %** and **95.5 %** on the optimization
-split; the same frozen harnesses on held-out data scored **69.1 %** and **64.2 %** — an
-optimism gap of roughly 30 points for *both* models. Any sign-off taken from
-tuning-set performance would have overshot by that much. A benchmark that only reports
-its tuning set is not evidence.
+Two consequences of taking that seriously, both uncomfortable and both published here:
+
+- **The answer key must be knowable and fixed.** Ground truth is *generated*, never
+  hand-labelled; the model-facing side carries only opaque `sc-<6hex>` ids while names
+  and manifests live in a separate zone; a byte-level leak scan runs at build time and
+  again before the first prompt; `dataset.json` hashes every model-facing file so
+  identical inputs across models are provable rather than assumed.
+- **Tuning must not contaminate the reported number.** The frozen harnesses scored
+  **97.7 %** and **95.5 %** on the optimization split; the same frozen harnesses on
+  held-out data scored **69.1 %** and **64.2 %** — an optimism gap of roughly 30 points
+  for *both* models. Any sign-off taken from tuning-set performance would have overshot
+  by that much. A benchmark that reports only its tuning set is not evidence, which is
+  also why `sc-e6ffa4` is published as a **recorded failure** rather than patched into
+  silence.
 
 ### 1 · Measuring an LLM's ability to find insight in actuarial A/E data
 
@@ -144,6 +150,14 @@ per-scenario diary entries**, 268 of which involved a harness review or edit; an
 the other subject, two kept edits from the same base. Both lineages are frozen in the
 repo, so the framework can be inspected, not just described — and so a later reader can
 see the edits that were *declined* (runbook §36) as well as the ones kept.
+
+**The method has a price, and governance means pricing it.** On one llama.cpp slot at
+~19 min per book for 3.8 and ~5 min for 3.6, a single 23-book optimization pass costs
+**~7 hours** for 3.8 and **~2 hours** for 3.6, and a 72-call held-out exam **~16 hours**
+versus **~6 hours**. Every harness version cost a pass, so the whole study ran to several
+days of exclusive serving time. That is what the one-hypothesis-per-pass discipline is
+*for*: brute-force prompt search is affordable on a cloud endpoint and ruinous here, and
+it is also why the cheaper model's harness converged in two kept edits instead of seven.
 
 Two honest caveats. First, the loop was steered by a human who chose which failures to
 pursue; the model proposed and applied edits, it did not set the agenda. Second, the
@@ -337,6 +351,7 @@ any number in this repo:
 |---|---|---|
 | **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted, without inventing? | [the report](docs/REPORT_qwen36_vs_qwen38.md), INDEX §6 |
 | **harness** | how much of that is the evidence pack, the rules block and the prompt, and does it transfer? | purposes 2–3 above; INDEX §3, §5–6 |
+| **cost** | what does one answer cost, and did the harness earn its keep? | report §2.4.6 — run time, reasoning volume, tokens, throughput |
 
 The planned Stage-2 variant — the model writing and iterating its own *pipeline* over
 many turns — was never built; what was built is the single-turn evidence-pack harness

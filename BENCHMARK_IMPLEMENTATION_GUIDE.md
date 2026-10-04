@@ -66,6 +66,11 @@ taught by reinforcement:
   in ~24 % of 3.8's runs and **0 of 144** of 3.6's.
 - The optimization-vs-heldout gap — the metric §7.4 predicted — came out at **~30 points
   for both models** (3.8: 97.7 → 69.1; 3.6: 95.5 → 64.2, both on the full held-out split).
+- §0's requirement to record **cost beside accuracy** was honoured for wall-clock and
+  tokens (not for iterations or human interventions, which never existed), and it changed
+  the conclusion rather than decorating it: Qwen3.6 reached ~93 % of Qwen3.8's held-out
+  accuracy at roughly **one third** of the time and tokens with better precision, so the
+  cost figures are part of the ranking argument rather than an appendix.
 
 An implementation from scratch today should read §11 and §5.2 as the parts of this guide
 that earned their cost, and treat Stage 2 as an open extension rather than a task.

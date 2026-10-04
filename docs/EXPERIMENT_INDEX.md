@@ -9,15 +9,16 @@ Last updated: end of the Qwen3.6-27B campaign and the cross-model harness matrix
 
 > **Why these two campaigns exist** (the short version; the full argument is in
 > [README § Why This Project Exists](../README.md#-why-this-project-exists--four-purposes)):
-> **(0)** governance — an A/E review is an auditable control point, so a model's
-> catches, misses and inventions have to be stated in writing before it is trusted near
-> one; **(1)** measure whether an LLM can find an actuarial insight in A/E experience
-> data; **(2)** quantify what the harness is worth, and whether it transfers — Qwen3.6
-> and Qwen3.8 share size and architecture, so everything that differs between them is
-> behaviour taught by reinforcement, which is exactly the variable that decides what a
-> harness must do; **(3)** record a reusable method for *building* a harness from model
-> evidence. Sections 2–6 below are the evidence for (1) and (2); section 3 and the
-> runbooks are the method for (3).
+> **(0)** governance of the *model and its pipeline*, not of the actuarial output — how do
+> you know how good a model is at experience-study work, what it costs, and whether the
+> pipeline wrapped around it is appropriate or needs updating and why; **(1)** measure
+> whether an LLM can find an actuarial insight in A/E experience data; **(2)** quantify
+> what the harness is worth, and whether it transfers — Qwen3.6 and Qwen3.8 share size and
+> architecture, so everything that differs between them is behaviour taught by
+> reinforcement, which is exactly the variable that decides what a harness must do;
+> **(3)** record a reusable method for *building* a harness from model evidence.
+> Sections 2–6 below are the evidence for (1) and (2); section 3 and the runbooks are the
+> method for (3).
 
 ---
 
