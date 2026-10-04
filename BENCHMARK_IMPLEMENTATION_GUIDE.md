@@ -1,79 +1,79 @@
 # Anomaly-Detection Benchmark — Implementation Guide
 
 > **Audience:** an LLM (or engineer) implementing this from scratch in a NEW folder.
-> **Purpose:** a controlled, repeatable sandbox that (1) lets different AI models
-> build their own pipeline to detect trend anomalies in synthetic life-insurance
-> experience data, (2) compares models/architectures on an objective leaderboard,
-> and (3) produces a Markdown report a human can validate.
+>
+> **Purpose:** a controlled, repeatable sandbox that does three things. It lets different AI
+> models build their own pipeline to detect trend anomalies in synthetic life-insurance
+> experience data. It compares models and architectures on an objective leaderboard. And it
+> produces a Markdown report a human can validate.
+>
 > **Source data:** the "Synthetic Life Insurance Experience Data Generator" repo
 > — [jasonzheshiou/Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)
-> (pure-Python, deterministic, seed=42). This benchmark is a separate project that
-> consumes that generator's outputs.
+> (pure-Python, deterministic, seed=42). This benchmark is a separate project that consumes
+> that generator's outputs.
 
 ---
 
-## 0·A Status of this guide — read before implementing anything
+## 0·A Status of this guide — read this before implementing anything
 
-**This document is the plan as written before the first experiment ran. It is kept
-unaltered in intent and is now annotated, not rewritten, so the gap between intention
-and outcome stays legible.** What was built, and what the two model campaigns actually
-measured, is in [README.md](README.md) (purpose and status),
+**This is the plan as written before the first experiment ran.** The plan is kept as it was,
+with status notes added rather than rewrites, so you can still see the gap between intention
+and outcome. For what was built and what was measured, read
+[README.md](README.md) (purpose and status),
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) (everything, with paths) and
 [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) (the findings).
 
 **Built, and used for every published number**
 
-| guide section | what shipped instead of nothing |
+| guide section | what shipped |
 |---|---|
 | §1 domain background | correct as written — A/E ≈ 1.0 baseline, four benefit lines, Poisson noise ~ 1/√target |
-| §2.4 strict split, §5.2 ZONE A / ZONE B | exactly as specified: `data/eval/` opaque ids, `data/truth/` manifests, `dataset.json` + `seal.json`, `scripts/leakcheck.py` |
-| §2.3 structured verdict, malformed = miss | `findings` JSON + scorer v3 strict matching; `strict=False` tolerance added for raw control characters |
-| §2.7 reproducibility pins | stronger than specified: every corpus carries `harness_snapshot/` + `MANIFEST.txt` with full sha256 of pack, runner and prompt |
-| §8 scoring | accuracy (strict hits / units) + FP/claim, on a unit = control × run ledger with book-wide controls expanded per benefit line |
+| §2.4 strict split, §5.2 ZONE A / ZONE B | exactly as specified: opaque ids in `data/eval/`, manifests in `data/truth/`, `dataset.json` + `seal.json`, `scripts/leakcheck.py` |
+| §2.3 structured verdict, malformed = miss | `findings` JSON + scorer v3 strict matching; added `strict=False` tolerance for raw control characters |
+| §2.7 reproducibility pins | stronger than specified: every corpus carries `harness_snapshot/` + `MANIFEST.txt` with the full sha256 of pack, runner and prompt |
+| §8 scoring | accuracy (strict hits / units) + FP/claim, on a unit = control × run ledger, with book-wide controls expanded per benefit line |
 
 **Built differently than specified**
 
-| guide section | specified | actual |
+| guide section | specified | what was built |
 |---|---|---|
-| §6–7 Stage 1 + Stage 2 | multi-turn free-code pipeline building, ≤5 iterations, frozen submission | **one turn**, with up to 4 sandboxed python *analysis* calls, plus a deterministic evidence pack; multi-turn pipeline construction was never built |
-| §3, §10 packaging | `src/abench/` package + `abench` CLI + `pyproject.toml` | flat `scripts/` modules, no package, no CLI, no install step |
-| §4.1–4.2 schemas | pydantic `ScenarioManifest` / `Verdict` classes | JSON manifests + a plain-dict scorer; no pydantic in the loop |
+| §6–7 Stage 1 + Stage 2 | multi-turn free-code pipeline building, ≤5 iterations, frozen submission | **one turn**, with up to 4 sandboxed python *analysis* calls and a deterministic evidence pack. Multi-turn pipeline construction was never built. |
+| §3, §10 packaging | `src/abench/` package + `abench` CLI + `pyproject.toml` | flat `scripts/` modules. No package, no CLI, no install step. |
+| §4.1–4.2 schemas | pydantic `ScenarioManifest` / `Verdict` classes | JSON manifests + a plain-dict scorer; pydantic is not in the loop |
 | §5.3 starter set | 6 canonical scenarios + heldout variants | 47 books in 8 families (`config/scenarios.yaml`), see [docs/scenario-catalog.md](docs/scenario-catalog.md) |
-| §7.4 iteration feedback | scores fed back to the *subject* model on the optimization set | feedback consumed by the **operator-side harness author**, not the subject; the subject gets one cold turn per book |
-| §8.3 effort metrics | tokens, wall-clock, iterations, code length, human interventions | token + wall-clock recorded per run; iteration/human-intervention counters never existed |
+| §7.4 iteration feedback | scores fed back to the *subject* model on the optimization set | feedback consumed by the **operator-side harness author** instead. The subject gets one cold turn per book. |
+| §8.3 effort metrics | tokens, wall-clock, iterations, code length, human interventions | tokens and wall-clock per run. Iteration and human-intervention counters never existed. |
 
-**Never built** — §7.3 sandbox tiers (what runs is `python -I -c`, 10 s, 4 000-char cap,
+**Never built**: §7.3 sandbox tiers (what runs is `python -I -c`, 10 s, 4 000-char cap —
 **no rlimits, no network block, no filesystem jail**: advisory only); §8.2 window IoU and
 magnitude error; §2.5 N×K median + spread (runs were summed, not summarised); §8.4 the
 classical control-chart baseline; §9 Stage-3 report and blind human validation; §12
 acceptance tests beyond the registry invariants.
 
-### What the study measured, and how it changes the guide's thesis
+### What the study found, and what it does to the thesis
 
-The thesis in §0 ("does the optimal *architecture around the model* change as model
-capabilities change?") was answered **yes**, and answered better than expected — because
-the two subjects were the same size and architecture, and differed only in behaviour
-taught by reinforcement:
+The answer to the thesis in §0 ("does the best architecture around a model change as the
+model changes?") is **yes** — and the evidence is cleaner than expected, because both
+subjects had the same size and architecture and differed only in behaviour learned by
+reinforcement:
 
-- Each model scored best with the harness tuned **for it**: Qwen3.8 71.2 % own vs 70.3 %
-  on 3.6's harness; Qwen3.6 65.8 % own vs 64.9 % on 3.8's. A harness is per-model
-  infrastructure, not portable infrastructure.
-- The same harness bought Qwen3.8 **+23.8 points of precision** (34.3 % → 58.1 %) and
-  Qwen3.6 **+1.3 points** (60.0 % → 61.3 %) — because the two models fail differently.
-  3.8 over-claims (+31 of 69 false positives were invented, not mislabelled); 3.6 is
-  cautious and under-claims.
-- Behaviour decided whether a harness feature existed at all: the offered tool was used
-  in ~24 % of 3.8's runs and **0 of 144** of 3.6's.
-- The optimization-vs-heldout gap — the metric §7.4 predicted — came out at **~30 points
-  for both models** (3.8: 97.7 → 69.1; 3.6: 95.5 → 64.2, both on the full held-out split).
-- §0's requirement to record **cost beside accuracy** was honoured for wall-clock and
-  tokens (not for iterations or human interventions, which never existed), and it changed
-  the conclusion rather than decorating it: Qwen3.6 reached ~93 % of Qwen3.8's held-out
-  accuracy at roughly **one third** of the time and tokens with better precision, so the
-  cost figures are part of the ranking argument rather than an appendix.
+- Each model did best with the harness tuned **for it**: 3.8 got 71.2 % on its own harness
+  and 70.3 % on 3.6's; 3.6 got 65.8 % on its own and 64.9 % on 3.8's. A harness is
+  per-model equipment, not portable equipment.
+- The same harness gave 3.8 **+23.8 points of precision** (34.3 % → 58.1 %) and 3.6
+  **+1.3 points** (60.0 % → 61.3 %). The models fail differently: 3.8 claims too much (31
+  of 69 false alarms were invented rather than mislabelled), 3.6 holds back.
+- Behaviour decided whether a harness feature existed at all. The offered tool was used in
+  about 24 % of 3.8's runs and **0 of 144** of 3.6's.
+- The optimization-vs-heldout gap that §7.4 predicted came out at **about 30 points for
+  both models** (3.8: 97.7 → 69.1; 3.6: 95.5 → 64.2, both on the full held-out split).
+- §0 asked for **cost recorded beside accuracy**. Wall-clock and tokens were, iterations and
+  human interventions were not. It changed the conclusion instead of decorating it: 3.6
+  reached about 93 % of 3.8's held-out accuracy at about a third of the time and tokens,
+  with better precision, so cost is part of the ranking argument.
 
-An implementation from scratch today should read §11 and §5.2 as the parts of this guide
-that earned their cost, and treat Stage 2 as an open extension rather than a task.
+If you implement this from scratch today, treat §11 and §5.2 as the parts that earned their
+cost, and treat Stage 2 as an open extension rather than a task.
 
 ---
 
@@ -154,17 +154,17 @@ by `experience generate --out <dir>`; pipelines may use either the precomputed A
 tables or the raw store. **Hand pipelines the raw store for the hardest version;
 the A/E tables are the easier version.**
 
-> **What actually shipped, per book** (`data/eval/<split>/<sc-xxxxxx>/`, 34 files, of
-> which 29 are published): `artifacts/ae_<benefit>_by_year.csv|.png`,
+> **What actually shipped.** Each published book (`data/eval/<split>/<sc-xxxxxx>/`) holds
+> 34 files, 29 of them in the repo:
+> `artifacts/ae_<benefit>_by_year.csv|.png`,
 > `artifacts/ae_<benefit>_age_gender.csv|.png`, `artifacts/ae_<benefit>.csv`,
 > `artifacts/ae_ip_termination.csv`, `artifacts/ae_ip_termination_by_month.csv|.png`,
 > `artifacts/summary.json`, `artifacts/scenario_id.txt`, top-level `<Benefit>.csv`
-> per benefit, plus the excluded bulk (`exposure.csv`, `<benefit>_claims.csv`). The raw
+> per benefit, plus the excluded bulk files (`exposure.csv`, `<benefit>_claims.csv`). The raw
 > store keeps **both** `.csv` and `.parquet` per table plus `metadata.json`, in
-> `data/raw/<id>/store/` alongside `run_info.json` — none of it published. The
-> model-facing prompt **lists every file in the scenario
-> directory**, so which files exist is itself part of the prompt (see the clone caveat
-> in the README).
+> `data/raw/<id>/store/` alongside `run_info.json` — none of it published. Note that the
+> model-facing prompt **lists every file in the scenario directory**, so which files exist
+> is part of the prompt (see the clone caveat in the README).
 
 ### Ground truth
 The ground truth is the **scenario manifest** (which control, which benefit, which
@@ -274,12 +274,8 @@ class ScenarioManifest(BaseModel):
 
 ### 4.2 `Verdict` (what every model/submission must emit)
 
-> **What actually shipped.** No pydantic model exists; the contract is prose in the
-> pinned system prompt, and it is the schema below. Two things differ from the design in
-> a way worth keeping: `overall_assessment` forces an explicit `clean` verdict, and
-> `recommended_action` asks for the actuarial follow-up an underwriter or pricing
-> actuary would take — which is what makes the answer an *insight* rather than a
-> pattern label. The scorer ignores `recommended_action` and `confidence`.
+> **What actually shipped.** No pydantic model was built. The contract is written as prose in
+> the pinned system prompt, and asks for this shape:
 >
 > ```json
 > {"scenario_id": "<given id>",
@@ -293,8 +289,14 @@ class ScenarioManifest(BaseModel):
 >                "recommended_action": "what to do next"}]}
 > ```
 >
-> Unparseable JSON is a miss, with one tolerated deviation: `json.loads(..., strict=False)`
-> so a raw newline inside a string does not destroy an otherwise correct answer.
+> Two differences from the design are worth keeping. `overall_assessment` forces an explicit
+> `clean` answer, and `recommended_action` asks for the actuarial follow-up — that is what
+> makes the answer an *insight* instead of a labelled pattern. The scorer ignores
+> `recommended_action` and `confidence`.
+>
+> Unparseable JSON scores as a miss, with one tolerated exception: the parser uses
+> `json.loads(..., strict=False)`, so a raw newline inside a string does not throw away an
+> otherwise correct answer.
 
 ```python
 class AnomalyClaim(BaseModel):
@@ -344,13 +346,13 @@ Reuse the generator rather than reimplementing it:
 - **Option 2:** import the generator as a library (`pip install -e <generator path>`)
   and call its pipeline API directly.
 
-> **What was done:** Option 2, via `scripts/generate_scenarios.py`, which imports the
+> **What was done.** Option 2, through `scripts/generate_scenarios.py`. It imports the
 > generator as a library from a **sibling directory** named
-> `Life_insurance_data_generator_new` (hard-coded as `GEN_ROOT`; there is no override
-> flag). Clone [Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)
-> under that directory name. Scale presets live in `config/scenarios.yaml`; the
-> published corpus is `--scale full` (250 000 policies, seed 42, generator commit
-> `66a73d0`). Step-by-step instructions:
+> `Life_insurance_data_generator_new`, hard-coded as `GEN_ROOT` with no override flag. Clone
+> [Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)
+> under that directory name. Scale presets live in `config/scenarios.yaml`. The published
+> corpus is `--scale full` (250 000 policies, seed 42, generator commit `66a73d0`).
+> Step-by-step instructions:
 > [README § Where the data comes from](README.md#-where-the-data-comes-from-and-how-to-generate-it-yourself).
 
 For the **heldout set**, mint NEW scenarios (new windows/magnitudes/seeds) that
@@ -456,15 +458,15 @@ The harness validates verdict JSON with the pydantic schema; malformed = miss.
 
 ### 7.3 Sandboxed runner (`runner.py`) — do not skip
 
-> ⚠️ **Status:** this section was **not implemented as written.** What ships is
-> `run_sandboxed_python()` in `scripts/run_zero_shot.py`: `python -I -c <code>` with
-> `cwd` set to the scenario's `artifacts/`, a 10 s wall timeout and a 4 000-char output
-> cap. There is **no `setrlimit`, no network block and no filesystem jail** — neither
-> Tier 1 nor Tier 2. Probed directly: model-authored code was able to read files outside
-> the workspace and enumerate the truth manifests. All 97 tool calls recorded in the two
-> campaigns stayed inside `artifacts/`, but that was the model's choice, not a control.
-> Treat "never read outside `artifacts/`" as a clause in the rules text. If you build
-> this for real, implement this section properly before running anything untrusted.
+> ⚠️ **Status: not implemented as written.** What runs today is
+> `run_sandboxed_python()` in `scripts/run_zero_shot.py`: `python -I -c <code>`, `cwd` set to
+> the scenario's `artifacts/`, a 10 s timeout and a 4 000-char output cap. There is **no
+> `setrlimit`, no network block and no filesystem jail** — not Tier 1, not Tier 2. This was
+> tested directly: model-authored code could read files outside the workspace and list the
+> truth manifests. All 97 tool calls recorded in the two campaigns stayed inside
+> `artifacts/`, but that was the model choosing to. "Never read outside `artifacts/`" is a
+> line in the rules text, not a control. If you build this for real, implement this section
+> before running anything you do not trust.
 
 Security and fairness require isolation. Implement in two tiers:
 
@@ -563,12 +565,12 @@ optional later upgrade. Do NOT put validation UI in the benchmark core.
 
 ### 10.1 `config/experiment.yaml`
 
-> **Status: never created.** Configuration ended up split three ways: scenario registry in
-> `config/scenarios.yaml` (scale presets, 47 books, split); sampler and endpoint settings
-> passed as CLI flags to `scripts/run_zero_shot.py` / `run_zero_shot_baseline_v2.py`;
-> harness behaviour fixed in the code plus a pinned system-prompt file under
-> `data/prompts/`. The block below is the original design, kept for reference. What
-> actually ran, per corpus, is recorded in each corpus's `harness_snapshot/MANIFEST.txt`.
+> **Status: this file was never created.** Configuration ended up split three ways: the
+> scenario registry in `config/scenarios.yaml` (scale presets, 47 books, split); sampler and
+> endpoint settings as command-line flags to `scripts/run_zero_shot.py` and
+> `run_zero_shot_baseline_v2.py`; harness behaviour fixed in code plus a pinned system-prompt
+> file in `data/prompts/`. The block below is the original design, kept for reference. For
+> what actually ran in a given corpus, read that corpus's `harness_snapshot/MANIFEST.txt`.
 
 ```yaml
 generator:
@@ -603,12 +605,14 @@ models:
     base_url: http://192.168.1.59:1234/v1
 ```
 
-The configuration that produced every published number: two subjects
-(`Qwen3.6-27B`, `Qwen3.8-27B-Q8_0`) served by **llama.cpp** at
-`http://192.168.1.59:8080/v1`, **one slot** (one generation at a time), temperature 1.0 /
-top_p 0.95 / top_k 20 / min_p 0.0, streaming, `max_tokens` never set. Neither model was
-used as the harness author — the operator-side agent that built the harness ran on
-DeepSeek V4.1 Flash, a third model, so no subject tuned the exam it sat.
+What actually produced every published number:
+
+- **Subjects**: `Qwen3.6-27B` and `Qwen3.8-27B-Q8_0`, served by **llama.cpp** at
+  `http://192.168.1.59:8080/v1`, **one slot** (one generation at a time).
+- **Sampling**: temperature 1.0, top_p 0.95, top_k 20, min_p 0.0, streaming, and
+  `max_tokens` never set.
+- **Harness author**: neither subject. The operator-side agent that built the harness ran on
+  DeepSeek V4.1 Flash, a third model, so no subject tuned the exam it sat.
 
 ### 10.2 CLI
 
@@ -643,13 +647,13 @@ swappable per model in config.
 
 ## 12. Acceptance criteria / test plan
 
-> **Status:** of this plan, only the *split-generation* criterion is covered by an
-> automated test (`tests/test_registry.py`: split disjointness, manifest contract, scale
-> presets — all passing). `stats_pack.py`, `score_xam.py`, `harness_gate.py` and
-> `leakcheck.py` have **no unit tests**; their correctness is carried by the runtime
-> preflight gate, the freeze gate, and by diffing all 23 regenerated optimization packs
-> after any change. The sandbox, integration-smoke and baseline-sanity tests below were
-> never written — and the classical detector they depend on does not exist.
+> **Status:** one item from this plan has an automated test — split generation, in
+> `tests/test_registry.py` (split disjointness, manifest contract, scale presets; all
+> passing). `stats_pack.py`, `score_xam.py`, `harness_gate.py` and `leakcheck.py` have **no
+> unit tests**. Their correctness rests on the runtime preflight gate, the freeze gate, and
+> diffing all 23 regenerated optimization packs after any change. The sandbox,
+> integration-smoke and baseline-sanity tests below were never written, and the classical
+> detector they depend on does not exist.
 
 ### Unit tests
 - `Verdict` schema rejects malformed JSON (bad enum, no_op mismatch, duplicate claims).
@@ -675,20 +679,19 @@ proves the signal is present and the detector floor is sane.
 
 ## 13. Milestones (implement in this order)
 
-> **Status: none of these milestones were executed as packaged deliverables.** The
-> functionality arrived out of order and as flat scripts: the deterministic data +
-> split + scoring core was built first (M0's substance) and then *bypassed* — Stage 2
-> (M1–M2) was dropped in favour of a single-turn evidence-pack harness, while the M3
-> report/validation loop and the M0 packaging were never done. What the campaign did
-> invent, and this guide did not anticipate, is a milestone of its own: **an agent that
-> iterates the harness against optimization-set evidence.** Read the list below as
-> history plus intent, and the "actual" column as what to reuse.
+> **Status: no milestone was delivered as packaged.** Work arrived out of order and as flat
+> scripts. The deterministic data + split + scoring core was built first (the substance of
+> M0) and then bypassed: Stage 2 (M1–M2) was dropped in favour of a single-turn evidence-pack
+> harness, and the M3 report/validation loop and M0 packaging were never done. The campaigns
+> then invented something this guide did not plan for, and it deserves its own milestone:
+> **an agent that iterates the harness against optimization-set evidence.** Read the table
+> as history plus intent; read the "actual" column as what you can reuse.
 
 | Milestone | Planned | Actual |
 |---|---|---|
 | **M0** skeleton + deterministic core, no LLM/sandbox | `manifest.py`, `verdict.py`, `datasets.py`, `scoring.py`, classical detector, stub model, `report.py` | ✅ substance, no packaging: `generate_scenarios.py` + `score_xam.py` + registry + tests. ❌ classical detector, stub model, `report.py` |
 | **M1** sandboxed runner + one real LLM writing code | `runner.py` Tier 1, Stage 2 against optimization | ⚠️ replaced: `run_sandboxed_python()` (advisory, §7.3) used for *analysis*, not pipeline construction |
-| **M2** N×K + heldout + leaderboard | freeze/hash, execution variance, `leaderboard.json` | ⚠️ partial: freeze/hash is excellent (`harness_snapshot/`), heldout split honoured once; ❌ median+spread, `leaderboard.json` |
+| **M2** N×K + heldout + leaderboard | freeze/hash, execution variance, `leaderboard.json` | ⚠️ partial: freeze/hash is strong (`harness_snapshot/`) and the held-out split was used exactly once; ❌ median+spread, `leaderboard.json` |
 | **M3** Stage 1 baseline + Stage 3 validation | zero-shot prompt, report, human-review queue | ✅ Stage 1 is the entire measured surface (`xam_*` corpora). ❌ reports, human review |
 | **M4** multi-model + architecture axis + polish | ≥2 models, two topologies, cost metrics, docs | ✅ exceeded in substance: two models × two harnesses on one endpoint, cost analysis in the report, four docs. ❌ the orchestrated-vs-autonomous topology axis |
 
@@ -709,14 +712,17 @@ proves the signal is present and the detector floor is sane.
 
 ## 15. Appendix — example prompts and artifacts
 
-> **Status: illustrative, not what ran.** The prompts actually used are archived as
-> artifacts, and they are much longer than these sketches: the system prompt is a file
-> under `data/prompts/` (3 053 chars for the baseline line, 3 866 for the harness-era
-> line), the taxonomy and discipline clauses live in `HARNESS_RULES` inside
-> `scripts/run_zero_shot.py`, and the model additionally receives a deterministic
-> evidence pack per book. Exact bytes for any published number are in that corpus's
-> `harness_snapshot/` — and `results/<corpus>/prompts/*.md` holds a fully rendered
-> prompt for every scenario.
+> **Status: illustrative. These are not the prompts that ran.** The real ones are archived
+> as artifacts and are far longer than these sketches:
+>
+> - the system prompt is a file in `data/prompts/` — 3 053 characters for the baseline line,
+>   3 866 for the harness-era line;
+> - the taxonomy and discipline clauses live in `HARNESS_RULES` inside
+>   `scripts/run_zero_shot.py`;
+> - the model also receives a deterministic evidence pack for each book.
+>
+> The exact bytes behind any published number are in that corpus's `harness_snapshot/`, and
+> `results/<corpus>/prompts/*.md` holds one fully rendered prompt per scenario.
 
 ### 15.1 Stage-1 prompt (abridged)
 

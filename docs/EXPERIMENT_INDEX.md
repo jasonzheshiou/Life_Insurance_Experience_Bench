@@ -1,24 +1,25 @@
 # EXPERIMENT INDEX — Data Pipeline Arena, Qwen3.6-27B vs Qwen3.8-27B
 
-**Start here.** This file is the master index for the benchmark, the harness, both
-model campaigns, every result corpus, and the replication commands. It is written so
-that someone with no prior context can reconstruct what was done, why, and where the
-evidence lives.
+**Start here.** This file is the master index: the benchmark, the harness, both model
+campaigns, every result corpus, and the replication commands. It assumes no prior context.
+You should be able to work out what was done, why, and where the evidence lives.
 
 Last updated: end of the Qwen3.6-27B campaign and the cross-model harness matrix.
 
-> **Why these two campaigns exist** (the short version; the full argument is in
-> [README § Why This Project Exists](../README.md#-why-this-project-exists--four-purposes)):
-> **(0)** governance of the *model and its pipeline*, not of the actuarial output — how do
-> you know how good a model is at experience-study work, what it costs, and whether the
-> pipeline wrapped around it is appropriate or needs updating and why; **(1)** measure
-> whether an LLM can find an actuarial insight in A/E experience data; **(2)** quantify
-> what the harness is worth, and whether it transfers — Qwen3.6 and Qwen3.8 share size and
-> architecture, so everything that differs between them is behaviour taught by
-> reinforcement, which is exactly the variable that decides what a harness must do;
-> **(3)** record a reusable method for *building* a harness from model evidence.
-> Sections 2–6 below are the evidence for (1) and (2); section 3 and the runbooks are the
-> method for (3).
+**Why these two campaigns exist.** Short version; the full argument is in
+[README § Why This Project Exists](../README.md#-why-this-project-exists--four-purposes).
+
+0. **Govern the model and its pipeline.** How good is the model at experience-study work,
+   what does it cost, and is the pipeline around it right or in need of updating?
+1. **Measure the model's eye.** Can an LLM find an actuarial insight in A/E data?
+2. **Measure the harness.** What is it worth, and does it transfer? Qwen3.6 and Qwen3.8
+   have the same size and architecture, so everything that differs between them is
+   behaviour learned by reinforcement — exactly the thing that decides what a harness has
+   to do.
+3. **Record a reusable method** for building a harness from model evidence.
+
+Sections 2–6 hold the evidence for 1 and 2. Section 3 and the runbooks hold the method
+for 3.
 
 ---
 
@@ -58,19 +59,19 @@ name (`shock_death_2016`); the opaque id is the **filename**. Key by filename.
 
 ### How the data were generated
 
-By the separate public project
-**[Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)**,
-driven by `scripts/generate_scenarios.py` from the registry `config/scenarios.yaml`
-— one deterministic generator run per book. Published pins: scale `full` (250 000
-policies), seed 42, generator commit **`66a73d0`**. Full regeneration steps are in
+A separate public project generates every book:
+**[Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)**.
+`scripts/generate_scenarios.py` drives it from the registry `config/scenarios.yaml`, one
+deterministic run per book. Published pins: scale `full` (250 000 policies), seed 42,
+generator commit **`66a73d0`**. To regenerate it yourself, use
 [README § Where the data comes from](../README.md#-where-the-data-comes-from-and-how-to-generate-it-yourself).
 
-The truth manifest records what was planted: `controls[]` with `benefit`,
-`type`, `window`, `factor`, and `signature.direction`. A book-wide control has
-`benefit: "all"`, which the scorer expands to **one unit per benefit line (4 units)**.
+The truth manifest records what was planted: `controls[]` with `benefit`, `type`,
+`window`, `factor`, and `signature.direction`. A book-wide control has `benefit: "all"`,
+which the scorer expands to **one unit per benefit line (4 units)**.
 
-The split is fixed and must not change: the same 47 books, with the same planted
-controls, are what every corpus in `results/` was scored against.
+The split is fixed and must not change: every corpus in `results/` was scored against
+these same 47 books with these same planted controls.
 
 ---
 
@@ -123,26 +124,27 @@ the *findings* ledger, `precision + FP/claim = 100 %`.
 
 ### Who builds the harness
 
-Neither subject wrote its own harness. Both lineages were built by the operator-side
-agent, running on **DeepSeek V4.1 Flash** — a third model, deliberately not one of the
-two subjects, so no model tuned the exam it later sat. The loop, per pass:
+Neither subject wrote its own harness. An operator-side agent built both lineages, running
+on **DeepSeek V4.1 Flash** — a third model, deliberately not one of the two subjects, so no
+model tuned the exam it later sat. Each pass:
 
-1. run the frozen harness over all 23 **optimization** books;
-2. score, then read the evidence per unit — recorded prompt, answer, tool log, the
-   scorer's per-control diff — and name *why* each miss missed;
-3. one hypothesis → **one** edit, to `stats_pack.py`, `HARNESS_RULES`, or a new pinned
-   prompt file;
-4. verify on the affected book(s) in a scratch corpus (`harness_q36_step*`), then
-   regression-check the neighbours it could have disturbed (`harness_q36_regress`);
-5. keep or revert; snapshot code **and** prompt into `results/<corpus>/harness_snapshot/`;
-6. never read a held-out result before deciding an edit, and never feed one back.
+1. Run the frozen harness over all 23 **optimization** books.
+2. Score it, then read the evidence per unit — recorded prompt, answer, tool log, the
+   scorer's per-control diff — and say why each miss missed.
+3. Turn that into **one** hypothesis and **one** edit: `stats_pack.py`, `HARNESS_RULES`, or
+   a new pinned prompt file.
+4. Test it on the affected books in a scratch corpus (`harness_q36_step*`), then re-check
+   the neighbours it could have disturbed (`harness_q36_regress`).
+5. Keep or revert. Snapshot code **and** prompt into
+   `results/<corpus>/harness_snapshot/`.
+6. Never read a held-out result before deciding an edit, and never feed one back.
 
-The corpus names in section 5 *are* this loop: `harness_opt_p1..p7` and
-`harness_q36_p1..p4` are harness passes, `harness_q36_step*` are single-book tests of
-one hypothesis each, and the two `*_final*` corpora are the exams after the tuning.
-Two caveats worth stating: a human chose which failures to pursue, and the frozen record
-proves which harness **bytes** produced which numbers (`MANIFEST.txt`) rather than which
-model authored each line.
+The corpus names in section 5 are this loop: `harness_opt_p1..p7` and `harness_q36_p1..p4`
+are harness passes; `harness_q36_step*` are single-book tests of one hypothesis each; the
+two `*_final*` corpora are the exams after the tuning.
+
+Two limits: a human chose which failures to pursue, and the frozen record proves which
+harness **bytes** produced which numbers (`MANIFEST.txt`), not which model wrote each line.
 
 ### Harness versions
 
@@ -226,11 +228,11 @@ Diary of the 3.8 loop: `results/logs/harness_opt_loop.md` (4,750 lines).
 
 ### Cross-model matrix
 
-**This table is the like-for-like comparison: 23 books × 3 runs = 69 records = 111
-units each** (units exceed records because a book-wide control expands to one unit per
-benefit line). `sc-e6ffa4` is excluded from every cell because it never completed under
-3.8 + the 3.6 harness (section 8). Do not mix these with the per-campaign rows above,
-which include the failed book and therefore report `/123`.
+**Like-for-like: every cell below covers the same 23 books × 3 runs = 69 records = 111
+units.** Units outnumber records because a book-wide control expands to one unit per benefit
+line. `sc-e6ffa4` is out of every cell; it never completed under 3.8 + the 3.6 harness
+(section 8). The per-campaign rows above do include it, so they report `/123` — do not mix
+the two.
 
 | model + harness | records | accuracy | FP/claim |
 |---|---|---|---|
@@ -239,9 +241,9 @@ which include the failed book and therefore report `/123`.
 | 3.6 + 3.8's (v1.6e + 3866) | 23 × 3 | 64.9 % (72/111) | 43.3 % |
 | 3.6 + own (tuned + 3053) | 23 × 3 | 65.8 % (73/111) | **38.7 %** |
 
-Including `sc-e6ffa4` as its recorded zero (24 books, 123 units): 3.8 own
-**69.1 %**, 3.6 own 64.2 %, 3.6 + 3.8's 63.4 %, and 3.8 + 3.6's stays 70.3 % because
-that cell never had the book to lose.
+Count `sc-e6ffa4` as the zero it is (24 books, 123 units) and the same four cells read: 3.8
+own **69.1 %**, 3.6 own 64.2 %, 3.6 + 3.8's 63.4 %. The 3.8 + 3.6's cell does not move
+(70.3 %), because that run never contained the book.
 
 `harness_q38_tuned` is **incomplete by design**: `sc-e6ffa4` is a recorded failure
 (section 8). Reported as **23/24** — see section 7 for both treatments.
@@ -396,7 +398,7 @@ python3 -c "import ast;ast.parse(open('scripts/stats_pack.py').read())"
 it never completed: 6+ attempts, one of 2 h 25 min, **0 usable runs**. It completes
 **9/9 under the three other configurations.**
 
-Root cause is a **three-way conjunction** — none sufficient alone:
+Three things had to go wrong together. None of them was enough on its own:
 
 1. the 3053 prompt lacks ~800 chars of volatility guidance present in the 3866 one
    (a 546-char block describing exactly this book: several lines swinging together
