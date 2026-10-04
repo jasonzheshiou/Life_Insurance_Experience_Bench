@@ -154,9 +154,10 @@ the A/E tables are the easier version.**
 > `artifacts/ae_<benefit>_age_gender.csv|.png`, `artifacts/ae_<benefit>.csv`,
 > `artifacts/ae_ip_termination.csv`, `artifacts/ae_ip_termination_by_month.csv|.png`,
 > `artifacts/summary.json`, `artifacts/scenario_id.txt`, top-level `<Benefit>.csv`
-> per benefit, plus the excluded bulk (`exposure.csv`, `<benefit>_claims.csv`). Store
-> format is CSV, not parquet; the store sits in `data/raw/<id>/store/` alongside
-> `run_info.json`. The model-facing prompt **lists every file in the scenario
+> per benefit, plus the excluded bulk (`exposure.csv`, `<benefit>_claims.csv`). The raw
+> store keeps **both** `.csv` and `.parquet` per table plus `metadata.json`, in
+> `data/raw/<id>/store/` alongside `run_info.json` — none of it published. The
+> model-facing prompt **lists every file in the scenario
 > directory**, so which files exist is itself part of the prompt (see the clone caveat
 > in the README).
 
