@@ -1,0 +1,49 @@
+{
+  "eval_id": "sc-a3e6a6",
+  "descriptive_id": "sys_shock_crisis_2015_2016",
+  "schema_version": 1,
+  "scenario_id": "sys_shock_crisis_2015_2016",
+  "family": "systemic",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "Death",
+        "CI",
+        "IP"
+      ],
+      "window": [
+        2015,
+        2016
+      ],
+      "factor": {
+        "Death": 1.4,
+        "CI": 1.2,
+        "IP": 1.1
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "Death x1.4, CI x1.2, IP x1.1"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD"
+  ],
+  "primary": null
+}

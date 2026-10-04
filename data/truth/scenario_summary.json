@@ -1,0 +1,1383 @@
+{
+  "generated_at": "2026-08-30T12:01:24.518013+00:00",
+  "scale": "full",
+  "n_policies": 250000,
+  "seed": 42,
+  "counts": {
+    "optimization": 23,
+    "heldout": 24
+  },
+  "statuses": {
+    "baseline": "pass",
+    "drift_ci_down_2016_2019": "pass",
+    "drift_ci_up_2021_2023": "pass",
+    "drift_death_up_2015_2017": "pass",
+    "drift_death_up_2018_2024": "pass",
+    "drift_ip_down_2020_2024": "pass",
+    "drift_tpd_up_2019_2021": "pass",
+    "ip_recovery_cancer_x05": "pass",
+    "ip_recovery_cardio_x04": "pass",
+    "ip_recovery_injury_x15": "pass",
+    "ip_recovery_mental_health_x2": "pass",
+    "ip_recovery_mh_msk": "pass",
+    "mixed_drift_death_shock_ci": "pass",
+    "mixed_drift_ip_vol_death": "pass",
+    "mixed_shock_tpd_drift_death": "pass",
+    "mixed_triple_ci_ip_mh": "pass",
+    "noop_neutral_controls": "pass",
+    "shock_ci_2021_2022": "pass",
+    "shock_ci_tpd_2015_2016": "pass",
+    "shock_covid_2020_2022": "pass",
+    "shock_death_2016": "pass",
+    "shock_ip_2018_2019": "pass",
+    "shock_tpd_ip_2023": "pass",
+    "sys_cascade_drift_shock_2018": "warn",
+    "sys_cascade_shock_drift_2020": "pass",
+    "sys_drift_aging_2016_2019": "warn",
+    "sys_drift_aging_2018_2024": "pass",
+    "sys_drift_diverge_2018_2024": "pass",
+    "sys_drift_diverge_2020_2023": "pass",
+    "sys_shock_crisis_2015_2016": "pass",
+    "sys_shock_crisis_2020_2022": "pass",
+    "sys_shock_inverse_2017_2019": "pass",
+    "sys_shock_inverse_2021_2022": "pass",
+    "sys_shock_tpd_ip_2021_2022": "pass",
+    "sys_shock_tpd_ip_2022": "pass",
+    "sys_trend_tpd_ip_2015_2018": "pass",
+    "sys_trend_tpd_ip_2019_2023": "pass",
+    "sys_vol_macro_2019_2021": "pass",
+    "sys_vol_macro_2020_2024": "pass",
+    "trap_noise_drift_lookalike": "pass",
+    "trap_noise_drift_lookalike_b": "pass",
+    "trap_noise_spike_lookalike": "pass",
+    "trap_noise_spike_lookalike_b": "pass",
+    "volatility_ci_sigma_015": "pass",
+    "volatility_death_sigma_02": "pass",
+    "volatility_ip_sigma_03": "pass",
+    "volatility_tpd_sigma_04": "pass"
+  },
+  "checks": {
+    "baseline": [
+      {
+        "name": "baseline_ae_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "overall A/E 1.0040 within 1 \u00b1 0.0707"
+      },
+      {
+        "name": "baseline_ae_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "overall A/E 1.0143 within 1 \u00b1 0.0456"
+      },
+      {
+        "name": "baseline_ae_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "overall A/E 1.0063 within 1 \u00b1 0.0559"
+      },
+      {
+        "name": "baseline_ae_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "overall A/E 1.0023 within 1 \u00b1 0.0408"
+      }
+    ],
+    "drift_ci_down_2016_2019": [
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope -0.1222/yr over 4 yrs (injected -0.10/yr, thr=0.040)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "drift_ci_up_2021_2023": [
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0351/yr over 3 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "drift_death_up_2015_2017": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.1019/yr over 3 yrs (injected +0.15/yr, thr=0.060)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "drift_death_up_2018_2024": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.1082/yr over 7 yrs (injected +0.15/yr, thr=0.060)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "drift_ip_down_2020_2024": [
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope -0.1208/yr over 5 yrs (injected -0.10/yr, thr=0.040)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "drift_tpd_up_2019_2021": [
+      {
+        "name": "drift_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0680/yr over 3 yrs (injected +0.08/yr, thr=0.032)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "ip_recovery_cancer_x05": [
+      {
+        "name": "recovery_Cancer",
+        "status": "pass",
+        "ok": true,
+        "detail": "Cancer mean duration 209.0 vs baseline 124.1 (factor x0.5)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "ip_recovery_cardio_x04": [
+      {
+        "name": "recovery_Cardiovascular",
+        "status": "pass",
+        "ok": true,
+        "detail": "Cardiovascular mean duration 212.7 vs baseline 98.5 (factor x0.4)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "ip_recovery_injury_x15": [
+      {
+        "name": "recovery_Injury/Accident",
+        "status": "pass",
+        "ok": true,
+        "detail": "Injury/Accident mean duration 13.6 vs baseline 28.7 (factor x1.5)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "ip_recovery_mental_health_x2": [
+      {
+        "name": "recovery_Mental Health",
+        "status": "pass",
+        "ok": true,
+        "detail": "Mental Health mean duration 17.9 vs baseline 59.9 (factor x2.0)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "ip_recovery_mh_msk": [
+      {
+        "name": "recovery_Mental Health",
+        "status": "pass",
+        "ok": true,
+        "detail": "Mental Health mean duration 11.2 vs baseline 59.9 (factor x2.5)"
+      },
+      {
+        "name": "recovery_Musculoskeletal",
+        "status": "pass",
+        "ok": true,
+        "detail": "Musculoskeletal mean duration 19.7 vs baseline 39.0 (factor x1.5)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "mixed_drift_death_shock_ci": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0601/yr over 6 yrs (injected +0.08/yr, thr=0.032)"
+      },
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.327 vs 1.0 (factor x1.4)"
+      }
+    ],
+    "mixed_drift_ip_vol_death": [
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0566/yr over 5 yrs (injected +0.07/yr, thr=0.028)"
+      },
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 14.26x baseline std, mean 1.102"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.102)"
+      }
+    ],
+    "mixed_shock_tpd_drift_death": [
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.204 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0381/yr over 4 yrs (injected +0.06/yr, thr=0.024)"
+      }
+    ],
+    "mixed_triple_ci_ip_mh": [
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0619/yr over 5 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 11.76x baseline std, mean 1.004"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.004)"
+      },
+      {
+        "name": "recovery_Mental Health",
+        "status": "pass",
+        "ok": true,
+        "detail": "Mental Health mean duration 29.4 vs baseline 59.9 (factor x1.5)"
+      }
+    ],
+    "noop_neutral_controls": [
+      {
+        "name": "noop_claims_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "Death claims bit-identical"
+      },
+      {
+        "name": "noop_claims_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "CI claims bit-identical"
+      },
+      {
+        "name": "noop_claims_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "TPD claims bit-identical"
+      },
+      {
+        "name": "noop_claims_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "IP claims bit-identical"
+      },
+      {
+        "name": "noop_exposure",
+        "status": "pass",
+        "ok": true,
+        "detail": "exposure bit-identical"
+      },
+      {
+        "name": "noop_termination_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "IP termination A/E bit-identical"
+      }
+    ],
+    "shock_ci_2021_2022": [
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.284 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "shock_ci_tpd_2015_2016": [
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.195 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.330 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "shock_covid_2020_2022": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.266 vs 1.0 (factor x1.5)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "shock_death_2016": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.433 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "shock_ip_2018_2019": [
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.383 vs 1.0 (factor x1.5)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "shock_tpd_ip_2023": [
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.235 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.177 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      }
+    ],
+    "sys_cascade_drift_shock_2018": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0388/yr over 4 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "weak",
+        "ok": true,
+        "detail": "fitted slope +0.0087/yr over 4 yrs (injected +0.03/yr, thr=0.012)"
+      },
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.294 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.127 vs 1.0 (factor x1.2)"
+      }
+    ],
+    "sys_cascade_shock_drift_2020": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.310 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.159 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0253/yr over 4 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0760/yr over 4 yrs (injected +0.04/yr, thr=0.016)"
+      }
+    ],
+    "sys_drift_aging_2016_2019": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0460/yr over 4 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0530/yr over 4 yrs (injected +0.03/yr, thr=0.012)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "weak",
+        "ok": true,
+        "detail": "fitted slope +0.0031/yr over 4 yrs (injected +0.02/yr, thr=0.008)"
+      }
+    ],
+    "sys_drift_aging_2018_2024": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0585/yr over 7 yrs (injected +0.06/yr, thr=0.024)"
+      },
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0331/yr over 7 yrs (injected +0.04/yr, thr=0.016)"
+      },
+      {
+        "name": "drift_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0248/yr over 7 yrs (injected +0.03/yr, thr=0.012)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0160/yr over 7 yrs (injected +0.02/yr, thr=0.008)"
+      }
+    ],
+    "sys_drift_diverge_2018_2024": [
+      {
+        "name": "drift_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0585/yr over 7 yrs (injected +0.06/yr, thr=0.024)"
+      },
+      {
+        "name": "drift_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope -0.0464/yr over 7 yrs (injected -0.04/yr, thr=0.016)"
+      }
+    ],
+    "sys_drift_diverge_2020_2023": [
+      {
+        "name": "drift_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0453/yr over 4 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope -0.0239/yr over 4 yrs (injected -0.03/yr, thr=0.012)"
+      }
+    ],
+    "sys_shock_crisis_2015_2016": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.365 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.195 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.069 vs 1.0 (factor x1.1)"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "sys_shock_crisis_2020_2022": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.266 vs 1.0 (factor x1.5)"
+      },
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.190 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.145 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.052 vs 1.0 (factor x1.1)"
+      }
+    ],
+    "sys_shock_inverse_2017_2019": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.193 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 0.756 vs 1.0 (factor x0.7)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      }
+    ],
+    "sys_shock_inverse_2021_2022": [
+      {
+        "name": "shock_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.289 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "shock_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 0.662 vs 1.0 (factor x0.6)"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.006 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.002 within 1 \u00b1 0.041"
+      }
+    ],
+    "sys_shock_tpd_ip_2021_2022": [
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.321 vs 1.0 (factor x1.4)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.238 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      }
+    ],
+    "sys_shock_tpd_ip_2022": [
+      {
+        "name": "shock_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.295 vs 1.0 (factor x1.3)"
+      },
+      {
+        "name": "shock_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "win_mean 1.171 vs 1.0 (factor x1.2)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.004 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.014 within 1 \u00b1 0.046"
+      }
+    ],
+    "sys_trend_tpd_ip_2015_2018": [
+      {
+        "name": "drift_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0595/yr over 4 yrs (injected +0.04/yr, thr=0.016)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0305/yr over 4 yrs (injected +0.03/yr, thr=0.012)"
+      }
+    ],
+    "sys_trend_tpd_ip_2019_2023": [
+      {
+        "name": "drift_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0609/yr over 5 yrs (injected +0.05/yr, thr=0.020)"
+      },
+      {
+        "name": "drift_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "fitted slope +0.0312/yr over 5 yrs (injected +0.04/yr, thr=0.016)"
+      }
+    ],
+    "sys_vol_macro_2019_2021": [
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 5.89x baseline std, mean 1.183"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.183)"
+      },
+      {
+        "name": "vol_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 7.28x baseline std, mean 1.146"
+      },
+      {
+        "name": "vol_level_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.146)"
+      },
+      {
+        "name": "vol_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 14.36x baseline std, mean 0.960"
+      },
+      {
+        "name": "vol_level_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (0.960)"
+      },
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 16.85x baseline std, mean 1.058"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.058)"
+      }
+    ],
+    "sys_vol_macro_2020_2024": [
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 8.47x baseline std, mean 1.017"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.017)"
+      },
+      {
+        "name": "vol_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 10.23x baseline std, mean 1.039"
+      },
+      {
+        "name": "vol_level_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.039)"
+      },
+      {
+        "name": "vol_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 5.80x baseline std, mean 1.003"
+      },
+      {
+        "name": "vol_level_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.003)"
+      },
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 12.37x baseline std, mean 1.004"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.004)"
+      }
+    ],
+    "trap_noise_drift_lookalike": [
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 3.52x baseline std, mean 1.145"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.145)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 0.999 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 0.999 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.000 within 1 \u00b1 0.041"
+      }
+    ],
+    "trap_noise_drift_lookalike_b": [
+      {
+        "name": "vol_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 6.92x baseline std, mean 1.006"
+      },
+      {
+        "name": "vol_level_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.006)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 0.997 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 0.995 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.001 within 1 \u00b1 0.041"
+      }
+    ],
+    "trap_noise_spike_lookalike": [
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 7.59x baseline std, mean 1.266"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.266)"
+      },
+      {
+        "name": "vol_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 8.24x baseline std, mean 1.195"
+      },
+      {
+        "name": "vol_level_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.195)"
+      },
+      {
+        "name": "vol_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 21.66x baseline std, mean 0.937"
+      },
+      {
+        "name": "vol_level_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (0.937)"
+      },
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 19.47x baseline std, mean 1.076"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.076)"
+      }
+    ],
+    "trap_noise_spike_lookalike_b": [
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 199.06x baseline std, mean 0.470"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (0.470)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.002 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.008 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 0.998 within 1 \u00b1 0.056"
+      }
+    ],
+    "volatility_ci_sigma_015": [
+      {
+        "name": "vol_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 5.52x baseline std, mean 0.994"
+      },
+      {
+        "name": "vol_level_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (0.994)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.001 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.005 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.000 within 1 \u00b1 0.041"
+      }
+    ],
+    "volatility_death_sigma_02": [
+      {
+        "name": "vol_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 3.07x baseline std, mean 1.014"
+      },
+      {
+        "name": "vol_level_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.014)"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.019 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.005 within 1 \u00b1 0.056"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.000 within 1 \u00b1 0.041"
+      }
+    ],
+    "volatility_ip_sigma_03": [
+      {
+        "name": "vol_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 25.65x baseline std, mean 1.006"
+      },
+      {
+        "name": "vol_level_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (1.006)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.001 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.019 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched TPD A/E 1.005 within 1 \u00b1 0.056"
+      }
+    ],
+    "volatility_tpd_sigma_04": [
+      {
+        "name": "vol_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "in-window std 14.33x baseline std, mean 0.966"
+      },
+      {
+        "name": "vol_level_tpd",
+        "status": "pass",
+        "ok": true,
+        "detail": "level unchanged (0.966)"
+      },
+      {
+        "name": "spillover_death",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched Death A/E 1.001 within 1 \u00b1 0.071"
+      },
+      {
+        "name": "spillover_ci",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched CI A/E 1.019 within 1 \u00b1 0.046"
+      },
+      {
+        "name": "spillover_ip",
+        "status": "pass",
+        "ok": true,
+        "detail": "untouched IP A/E 1.000 within 1 \u00b1 0.041"
+      }
+    ]
+  },
+  "eval_ids": {
+    "baseline": "sc-14cdd9",
+    "drift_ci_down_2016_2019": "sc-3c83fd",
+    "drift_ci_up_2021_2023": "sc-87e6e7",
+    "drift_death_up_2015_2017": "sc-f916b9",
+    "drift_death_up_2018_2024": "sc-f69eea",
+    "drift_ip_down_2020_2024": "sc-90a5be",
+    "drift_tpd_up_2019_2021": "sc-9372cd",
+    "ip_recovery_cancer_x05": "sc-17d82f",
+    "ip_recovery_cardio_x04": "sc-11135c",
+    "ip_recovery_injury_x15": "sc-e549ad",
+    "ip_recovery_mental_health_x2": "sc-409000",
+    "ip_recovery_mh_msk": "sc-9db072",
+    "mixed_drift_death_shock_ci": "sc-63f1c7",
+    "mixed_drift_ip_vol_death": "sc-f520e5",
+    "mixed_shock_tpd_drift_death": "sc-e28a00",
+    "mixed_triple_ci_ip_mh": "sc-ca7798",
+    "noop_neutral_controls": "sc-12be68",
+    "shock_ci_2021_2022": "sc-042304",
+    "shock_ci_tpd_2015_2016": "sc-f19bae",
+    "shock_covid_2020_2022": "sc-5e376b",
+    "shock_death_2016": "sc-696b93",
+    "shock_ip_2018_2019": "sc-7e3a65",
+    "shock_tpd_ip_2023": "sc-48351f",
+    "sys_cascade_drift_shock_2018": "sc-c9d78b",
+    "sys_cascade_shock_drift_2020": "sc-d72b95",
+    "sys_drift_aging_2016_2019": "sc-73fd27",
+    "sys_drift_aging_2018_2024": "sc-da1123",
+    "sys_drift_diverge_2018_2024": "sc-8d3b47",
+    "sys_drift_diverge_2020_2023": "sc-21b383",
+    "sys_shock_crisis_2015_2016": "sc-a3e6a6",
+    "sys_shock_crisis_2020_2022": "sc-bba653",
+    "sys_shock_inverse_2017_2019": "sc-3411b2",
+    "sys_shock_inverse_2021_2022": "sc-4a7f9e",
+    "sys_shock_tpd_ip_2021_2022": "sc-abbec4",
+    "sys_shock_tpd_ip_2022": "sc-6fe297",
+    "sys_trend_tpd_ip_2015_2018": "sc-3627d2",
+    "sys_trend_tpd_ip_2019_2023": "sc-137901",
+    "sys_vol_macro_2019_2021": "sc-314eca",
+    "sys_vol_macro_2020_2024": "sc-e6ffa4",
+    "trap_noise_drift_lookalike": "sc-8a9fa1",
+    "trap_noise_drift_lookalike_b": "sc-0ce4d6",
+    "trap_noise_spike_lookalike": "sc-9660b9",
+    "trap_noise_spike_lookalike_b": "sc-a15166",
+    "volatility_ci_sigma_015": "sc-62c222",
+    "volatility_death_sigma_02": "sc-6e2478",
+    "volatility_ip_sigma_03": "sc-2d248f",
+    "volatility_tpd_sigma_04": "sc-88fa33"
+  },
+  "fingerprint": "648dc18cbd8f88d6",
+  "seal": "2deda8760407c9b270a1f443acbbeda641d225eb67d8afb6e8ca15afb01433a2",
+  "missing": []
+}

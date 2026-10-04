@@ -1,0 +1,21 @@
+{
+  "benefits": {
+    "Death": {
+      "overall_ae": 1.001,
+      "claims": 5005
+    },
+    "CI": {
+      "overall_ae": 1.0193,
+      "claims": 12232
+    },
+    "TPD": {
+      "overall_ae": 1.0051,
+      "claims": 8041
+    },
+    "IP": {
+      "overall_ae": 0.9995,
+      "claims": 14993,
+      "overall_termination_ae": 1.0001
+    }
+  }
+}
