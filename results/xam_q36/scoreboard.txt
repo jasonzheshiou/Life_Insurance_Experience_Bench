@@ -1,0 +1,56 @@
+
+====================================================================================================
+RUN DIR: results/xam_q36/zero_shot   [scorer v3: null-window=full-period, per-benefit units, clean-statements excluded, ip_recovery direction live]
+====================================================================================================
+sc-042304   fam=shock       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-0ce4d6   fam=noise_trap  runs=3 strict=0/3 loose=0/3 FP=3 badjson=0 err=0
+sc-11135c   fam=recovery    runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-12be68   fam=CLEAN       runs=3 FALSE-POSITIVE: claimed-anomalies=0/3 FP=0 badjson=0 err=0
+sc-137901   fam=systemic    runs=3 strict=4/6 loose=4/6 FP=4 badjson=0 err=0
+sc-14cdd9   fam=CLEAN       runs=3 FALSE-POSITIVE: claimed-anomalies=0/3 FP=0 badjson=0 err=0
+sc-17d82f   fam=recovery    runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-21b383   fam=systemic    runs=3 strict=2/6 loose=2/6 FP=3 badjson=0 err=0
+sc-2d248f   fam=volatility  runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-314eca   fam=systemic    runs=3 strict=3/12 loose=3/12 FP=10 badjson=0 err=0
+sc-3411b2   fam=systemic    runs=3 strict=0/6 loose=1/6 FP=5 badjson=0 err=0
+sc-3627d2   fam=systemic    runs=3 strict=3/6 loose=3/6 FP=3 badjson=0 err=0
+sc-3c83fd   fam=drift       runs=3 strict=2/3 loose=2/3 FP=1 badjson=0 err=0
+sc-409000   fam=recovery    runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-48351f   fam=shock       runs=3 strict=6/6 loose=6/6 FP=0 badjson=0 err=0
+sc-4a7f9e   fam=systemic    runs=3 strict=6/6 loose=6/6 FP=2 badjson=0 err=0
+sc-5e376b   fam=shock       runs=3 strict=1/3 loose=1/3 FP=2 badjson=0 err=0
+sc-62c222   fam=volatility  runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-63f1c7   fam=mixed       runs=3 strict=6/6 loose=6/6 FP=0 badjson=0 err=0
+sc-696b93   fam=shock       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-6e2478   fam=volatility  runs=3 strict=1/3 loose=1/3 FP=4 badjson=1 err=0
+sc-6fe297   fam=systemic    runs=3 strict=6/6 loose=6/6 FP=0 badjson=0 err=0
+sc-73fd27   fam=systemic    runs=3 strict=0/9 loose=0/9 FP=7 badjson=0 err=0
+sc-7e3a65   fam=shock       runs=3 strict=2/3 loose=2/3 FP=1 badjson=0 err=0
+sc-87e6e7   fam=drift       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-88fa33   fam=volatility  runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-8a9fa1   fam=noise_trap  runs=3 strict=2/3 loose=2/3 FP=1 badjson=0 err=0
+sc-8d3b47   fam=systemic    runs=3 strict=3/6 loose=6/6 FP=5 badjson=0 err=0
+sc-90a5be   fam=drift       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-9372cd   fam=drift       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-9660b9   fam=noise_trap  runs=3 strict=5/12 loose=5/12 FP=7 badjson=0 err=0
+sc-9db072   fam=recovery    runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-a15166   fam=noise_trap  runs=3 strict=0/3 loose=0/3 FP=11 badjson=0 err=0
+sc-a3e6a6   fam=systemic    runs=3 strict=6/9 loose=6/9 FP=5 badjson=0 err=0
+sc-abbec4   fam=systemic    runs=3 strict=6/6 loose=6/6 FP=2 badjson=0 err=0
+sc-bba653   fam=systemic    runs=3 strict=3/12 loose=3/12 FP=8 badjson=0 err=0
+sc-c9d78b   fam=systemic    runs=3 strict=5/12 loose=5/12 FP=1 badjson=0 err=0
+sc-ca7798   fam=mixed       runs=3 strict=9/9 loose=9/9 FP=0 badjson=0 err=0
+sc-d72b95   fam=systemic    runs=3 strict=4/12 loose=5/12 FP=10 badjson=0 err=0
+sc-da1123   fam=systemic    runs=3 strict=12/12 loose=12/12 FP=2 badjson=0 err=0
+sc-e28a00   fam=mixed       runs=3 strict=5/6 loose=5/6 FP=1 badjson=0 err=0
+sc-e549ad   fam=recovery    runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-e6ffa4   fam=systemic    runs=3 strict=3/12 loose=3/12 FP=0 badjson=0 err=0
+sc-f19bae   fam=shock       runs=3 strict=4/6 loose=4/6 FP=2 badjson=0 err=0
+sc-f520e5   fam=mixed       runs=3 strict=4/6 loose=4/6 FP=2 badjson=0 err=0
+sc-f69eea   fam=drift       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-f916b9   fam=drift       runs=3 strict=0/3 loose=0/3 FP=2 badjson=0 err=0
+  TOTALS: runs=141 strict-recall=155/255=60.8% loose=62.7% FP/run=0.74 badjson=1 errors=0
+  CLEAN-data honesty: claimed an anomaly on 0/6 clean run(s)
+  DRIFT-WINDOW STRATA (per control-run): persistent-to-horizon strict 27/36 (loose 31/36) | bounded-then-reverting strict 24/51 (loose 24/51)
+
+wrote results/xam_q36/scores.json

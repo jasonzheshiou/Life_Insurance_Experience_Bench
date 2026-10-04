@@ -1,0 +1,205 @@
+{
+  "corpus": {
+    "run_dir": "results/harness_q36_p2/zero_shot",
+    "split": "optimization",
+    "runs_per_scenario": 1,
+    "n_runs": 23,
+    "strict": 42,
+    "controls": 44,
+    "strict_pct": 0.9545454545454546,
+    "loose": 42,
+    "loose_pct": 0.9545454545454546,
+    "fp": 7,
+    "fp_per_run": 0.30434782608695654,
+    "badjson": 0,
+    "errors": 0,
+    "clean_runs": 1,
+    "clean_false_claims": 0,
+    "persistent": {
+      "hit": 9,
+      "n": 10,
+      "loose": 9
+    },
+    "bounded": {
+      "hit": 5,
+      "n": 5,
+      "loose": 5
+    },
+    "families": {
+      "CLEAN": {
+        "strict": 0,
+        "loose": 0,
+        "controls": 0,
+        "fp": 0,
+        "runs": 1
+      },
+      "drift": {
+        "strict": 3,
+        "loose": 3,
+        "controls": 3,
+        "fp": 1,
+        "runs": 3
+      },
+      "mixed": {
+        "strict": 3,
+        "loose": 3,
+        "controls": 4,
+        "fp": 2,
+        "runs": 2
+      },
+      "noise_trap": {
+        "strict": 5,
+        "loose": 5,
+        "controls": 5,
+        "fp": 1,
+        "runs": 2
+      },
+      "recovery": {
+        "strict": 2,
+        "loose": 2,
+        "controls": 2,
+        "fp": 0,
+        "runs": 2
+      },
+      "shock": {
+        "strict": 4,
+        "loose": 4,
+        "controls": 4,
+        "fp": 2,
+        "runs": 3
+      },
+      "systemic": {
+        "strict": 23,
+        "loose": 23,
+        "controls": 24,
+        "fp": 0,
+        "runs": 8
+      },
+      "volatility": {
+        "strict": 2,
+        "loose": 2,
+        "controls": 2,
+        "fp": 1,
+        "runs": 2
+      }
+    }
+  },
+  "reference": {
+    "run_dir": "results/xam_q36/zero_shot",
+    "split": "optimization",
+    "runs_per_scenario": 1,
+    "n_runs": 23,
+    "strict": 27,
+    "controls": 44,
+    "strict_pct": 0.6136363636363636,
+    "loose": 29,
+    "loose_pct": 0.6590909090909091,
+    "fp": 19,
+    "fp_per_run": 0.8260869565217391,
+    "badjson": 0,
+    "errors": 0,
+    "clean_runs": 1,
+    "clean_false_claims": 0,
+    "persistent": {
+      "hit": 7,
+      "n": 10,
+      "loose": 9
+    },
+    "bounded": {
+      "hit": 2,
+      "n": 5,
+      "loose": 2
+    },
+    "families": {
+      "CLEAN": {
+        "strict": 0,
+        "loose": 0,
+        "controls": 0,
+        "fp": 0,
+        "runs": 1
+      },
+      "drift": {
+        "strict": 2,
+        "loose": 2,
+        "controls": 3,
+        "fp": 1,
+        "runs": 3
+      },
+      "mixed": {
+        "strict": 3,
+        "loose": 3,
+        "controls": 4,
+        "fp": 1,
+        "runs": 2
+      },
+      "noise_trap": {
+        "strict": 1,
+        "loose": 1,
+        "controls": 5,
+        "fp": 4,
+        "runs": 2
+      },
+      "recovery": {
+        "strict": 2,
+        "loose": 2,
+        "controls": 2,
+        "fp": 0,
+        "runs": 2
+      },
+      "shock": {
+        "strict": 4,
+        "loose": 4,
+        "controls": 4,
+        "fp": 0,
+        "runs": 3
+      },
+      "systemic": {
+        "strict": 14,
+        "loose": 16,
+        "controls": 24,
+        "fp": 12,
+        "runs": 8
+      },
+      "volatility": {
+        "strict": 1,
+        "loose": 1,
+        "controls": 2,
+        "fp": 1,
+        "runs": 2
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "strict recall >= 80%",
+      "ok": true,
+      "detail": "42/44 = 95.5%"
+    },
+    {
+      "name": "false positives per run <= 1.0",
+      "ok": true,
+      "detail": "7/23 = 0.30"
+    },
+    {
+      "name": "clean data never called anomalous",
+      "ok": true,
+      "detail": "claimed an anomaly on 0/1 clean run(s)"
+    },
+    {
+      "name": "no unparseable answers and no errored runs",
+      "ok": true,
+      "detail": "badjson=0 errors=0"
+    },
+    {
+      "name": "drift stratum not worse: persistent-to-horizon",
+      "ok": true,
+      "detail": "9/10 vs 7/10 at zero-shot (no regression)"
+    },
+    {
+      "name": "drift stratum not worse: bounded-then-reverting",
+      "ok": true,
+      "detail": "5/5 vs 2/5 at zero-shot (no regression)"
+    }
+  ],
+  "freeze": true
+}

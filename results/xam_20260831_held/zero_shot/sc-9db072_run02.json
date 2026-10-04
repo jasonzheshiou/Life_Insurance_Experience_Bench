@@ -1,0 +1,25 @@
+{
+  "scenario_id": "sc-9db072",
+  "run": 2,
+  "model": "Qwen3.8-Flash-Next",
+  "temperature": 1.0,
+  "sampling": {
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0
+  },
+  "seed": 1235,
+  "started_at": "2026-08-30T18:27:33.134478+00:00",
+  "error": "all 3 attempt(s) failed; last: URLError(ConnectionRefusedError(111, 'Connection refused'))",
+  "attempts": [
+    "attempt 1: URLError(ConnectionRefusedError(111, 'Connection refused'))",
+    "attempt 2: URLError(ConnectionRefusedError(111, 'Connection refused'))",
+    "attempt 3: URLError(ConnectionRefusedError(111, 'Connection refused'))"
+  ],
+  "raw_response": null,
+  "content": null,
+  "reasoning_content": null,
+  "finished_at": "2026-08-30T18:27:45.196270+00:00"
+}

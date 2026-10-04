@@ -1,0 +1,47 @@
+{
+  "eval_id": "sc-7e3a65",
+  "descriptive_id": "shock_ip_2018_2019",
+  "schema_version": 1,
+  "scenario_id": "shock_ip_2018_2019",
+  "family": "shock",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "IP"
+      ],
+      "window": [
+        2018,
+        2019
+      ],
+      "factor": {
+        "IP": 1.5
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "IP x1.5"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "CI",
+    "TPD"
+  ],
+  "primary": null
+}

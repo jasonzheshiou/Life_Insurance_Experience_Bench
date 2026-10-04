@@ -1,0 +1,102 @@
+# Behavioural dossier — scenario `sc-f520e5`
+
+> **SCORER-SIDE DOCUMENT — contains ground truth.** For the experimenter's eyes only. Never feed this file to a model, never copy it under `data/eval/`, never let the prompt builder see it. The model that answered never saw any part of this file.
+
+## Tier 1 · Executive summary (for a general reader)
+
+This scenario hides a manufactured irregularity in synthetic insurance claims data. Asked three separate times (fresh context each time, no memory, no tools, no internet), the AI model did not clearly identify the injected anomaly. Overall it answered 'clean' in 0/3 runs.
+
+**What was hidden:** drift on IP [2018, 2022] (+0.07/yr); volatility on Death [2019, 2022] (sigma=0.25).
+**What the model said:**
+- run 1: Death / shock / dispersion (confidence 0.85) — FALSE POSITIVE
+- run 1: IP / volatility / dispersion (confidence 0.72) — FALSE POSITIVE
+- run 1: IP / recovery / increase (confidence 0.3) — FALSE POSITIVE
+- run 2: Death / shock / increase (confidence 0.95) — FALSE POSITIVE
+- run 2: Death / shock / decrease (confidence 0.9) — FALSE POSITIVE
+- run 2: IP / volatility / dispersion (confidence 0.85) — FALSE POSITIVE
+- run 2: IP / recovery / increase (confidence 0.4) — FALSE POSITIVE
+- run 3: Death / shock / increase (confidence 0.9) — FALSE POSITIVE
+
+**Did it cheat?** No. It was given only the numbers, could not run code, open files, or use tools — and none of that was available in the conversation (see Tier 3 for the evidence).
+
+## Tier 2 · For the actuary (what to make of the answer)
+
+**The task.** The model was handed the A/E experience tables for this book — mixed_drift_ip_vol_death (mixed family) — exactly as a pricing analyst would see them, and asked: where are the anomalies, what kind, and what would you do? It had no knowledge of the injected control: drift on IP [2018, 2022] (+0.07/yr); volatility on Death [2019, 2022] (sigma=0.25).
+
+**Diagnosis to trust:** the injected irregularity was NOT named.
+
+Confidence stated on the correct finding: n/a.
+**Where it helps:** the evidence strings point at the exact rows it used, so you can replay its reasoning. The magnitudes it quotes are checkable against the A/E series.
+
+**Where to be careful:**
+- A finding does not equal an injected control. The model may raise genuine statistical anomalies (e.g. a −2.5σ year) that are noise, not the planted event.
+- The termination table shown to the model is aggregated (pooled over duration months); that removes an artefact the old prompt had, but the aggregate can still hide small-cell noise.
+- 'Clean' verdicts are only as good as the model's tolerance for 2–3σ excursions. On deliberately clean scenarios it should say clean; on noise-trap scenarios it should say nothing.
+
+## Tier 3 · Methodology & outcomes (for the record)
+
+### What the model was given
+
+- endpoint/model: `http://192.168.1.59:8080/v1` / `Qwen3.8-Flash-Next`
+- prompt: system + user turns, 4032 chars, sha256 `6109d9ee40bf598121a10688bcedca312abca30305c50f9357148dca3039dc35`
+- the exact prompt text is archived at `results/xam_v4/zero_shot/sc-f520e5_prompt.md`
+- samplers: {"top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 0.0, "repetition_penalty": 1.0}
+- `max_tokens`: **not sent** · `stream`: `True` · termination aggregation: `pooled`
+- files shown: listing only; contents of `summary.json` and the per-benefit yearly A/E + IP termination tables
+
+### What was sent (verbatim request body, redacted messages)
+
+```json
+{
+  "model": "Qwen3.8-Flash-Next",
+  "temperature": 1.0,
+  "seed": 1234,
+  "top_p": 0.95,
+  "top_k": 20,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repetition_penalty": 1.0,
+  "repeat_penalty": 1.0,
+  "stream": true,
+  "stream_options": {
+    "include_usage": true
+  }
+}
+```
+
+### Per-run facts
+
+| run | seed | wall time | completion tok | prompt tok | finish | answer chars | reasoning chars | error |
+|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | 1234 | 6672s | 30689 | 2477 | stop | 3072 | 93847 | ok |
+| 2 | 1235 | 2728s | 28079 | 2477 | stop | 3327 | 86490 | ok |
+| 3 | 1236 | 7159s | 32300 | 2477 | stop | 2404 | 94117 | ok |
+
+### Tool use (did it do anything besides read the text?)
+
+| check | result |
+|---|---|
+| tools offered in request | `False` |
+| tool calls in response | `False` |
+| code fences in output | `False` |
+| python code / file reads in output | `False` |
+| asked to inspect files | `False` |
+
+The runner offers no tools (`tools`/`function_call` keys never appear in the request) and the server returned none. The model answered from the text alone.
+
+### The data it saw (for replaying its reasoning)
+
+
+### Ground truth (scorer-side)
+
+- descriptive id: `mixed_drift_ip_vol_death` (family `mixed`)
+- controls: drift on IP [2018, 2022] (+0.07/yr); volatility on Death [2019, 2022] (sigma=0.25)
+
+### Scorer verdict summary
+
+- TRUE POSITIVE findings: 0
+- other / false-positive findings: 9
+- runs: 3 · overall 'clean' verdicts: 0
+
+---
+_Generated by scripts/report_xam.py · scenario `sc-f520e5` · run dir `results/xam_v4/zero_shot`_

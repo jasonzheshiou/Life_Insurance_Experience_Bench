@@ -1,0 +1,67 @@
+{
+  "eval_id": "sc-73fd27",
+  "descriptive_id": "sys_drift_aging_2016_2019",
+  "schema_version": 1,
+  "scenario_id": "sys_drift_aging_2016_2019",
+  "family": "systemic",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "drift",
+      "benefit": "Death",
+      "window": [
+        2016,
+        2019
+      ],
+      "factor": 0.05,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.05/yr"
+      }
+    },
+    {
+      "type": "drift",
+      "benefit": "CI",
+      "window": [
+        2016,
+        2019
+      ],
+      "factor": 0.03,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.03/yr"
+      }
+    },
+    {
+      "type": "drift",
+      "benefit": "IP",
+      "window": [
+        2016,
+        2019
+      ],
+      "factor": 0.02,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.02/yr"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD"
+  ],
+  "primary": null
+}

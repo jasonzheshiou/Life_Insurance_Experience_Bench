@@ -1,0 +1,4 @@
+harness snapshot for pass 5 — 2026-09-12T22:49:40Z
+model=Qwen3.8-27B-Q8_0  runs/scenario=1  tool_calls=4
+1959809282cf5b0feb7cf30063c5f31fb86f417c77e65e832499b3c71b9258c3  stats_pack.py
+cfdfa05247709f325984a1428290e26ba1fe5eed683a08fb41767a3598f2f436  run_zero_shot.py

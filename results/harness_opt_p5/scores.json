@@ -1,0 +1,52 @@
+{
+  "results/harness_opt_p5/zero_shot": {
+    "sc-042304": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "shock",
+        "n_controls": 1,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 11778
+      }
+    ]
+  }
+}

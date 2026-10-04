@@ -1,0 +1,48 @@
+{
+  "eval_id": "sc-4a7f9e",
+  "descriptive_id": "sys_shock_inverse_2021_2022",
+  "schema_version": 1,
+  "scenario_id": "sys_shock_inverse_2021_2022",
+  "family": "systemic",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "Death",
+        "CI"
+      ],
+      "window": [
+        2021,
+        2022
+      ],
+      "factor": {
+        "Death": 1.4,
+        "CI": 0.6
+      },
+      "signature": {
+        "direction": "decrease",
+        "magnitude": "Death x1.4, CI x0.6"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

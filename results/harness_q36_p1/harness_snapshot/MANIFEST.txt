@@ -1,0 +1,27 @@
+harness snapshot for pass 1 — 2026-09-16T22:11:32Z
+model=Qwen3.6-27B  runs/scenario=1  tool_calls=4
+16e53e0ef0b097ab6e9616ce731fc3b1b1fe188e02ff0619cf0b7fbe5388bede  stats_pack.py
+a4b967de975625f9957b8555888a1f191b98a57808038f19ab0536992330acf9  run_zero_shot.py
+
+--- system prompt (added after the fact; see note) ---
+54d6d5c2bc7429196c5fd84b42d58cf03859c2c6b933941b410f81dd40d0e58a  system_prompt.txt (from data/prompts/system_v2_baseline.txt)
+
+NOTE (written 2026-09-17T09:35Z, after the pass had started): the two code
+files above were copied by harness_pass_run.sh automatically at pass start.
+The system prompt was NOT — the snapshot block only copies it when
+PINNED_PROMPT_FILE is exported in the launcher's environment, and this launch
+did not export it (the runner's own default already points at that same file,
+so the correct prompt was used regardless; see evidence below). system_prompt.txt
+was therefore copied in by hand afterwards, and is faithful because the source
+file was last modified 2026-09-16T09:25 local, i.e. BEFORE this pass started
+2026-09-17T08:11 local, and its sha256 still matches the text this pass sent.
+
+Evidence that this pass really used this prompt (from the run records):
+  * every record in ../zero_shot/*_run01.json carries
+    prompt.system_chars=3053 and prompt.revision="v2"
+  * ../zero_shot/<sid>_prompt.md embeds this system text verbatim
+  * results/logs/harness_pass_run.log contains the runner's
+    "[pinned-prompt] .../system_v2_baseline.txt (3053 chars)" line once per book.
+A script fix (fall back to the runner default when PINNED_PROMPT_FILE is unset)
+is deferred until the pass finishes, because editing a bash script while bash
+is still reading it can corrupt execution.

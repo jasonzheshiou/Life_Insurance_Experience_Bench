@@ -1,0 +1,17 @@
+================ Qwen3.8-27B full sweep — status ================
+corpus:   results/harness_q38_tuned/zero_shot  (prompt rev v2, 3 runs/scenario)
+state:    RUNNING
+updated:  2026-09-25T09:40:09Z
+
+RUNS FINISHED: 63/72  (87.5%)
+SCENARIOS COMPLETE: 21/24
+
+current:   now: sc-e6ffa4 (heldout) — 0/3 banked
+
+remaining scenarios (3):
+  sc-e6ffa4  (heldout, 0/3 banked)
+  sc-f19bae  (heldout, 0/3 banked)
+  sc-f916b9  (heldout, 0/3 banked)
+
+resume after any crash with the SAME command:
+  bash scripts/harness_final_heldout.sh

@@ -1,0 +1,15 @@
+================ Qwen3.6-27B full sweep — status ================
+corpus:   results/xam_q36/zero_shot  (prompt rev v2, 3 runs/scenario)
+state:    COMPLETE
+updated:  2026-09-16T17:53:20Z
+
+RUNS FINISHED: 141/141  (100.0%)
+SCENARIOS COMPLETE: 47/47
+
+current:   every scenario has 3 valid answers
+
+remaining scenarios (0):
+  none — every scenario has its full complement of valid runs
+
+resume after any crash with the SAME command:
+  bash scripts/sweep_qwen27b.sh

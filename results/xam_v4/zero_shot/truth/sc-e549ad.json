@@ -1,0 +1,48 @@
+{
+  "eval_id": "sc-e549ad",
+  "descriptive_id": "ip_recovery_injury_x15",
+  "schema_version": 1,
+  "scenario_id": "ip_recovery_injury_x15",
+  "family": "recovery",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "ip_recovery",
+      "benefit": [
+        "Injury/Accident"
+      ],
+      "window": [
+        2015,
+        2024
+      ],
+      "factor": {
+        "Injury/Accident": 1.5
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "Injury/Accident x1.5"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "CI",
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

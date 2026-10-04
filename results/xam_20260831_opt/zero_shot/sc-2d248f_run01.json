@@ -1,0 +1,21 @@
+{
+  "scenario_id": "sc-2d248f",
+  "run": 1,
+  "model": "Qwen3.8-Flash-Next",
+  "temperature": 1.0,
+  "sampling": {
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0
+  },
+  "seed": 1234,
+  "started_at": "2026-08-31T01:49:14.079029+00:00",
+  "error": "endpoint unavailable (wait-for-endpoint expired)",
+  "attempts": [],
+  "raw_response": null,
+  "content": null,
+  "reasoning_content": null,
+  "finished_at": "2026-08-31T02:19:14.421635+00:00"
+}

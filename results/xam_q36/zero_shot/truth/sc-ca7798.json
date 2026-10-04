@@ -1,0 +1,72 @@
+{
+  "eval_id": "sc-ca7798",
+  "descriptive_id": "mixed_triple_ci_ip_mh",
+  "schema_version": 1,
+  "scenario_id": "mixed_triple_ci_ip_mh",
+  "family": "mixed",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "drift",
+      "benefit": "CI",
+      "window": [
+        2020,
+        2024
+      ],
+      "factor": 0.05,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.05/yr"
+      }
+    },
+    {
+      "type": "volatility",
+      "benefit": "IP",
+      "window": [
+        2015,
+        2024
+      ],
+      "factor": 0.15,
+      "signature": {
+        "direction": "dispersion",
+        "magnitude": "sigma=0.15"
+      }
+    },
+    {
+      "type": "ip_recovery",
+      "benefit": [
+        "Mental Health"
+      ],
+      "window": [
+        2015,
+        2024
+      ],
+      "factor": {
+        "Mental Health": 1.5
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "Mental Health x1.5"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "TPD"
+  ],
+  "primary": null
+}

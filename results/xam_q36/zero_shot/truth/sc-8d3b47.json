@@ -1,0 +1,55 @@
+{
+  "eval_id": "sc-8d3b47",
+  "descriptive_id": "sys_drift_diverge_2018_2024",
+  "schema_version": 1,
+  "scenario_id": "sys_drift_diverge_2018_2024",
+  "family": "systemic",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "drift",
+      "benefit": "Death",
+      "window": [
+        2018,
+        2024
+      ],
+      "factor": 0.06,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.06/yr"
+      }
+    },
+    {
+      "type": "drift",
+      "benefit": "CI",
+      "window": [
+        2018,
+        2024
+      ],
+      "factor": -0.04,
+      "signature": {
+        "direction": "decrease",
+        "magnitude": "-0.04/yr"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

@@ -1,0 +1,248 @@
+{
+  "results/harness_q36_step3/zero_shot": {
+    "sc-d72b95": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 4,
+        "strict": 3,
+        "loose": 3,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2020
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2020
+              ],
+              "want_years": [
+                2020,
+                2020
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2020,
+              2020
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2020,
+                2020
+              ],
+              "want_years": [
+                2020,
+                2020
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "drift",
+            "benefit": "Death",
+            "unit_benefit": "Death",
+            "window": [
+              2021,
+              2024
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "drift",
+            "benefit": "CI",
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2024
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 2,
+              "years": [
+                2022,
+                2024
+              ],
+              "want_years": [
+                2021,
+                2024
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1,
+          2
+        ],
+        "_drift_units": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            true,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 3,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 6525
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 4,
+        "strict": 3,
+        "loose": 3,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2020
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2020
+              ],
+              "want_years": [
+                2020,
+                2020
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2020,
+              2020
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2020,
+                2020
+              ],
+              "want_years": [
+                2020,
+                2020
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "drift",
+            "benefit": "Death",
+            "unit_benefit": "Death",
+            "window": [
+              2021,
+              2024
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "drift",
+            "benefit": "CI",
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2024
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 2,
+              "years": [
+                2022,
+                2024
+              ],
+              "want_years": [
+                2021,
+                2024
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1,
+          2
+        ],
+        "_drift_units": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            true,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 3,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 5244
+      }
+    ]
+  }
+}

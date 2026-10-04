@@ -1,0 +1,5 @@
+harness snapshot for pass 2 — 2026-09-17T08:39:28Z
+model=Qwen3.6-27B  runs/scenario=1  tool_calls=4
+78717ce2dbc74e06fb6afc42ef640c505982a8d78202f67919dd69e23e4e74cf  stats_pack.py
+a4b967de975625f9957b8555888a1f191b98a57808038f19ab0536992330acf9  run_zero_shot.py
+54d6d5c2bc7429196c5fd84b42d58cf03859c2c6b933941b410f81dd40d0e58a  system_prompt.txt (from data/prompts/system_v2_baseline.txt)

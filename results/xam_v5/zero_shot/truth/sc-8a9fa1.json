@@ -1,0 +1,60 @@
+{
+  "eval_id": "sc-8a9fa1",
+  "descriptive_id": "trap_noise_drift_lookalike",
+  "schema_version": 1,
+  "scenario_id": "trap_noise_drift_lookalike",
+  "family": "noise_trap",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "volatility",
+      "benefit": "Death",
+      "window": [
+        2016,
+        2020
+      ],
+      "factor": 0.35,
+      "signature": {
+        "direction": "dispersion",
+        "magnitude": "sigma=0.35"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "CI",
+    "TPD",
+    "IP"
+  ],
+  "primary": {
+    "control_type": "volatility",
+    "benefit": "Death",
+    "window": [
+      2016,
+      2020
+    ],
+    "factor": 0.35,
+    "signature": {
+      "direction": "dispersion",
+      "magnitude": "sigma=0.35"
+    },
+    "benefit_lines_untouched": [
+      "CI",
+      "TPD",
+      "IP"
+    ]
+  }
+}

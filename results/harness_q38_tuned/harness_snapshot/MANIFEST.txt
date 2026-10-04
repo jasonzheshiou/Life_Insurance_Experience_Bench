@@ -1,0 +1,6 @@
+harness snapshot (frozen) — 2026-09-21T22:05:29Z
+model=Qwen3.8-27B  runs/scenario=3  base_url=http://192.168.1.59:8080/v1
+8bd4c07be285bf51c4fff0d04463b57124193c8736140f56da0c875ebad55246  stats_pack.py
+a4b967de975625f9957b8555888a1f191b98a57808038f19ab0536992330acf9  run_zero_shot.py
+runner=python3 scripts/run_zero_shot_baseline_v2.py
+54d6d5c2bc7429196c5fd84b42d58cf03859c2c6b933941b410f81dd40d0e58a  system_prompt.txt (from data/prompts/system_v2_baseline.txt)

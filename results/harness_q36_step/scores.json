@@ -1,0 +1,130 @@
+{
+  "results/harness_q36_step/zero_shot": {
+    "sc-3c83fd": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "drift",
+        "n_controls": 1,
+        "strict": 0,
+        "loose": 0,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "CI",
+            "unit_benefit": "CI",
+            "window": [
+              2016,
+              2019
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [],
+        "_drift_units": [
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 8263
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "drift",
+        "n_controls": 1,
+        "strict": 0,
+        "loose": 0,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "CI",
+            "unit_benefit": "CI",
+            "window": [
+              2016,
+              2019
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [],
+        "_drift_units": [
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 8079
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "drift",
+        "n_controls": 1,
+        "strict": 0,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "CI",
+            "unit_benefit": "CI",
+            "window": [
+              2016,
+              2019
+            ],
+            "loose": true,
+            "strict": false,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2024
+              ],
+              "want_years": [
+                2016,
+                2019
+              ],
+              "direction": "increase",
+              "window_ok": false,
+              "direction_ok": false
+            }
+          }
+        ],
+        "matched_idx": [],
+        "_drift_units": [
+          [
+            true,
+            false,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 8415
+      }
+    ]
+  }
+}

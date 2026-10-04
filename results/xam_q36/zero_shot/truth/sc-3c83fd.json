@@ -1,0 +1,60 @@
+{
+  "eval_id": "sc-3c83fd",
+  "descriptive_id": "drift_ci_down_2016_2019",
+  "schema_version": 1,
+  "scenario_id": "drift_ci_down_2016_2019",
+  "family": "drift",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "drift",
+      "benefit": "CI",
+      "window": [
+        2016,
+        2019
+      ],
+      "factor": -0.1,
+      "signature": {
+        "direction": "decrease",
+        "magnitude": "-0.10/yr"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "TPD",
+    "IP"
+  ],
+  "primary": {
+    "control_type": "drift",
+    "benefit": "CI",
+    "window": [
+      2016,
+      2019
+    ],
+    "factor": -0.1,
+    "signature": {
+      "direction": "decrease",
+      "magnitude": "-0.10/yr"
+    },
+    "benefit_lines_untouched": [
+      "Death",
+      "TPD",
+      "IP"
+    ]
+  }
+}

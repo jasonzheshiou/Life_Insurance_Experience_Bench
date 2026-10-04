@@ -1,0 +1,48 @@
+{
+  "eval_id": "sc-48351f",
+  "descriptive_id": "shock_tpd_ip_2023",
+  "schema_version": 1,
+  "scenario_id": "shock_tpd_ip_2023",
+  "family": "shock",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "TPD",
+        "IP"
+      ],
+      "window": [
+        2023,
+        2023
+      ],
+      "factor": {
+        "TPD": 1.3,
+        "IP": 1.2
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "TPD x1.3, IP x1.2"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "CI"
+  ],
+  "primary": null
+}

@@ -1,0 +1,14 @@
+sweep start: 2026-09-03T10:18:18Z  repair(sc-6e2478 run01) + sc-9660b9 sc-abbec4 sc-bba653 sc-d72b95 sc-da1123 sc-f520e5
+sc-bba653 : ok  2026-09-03T10:18:23Z
+sc-6e2478 : ok  2026-09-03T10:18:26Z
+sc-d72b95 : ok  2026-09-03T10:18:31Z
+sc-9660b9 : ok  2026-09-03T10:18:33Z
+sc-da1123 : ok  2026-09-03T10:18:39Z
+sc-abbec4 : ok  2026-09-03T10:18:41Z
+sc-bba653 : ok  2026-09-03T10:18:49Z
+sc-d72b95 : ok  2026-09-03T10:18:57Z
+sc-da1123 : ok  2026-09-03T10:19:05Z
+sc-f520e5 : ok  2026-09-03T13:01:33Z
+sweep complete: 2026-09-03T13:04:16Z
+sc-f520e5 : ok  2026-09-03T13:36:44Z
+sweep complete: 2026-09-03T13:39:28Z

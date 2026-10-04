@@ -1,0 +1,6 @@
+harness snapshot (FROZEN, v1.6e) — refreshed 2026-09-13T23:53:09Z
+model=Qwen3.8-27B  runs/scenario=1  tool_calls=4  corpus=results/harness_opt_p7
+gate: PASSED all six criteria — strict 43/44=97.7%, FP/run 0.96, clean intact, strata 9/10 and 5/5
+verification: these files rebuild all 23 recorded pack_text values byte-for-byte (23/23)
+16e53e0ef0b097ab6e9616ce731fc3b1b1fe188e02ff0619cf0b7fbe5388bede  stats_pack.py
+a4b967de975625f9957b8555888a1f191b98a57808038f19ab0536992330acf9  run_zero_shot.py

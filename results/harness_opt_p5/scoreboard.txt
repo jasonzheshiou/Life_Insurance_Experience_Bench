@@ -1,0 +1,8 @@
+
+====================================================================================================
+RUN DIR: results/harness_opt_p5/zero_shot   [scorer v3: null-window=full-period, per-benefit units, clean-statements excluded, ip_recovery direction live]
+====================================================================================================
+sc-042304   fam=shock       runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+  TOTALS: runs=1 strict-recall=1/1=100.0% loose=100.0% FP/run=0.00 badjson=0 errors=0
+
+wrote results/harness_opt_p5/scores.json

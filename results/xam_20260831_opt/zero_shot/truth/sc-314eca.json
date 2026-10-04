@@ -1,0 +1,44 @@
+{
+  "eval_id": "sc-314eca",
+  "descriptive_id": "sys_vol_macro_2019_2021",
+  "schema_version": 1,
+  "scenario_id": "sys_vol_macro_2019_2021",
+  "family": "systemic",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "volatility",
+      "benefit": "all",
+      "window": [
+        2019,
+        2021
+      ],
+      "factor": 0.25,
+      "signature": {
+        "direction": "dispersion",
+        "magnitude": "sigma=0.25"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "CI",
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

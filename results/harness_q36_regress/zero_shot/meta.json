@@ -1,0 +1,60 @@
+{
+  "run_id": "harness_q36_regress",
+  "created_at": "2026-09-18T11:19:31.929731+00:00",
+  "script_version": "0.5.0",
+  "prompt_revision": "v2",
+  "split": "optimization",
+  "scenarios": [
+    "sc-4a7f9e",
+    "sc-5e376b",
+    "sc-abbec4",
+    "sc-bba653"
+  ],
+  "model": "Qwen3.6-27B",
+  "base_url": "http://192.168.1.59:8080/v1",
+  "temperature": 1.0,
+  "sampling": {
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0
+  },
+  "max_tokens": null,
+  "stream": true,
+  "context": {
+    "n_ctx": 260096,
+    "props_url": "http://192.168.1.59:8080/props",
+    "default_max_tokens": -1,
+    "total_slots": 1
+  },
+  "stateless_calls": true,
+  "seed": 1234,
+  "runs": 3,
+  "detail": "full",
+  "termination_mean": "pooled",
+  "dataset_fingerprint": "2deda8760407c9b270a1f443acbbeda641d225eb67d8afb6e8ca15afb01433a2",
+  "leak_check": {
+    "status": "clean",
+    "leak_scan_scenarios": 4,
+    "descriptive_ids_from": "data/truth/id_map.csv",
+    "integrity": {
+      "status": "ok",
+      "files_verified": 136,
+      "seal_match": true
+    }
+  },
+  "harness": {
+    "version": "h1",
+    "mode": "full",
+    "tool_calls_max": 4,
+    "pack_sha": {
+      "sc-4a7f9e": "68d05696f31582a4",
+      "sc-5e376b": "f97e1d69c9d393fc",
+      "sc-abbec4": "253a266dbeff9ac6",
+      "sc-bba653": "ed748c351c3f08f2"
+    }
+  },
+  "aborted": null,
+  "failed_calls": 0
+}

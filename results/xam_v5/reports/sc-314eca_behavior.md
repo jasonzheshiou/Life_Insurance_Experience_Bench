@@ -1,0 +1,102 @@
+# Behavioural dossier — scenario `sc-314eca`
+
+> **SCORER-SIDE DOCUMENT — contains ground truth.** For the experimenter's eyes only. Never feed this file to a model, never copy it under `data/eval/`, never let the prompt builder see it. The model that answered never saw any part of this file.
+
+## Tier 1 · Executive summary (for a general reader)
+
+This scenario hides a manufactured irregularity in synthetic insurance claims data. Asked three separate times (fresh context each time, no memory, no tools, no internet), the AI model found the anomaly every time but also raised 11 additional item(s). Overall it answered 'clean' in 0/3 runs.
+
+**What was hidden:** volatility on all [2019, 2021] (sigma=0.25).
+**What the model said:**
+- run 1: Death / drift / increase (confidence 0.75) — FALSE POSITIVE
+- run 1: CI / drift / increase (confidence 0.68) — FALSE POSITIVE
+- run 1: TPD / volatility / dispersion (confidence 0.7) — TRUE POSITIVE
+- run 1: IP / shock / increase (confidence 0.65) — FALSE POSITIVE
+- run 2: Death / drift / increase (confidence 0.85) — FALSE POSITIVE
+- run 2: CI / drift / increase (confidence 0.85) — FALSE POSITIVE
+- run 2: TPD / shock / increase (confidence 0.8) — FALSE POSITIVE
+- run 2: TPD / shock / decrease (confidence 0.8) — FALSE POSITIVE
+
+**Did it cheat?** No. It was given only the numbers, could not run code, open files, or use tools — and none of that was available in the conversation (see Tier 3 for the evidence).
+
+## Tier 2 · For the actuary (what to make of the answer)
+
+**The task.** The model was handed the A/E experience tables for this book — sys_vol_macro_2019_2021 (systemic family) — exactly as a pricing analyst would see them, and asked: where are the anomalies, what kind, and what would you do? It had no knowledge of the injected control: volatility on all [2019, 2021] (sigma=0.25).
+
+**Diagnosis to trust:** the injected irregularity was named correctly (volatility on all [2019, 2021] (sigma=0.25)).
+
+Confidence stated on the correct finding: 0.7, 0.8.
+**Where it helps:** the evidence strings point at the exact rows it used, so you can replay its reasoning. The magnitudes it quotes are checkable against the A/E series.
+
+**Where to be careful:**
+- A finding does not equal an injected control. The model may raise genuine statistical anomalies (e.g. a −2.5σ year) that are noise, not the planted event.
+- The termination table shown to the model is aggregated (pooled over duration months); that removes an artefact the old prompt had, but the aggregate can still hide small-cell noise.
+- 'Clean' verdicts are only as good as the model's tolerance for 2–3σ excursions. On deliberately clean scenarios it should say clean; on noise-trap scenarios it should say nothing.
+
+## Tier 3 · Methodology & outcomes (for the record)
+
+### What the model was given
+
+- endpoint/model: `http://192.168.1.59:8080/v1` / `Qwen3.8-27B-Q8_0`
+- prompt: system + user turns, 4035 chars, sha256 `5b0d664ce0bb94d5e339c628e6bd6bebdbec8efd9eb37d396830db295d3f2134`
+- the exact prompt text is archived at `results/xam_v5/zero_shot/sc-314eca_prompt.md`
+- samplers: {"top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 0.0, "repetition_penalty": 1.0}
+- `max_tokens`: **not sent** · `stream`: `True` · termination aggregation: `pooled`
+- files shown: listing only; contents of `summary.json` and the per-benefit yearly A/E + IP termination tables
+
+### What was sent (verbatim request body, redacted messages)
+
+```json
+{
+  "model": "Qwen3.8-27B-Q8_0",
+  "temperature": 1.0,
+  "seed": 1234,
+  "top_p": 0.95,
+  "top_k": 20,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repetition_penalty": 1.0,
+  "repeat_penalty": 1.0,
+  "stream": true,
+  "stream_options": {
+    "include_usage": true
+  }
+}
+```
+
+### Per-run facts
+
+| run | seed | wall time | completion tok | prompt tok | finish | answer chars | reasoning chars | error |
+|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | 1234 | 994s | 16758 | 2733 | stop | 3811 | 39337 | ok |
+| 2 | 1235 | 1293s | 23388 | 2733 | stop | 5839 | 55813 | ok |
+| 3 | 1236 | 854s | 14194 | 2733 | stop | 3407 | 37527 | ok |
+
+### Tool use (did it do anything besides read the text?)
+
+| check | result |
+|---|---|
+| tools offered in request | `False` |
+| tool calls in response | `False` |
+| code fences in output | `False` |
+| python code / file reads in output | `False` |
+| asked to inspect files | `False` |
+
+The runner offers no tools (`tools`/`function_call` keys never appear in the request) and the server returned none. The model answered from the text alone.
+
+### The data it saw (for replaying its reasoning)
+
+
+### Ground truth (scorer-side)
+
+- descriptive id: `sys_vol_macro_2019_2021` (family `systemic`)
+- controls: volatility on all [2019, 2021] (sigma=0.25)
+
+### Scorer verdict summary
+
+- TRUE POSITIVE findings: 2
+- other / false-positive findings: 11
+- runs: 3 · overall 'clean' verdicts: 0
+
+---
+_Generated by scripts/report_xam.py · scenario `sc-314eca` · run dir `results/xam_v5/zero_shot`_

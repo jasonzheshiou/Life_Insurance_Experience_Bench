@@ -1,0 +1,4 @@
+harness snapshot (frozen) — 2026-09-13T23:56:46Z
+model=Qwen3.8-27B-Q8_0  runs/scenario=3  base_url=http://192.168.1.59:8080/v1
+16e53e0ef0b097ab6e9616ce731fc3b1b1fe188e02ff0619cf0b7fbe5388bede  stats_pack.py
+a4b967de975625f9957b8555888a1f191b98a57808038f19ab0536992330acf9  run_zero_shot.py

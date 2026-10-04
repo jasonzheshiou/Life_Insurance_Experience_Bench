@@ -1,0 +1,25 @@
+{
+  "scenario_id": "sc-0ce4d6",
+  "run": 1,
+  "model": "Qwen3.8-Flash-Next",
+  "temperature": 1.0,
+  "sampling": {
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0
+  },
+  "seed": 1234,
+  "started_at": "2026-08-31T03:25:27.590034+00:00",
+  "error": "all 3 attempt(s) failed; last: <HTTPError 503: 'Service Unavailable'>",
+  "attempts": [
+    "attempt 1: RemoteDisconnected('Remote end closed connection without response')",
+    "attempt 2: URLError(ConnectionRefusedError(111, 'Connection refused'))",
+    "attempt 3: <HTTPError 503: 'Service Unavailable'>"
+  ],
+  "raw_response": null,
+  "content": null,
+  "reasoning_content": null,
+  "finished_at": "2026-08-31T03:42:09.269078+00:00"
+}

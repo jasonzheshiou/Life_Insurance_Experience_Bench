@@ -1,0 +1,60 @@
+{
+  "eval_id": "sc-88fa33",
+  "descriptive_id": "volatility_tpd_sigma_04",
+  "schema_version": 1,
+  "scenario_id": "volatility_tpd_sigma_04",
+  "family": "volatility",
+  "split": "heldout",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "volatility",
+      "benefit": "TPD",
+      "window": [
+        2015,
+        2024
+      ],
+      "factor": 0.4,
+      "signature": {
+        "direction": "dispersion",
+        "magnitude": "sigma=0.4"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "CI",
+    "IP"
+  ],
+  "primary": {
+    "control_type": "volatility",
+    "benefit": "TPD",
+    "window": [
+      2015,
+      2024
+    ],
+    "factor": 0.4,
+    "signature": {
+      "direction": "dispersion",
+      "magnitude": "sigma=0.4"
+    },
+    "benefit_lines_untouched": [
+      "Death",
+      "CI",
+      "IP"
+    ]
+  }
+}

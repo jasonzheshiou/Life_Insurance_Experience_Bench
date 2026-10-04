@@ -1,0 +1,34 @@
+{
+  "true_sd": 0.1424,
+  "harness": {
+    "version": "h1",
+    "tool_calls": 1,
+    "turns": [
+      {
+        "role": "model",
+        "chars": 281,
+        "tool": true,
+        "finish_reason": "stop"
+      },
+      {
+        "role": "tool",
+        "code_chars": 249,
+        "result_chars": 7
+      },
+      {
+        "role": "model",
+        "chars": 18,
+        "tool": false,
+        "finish_reason": "stop"
+      }
+    ],
+    "transcript": [
+      {
+        "model_asked": "{\"tool\": \"python\", \"code\": \"import statistics\\nvalues = [1.02, 0.97, 1.11, 0.88, 1.31, 0.94, 1.07, 0.83, 1.19, 0.91, 1.04, 0.99, 1.27, 0.86, 1.12, 0.95, 1.08, 0.81, 1.23, 0.93, 1.01, 0.96, 1.15, 0.89, 1.29, 0.92, 1.06, 0.84, 1.21, 0.9]\\nprint(round(statistics.pstdev(values), 4))\"}",
+        "code": "import statistics\nvalues = [1.02, 0.97, 1.11, 0.88, 1.31, 0.94, 1.07, 0.83, 1.19, 0.91, 1.04, 0.99, 1.27, 0.86, 1.12, 0.95, 1.08, 0.81, 1.23, 0.93, 1.01, 0.96, 1.15, 0.89, 1.29, 0.92, 1.06, 0.84, 1.21, 0.9]\nprint(round(statistics.pstdev(values), 4))",
+        "result": "0.1424\n"
+      }
+    ]
+  },
+  "final_content": "{\"answer\": 0.1424}"
+}

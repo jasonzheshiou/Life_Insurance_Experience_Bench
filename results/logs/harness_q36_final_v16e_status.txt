@@ -1,0 +1,15 @@
+================ Qwen3.6-27B full sweep — status ================
+corpus:   results/harness_q36_final_v16e/zero_shot  (prompt rev v2, 3 runs/scenario)
+state:    SCORING
+updated:  2026-09-21T19:43:37Z
+
+RUNS FINISHED: 72/72  (100.0%)
+SCENARIOS COMPLETE: 24/24
+
+current:   corpus complete — scoring
+
+remaining scenarios (0):
+  none — every scenario has its full complement of valid runs
+
+resume after any crash with the SAME command:
+  bash scripts/harness_final_heldout.sh

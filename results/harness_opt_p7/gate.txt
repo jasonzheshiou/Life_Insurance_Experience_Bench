@@ -1,0 +1,25 @@
+==========================================================================
+FREEZE GATE — harness v1.6e — full 23-book corpus
+corpus: results/harness_opt_p7/zero_shot   (23 run(s), optimization split, run 1..1)
+==========================================================================
+  [PASS] strict recall >= 80%                         43/44 = 97.7%
+  [PASS] false positives per run <= 1.0               22/23 = 0.96
+  [PASS] clean data never called anomalous            claimed an anomaly on 0/1 clean run(s)
+  [PASS] no unparseable answers and no errored runs   badjson=0 errors=0
+  [PASS] drift stratum not worse: persistent-to-horizon 9/10 vs 8/10 at zero-shot (no regression)
+  [PASS] drift stratum not worse: bounded-then-reverting 5/5 vs 3/5 at zero-shot (no regression)
+--------------------------------------------------------------------------
+  per-family strict recall (strict/controls, fp):
+    CLEAN                  clean — false anomaly claims 0/1, fp=0
+    drift                   3/3  = 100.0%  loose 3/3  fp=1
+    mixed                   4/4  = 100.0%  loose 4/4  fp=4
+    noise_trap              5/5  = 100.0%  loose 5/5  fp=1
+    recovery                2/2  = 100.0%  loose 2/2  fp=0
+    shock                   4/4  = 100.0%  loose 4/4  fp=2
+    systemic               23/24 = 95.8%  loose 23/24  fp=10
+    volatility              2/2  = 100.0%  loose 2/2  fp=4
+--------------------------------------------------------------------------
+  reference (zero-shot, same design): 28/44 = 63.6% strict, fp/run 1.61
+  VERDICT: FREEZE — all criteria met
+==========================================================================
+wrote results/harness_opt_p7/gate.json

@@ -1,0 +1,59 @@
+{
+  "eval_id": "sc-63f1c7",
+  "descriptive_id": "mixed_drift_death_shock_ci",
+  "schema_version": 1,
+  "scenario_id": "mixed_drift_death_shock_ci",
+  "family": "mixed",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "drift",
+      "benefit": "Death",
+      "window": [
+        2019,
+        2024
+      ],
+      "factor": 0.08,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.08/yr"
+      }
+    },
+    {
+      "type": "shock",
+      "benefit": [
+        "CI"
+      ],
+      "window": [
+        2021,
+        2021
+      ],
+      "factor": {
+        "CI": 1.4
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "CI x1.4"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

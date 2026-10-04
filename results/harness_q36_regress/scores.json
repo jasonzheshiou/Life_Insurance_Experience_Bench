@@ -1,0 +1,929 @@
+{
+  "results/harness_q36_regress/zero_shot": {
+    "sc-4a7f9e": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "decrease"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 8758
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "decrease"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 6998
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "decrease"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 4866
+      }
+    ],
+    "sc-5e376b": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "shock",
+        "n_controls": 1,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 4323
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "shock",
+        "n_controls": 1,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 3725
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "shock",
+        "n_controls": 1,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 1,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 3532
+      }
+    ],
+    "sc-abbec4": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 6103
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 5284
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2021,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2021,
+                2022
+              ],
+              "want_years": [
+                2021,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 5437
+      }
+    ],
+    "sc-bba653": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 4,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 2,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [
+          1,
+          2
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 3,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 8425
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 4,
+        "strict": 0,
+        "loose": 0,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 5,
+        "fp": 5,
+        "error": null,
+        "completion_tokens": 9081
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "systemic",
+        "n_controls": 4,
+        "strict": 4,
+        "loose": 4,
+        "per_control": [
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "Death",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "CI",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "TPD",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 2,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "shock",
+            "benefit": [
+              "Death",
+              "CI",
+              "TPD",
+              "IP"
+            ],
+            "unit_benefit": "IP",
+            "window": [
+              2020,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 3,
+              "years": [
+                2020,
+                2022
+              ],
+              "want_years": [
+                2020,
+                2022
+              ],
+              "direction": "increase"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "_drift_units": [],
+        "supp_idx": [],
+        "n_findings": 4,
+        "fp": 0,
+        "error": null,
+        "completion_tokens": 5234
+      }
+    ]
+  }
+}

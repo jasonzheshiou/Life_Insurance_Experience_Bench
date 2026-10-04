@@ -1,0 +1,11 @@
+
+====================================================================================================
+RUN DIR: results/harness_q36_regress/zero_shot   [scorer v3: null-window=full-period, per-benefit units, clean-statements excluded, ip_recovery direction live]
+====================================================================================================
+sc-4a7f9e   fam=systemic    runs=3 strict=6/6 loose=6/6 FP=0 badjson=0 err=0
+sc-5e376b   fam=shock       runs=3 strict=3/3 loose=3/3 FP=0 badjson=0 err=0
+sc-abbec4   fam=systemic    runs=3 strict=6/6 loose=6/6 FP=0 badjson=0 err=0
+sc-bba653   fam=systemic    runs=3 strict=6/12 loose=6/12 FP=6 badjson=0 err=0
+  TOTALS: runs=12 strict-recall=21/27=77.8% loose=77.8% FP/run=0.50 badjson=0 errors=0
+
+wrote results/harness_q36_regress/scores.json

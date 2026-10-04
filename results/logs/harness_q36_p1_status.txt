@@ -1,0 +1,8 @@
+==== harness optimization pass 1 — unattended run ====
+state:    PASS_COMPLETE
+updated:  2026-09-17T00:14:01Z
+corpus:   results/harness_q36_p1  (model=Qwen3.6-27B, runs/scenario=1, harness=h1)
+SCENARIOS FINISHED: 23/23
+current:  all 23 optimization scenarios have a valid run
+log:      results/logs/harness_pass_run.log
+resume:   bash scripts/harness_pass_run.sh

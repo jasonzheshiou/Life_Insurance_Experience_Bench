@@ -1,0 +1,51 @@
+{
+  "run_id": "gatecheck_opt",
+  "created_at": "2026-08-30T16:00:58.525070+00:00",
+  "script_version": "0.3.0",
+  "split": "optimization",
+  "scenarios": [
+    "sc-042304",
+    "sc-137901",
+    "sc-14cdd9",
+    "sc-17d82f",
+    "sc-2d248f",
+    "sc-314eca",
+    "sc-3c83fd",
+    "sc-409000",
+    "sc-48351f",
+    "sc-4a7f9e",
+    "sc-5e376b",
+    "sc-63f1c7",
+    "sc-6e2478",
+    "sc-8a9fa1",
+    "sc-8d3b47",
+    "sc-9372cd",
+    "sc-9660b9",
+    "sc-abbec4",
+    "sc-bba653",
+    "sc-d72b95",
+    "sc-da1123",
+    "sc-f520e5",
+    "sc-f69eea"
+  ],
+  "model": "qwen3.8-27b",
+  "base_url": "http://192.168.1.59:1234/v1",
+  "temperature": 0.2,
+  "sampling": {},
+  "max_tokens": null,
+  "stateless_calls": true,
+  "seed": 1234,
+  "runs": 3,
+  "detail": "full",
+  "dataset_fingerprint": "2deda8760407c9b270a1f443acbbeda641d225eb67d8afb6e8ca15afb01433a2",
+  "leak_check": {
+    "status": "clean",
+    "leak_scan_scenarios": 23,
+    "descriptive_ids_from": "data/truth/id_map.csv",
+    "integrity": {
+      "status": "ok",
+      "files_verified": 782,
+      "seal_match": true
+    }
+  }
+}

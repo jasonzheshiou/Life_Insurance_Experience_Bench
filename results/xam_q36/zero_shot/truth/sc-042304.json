@@ -1,0 +1,47 @@
+{
+  "eval_id": "sc-042304",
+  "descriptive_id": "shock_ci_2021_2022",
+  "schema_version": 1,
+  "scenario_id": "shock_ci_2021_2022",
+  "family": "shock",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "CI"
+      ],
+      "window": [
+        2021,
+        2022
+      ],
+      "factor": {
+        "CI": 1.4
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "CI x1.4"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "Death",
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

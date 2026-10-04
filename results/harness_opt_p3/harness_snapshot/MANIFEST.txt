@@ -1,0 +1,4 @@
+harness snapshot for pass 3 (v1.4, the frozen version) — created 2026-09-12T09:48:42Z
+verified: reproduces all 23 pass-3 pack_text fields byte-for-byte
+2949d30c070a3bfe42659d00470229ee8984988fb93c498367a7a08b6782d6ac  stats_pack.py
+5e95615a78974e257762e681c526107f4339a34afc0597e59063febaf05972b0  run_zero_shot.py

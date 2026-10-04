@@ -1,0 +1,56 @@
+================ Qwen3.6-27B full sweep — status ================
+corpus:   results/xam_q36/zero_shot  (prompt rev v2, 3 runs/scenario)
+state:    STOPPED
+updated:  2026-09-16T01:03:59Z
+
+RUNS FINISHED: 15/141  (10.6%)
+SCENARIOS COMPLETE: 5/47
+
+current:   runner exited rc=143 on sc-314eca (optimization) at 2026-09-16T01:03:59Z — server issue?
+
+remaining scenarios (42):
+  sc-314eca  (optimization, 0/3 banked)
+  sc-3c83fd  (optimization, 0/3 banked)
+  sc-409000  (optimization, 0/3 banked)
+  sc-48351f  (optimization, 0/3 banked)
+  sc-4a7f9e  (optimization, 0/3 banked)
+  sc-5e376b  (optimization, 0/3 banked)
+  sc-63f1c7  (optimization, 0/3 banked)
+  sc-6e2478  (optimization, 0/3 banked)
+  sc-8a9fa1  (optimization, 0/3 banked)
+  sc-8d3b47  (optimization, 0/3 banked)
+  sc-9372cd  (optimization, 0/3 banked)
+  sc-9660b9  (optimization, 0/3 banked)
+  sc-abbec4  (optimization, 0/3 banked)
+  sc-bba653  (optimization, 0/3 banked)
+  sc-d72b95  (optimization, 0/3 banked)
+  sc-da1123  (optimization, 0/3 banked)
+  sc-f520e5  (optimization, 0/3 banked)
+  sc-f69eea  (optimization, 0/3 banked)
+  sc-0ce4d6  (heldout, 0/3 banked)
+  sc-11135c  (heldout, 0/3 banked)
+  sc-12be68  (heldout, 0/3 banked)
+  sc-21b383  (heldout, 0/3 banked)
+  sc-3411b2  (heldout, 0/3 banked)
+  sc-3627d2  (heldout, 0/3 banked)
+  sc-62c222  (heldout, 0/3 banked)
+  sc-696b93  (heldout, 0/3 banked)
+  sc-6fe297  (heldout, 0/3 banked)
+  sc-73fd27  (heldout, 0/3 banked)
+  sc-7e3a65  (heldout, 0/3 banked)
+  sc-87e6e7  (heldout, 0/3 banked)
+  sc-88fa33  (heldout, 0/3 banked)
+  sc-90a5be  (heldout, 0/3 banked)
+  sc-9db072  (heldout, 0/3 banked)
+  sc-a15166  (heldout, 0/3 banked)
+  sc-a3e6a6  (heldout, 0/3 banked)
+  sc-c9d78b  (heldout, 0/3 banked)
+  sc-ca7798  (heldout, 0/3 banked)
+  sc-e28a00  (heldout, 0/3 banked)
+  sc-e549ad  (heldout, 0/3 banked)
+  sc-e6ffa4  (heldout, 0/3 banked)
+  sc-f19bae  (heldout, 0/3 banked)
+  sc-f916b9  (heldout, 0/3 banked)
+
+resume after any crash with the SAME command:
+  bash scripts/sweep_qwen27b.sh

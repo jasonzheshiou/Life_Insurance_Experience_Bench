@@ -1,0 +1,12 @@
+{
+  "scenario_id": "sc-409000",
+  "run": 1,
+  "model": "Qwen3.8-Flash-Next",
+  "temperature": 1.0,
+  "seed": 1234,
+  "started_at": "2026-08-30T15:05:48.445986+00:00",
+  "error": "attempt 3: URLError(ConnectionRefusedError(111, 'Connection refused'))",
+  "raw_response": null,
+  "content": null,
+  "finished_at": "2026-08-30T15:17:04.193478+00:00"
+}

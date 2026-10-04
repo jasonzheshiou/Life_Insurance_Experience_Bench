@@ -1,0 +1,32 @@
+
+====================================================================================================
+RUN DIR: results/harness_opt_p2/zero_shot   [scorer v3: null-window=full-period, per-benefit units, clean-statements excluded, ip_recovery direction live]
+====================================================================================================
+sc-042304   fam=shock       runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-137901   fam=systemic    runs=1 strict=0/2 loose=1/2 FP=3 badjson=0 err=0
+sc-14cdd9   fam=CLEAN       runs=1 FALSE-POSITIVE: claimed-anomalies=0/1 FP=0 badjson=0 err=0
+sc-17d82f   fam=recovery    runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-2d248f   fam=volatility  runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-314eca   fam=systemic    runs=1 strict=1/4 loose=1/4 FP=4 badjson=0 err=0
+sc-3c83fd   fam=drift       runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-409000   fam=recovery    runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-48351f   fam=shock       runs=1 strict=2/2 loose=2/2 FP=0 badjson=0 err=0
+sc-4a7f9e   fam=systemic    runs=1 strict=2/2 loose=2/2 FP=0 badjson=0 err=0
+sc-5e376b   fam=shock       runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-63f1c7   fam=mixed       runs=1 strict=2/2 loose=2/2 FP=0 badjson=0 err=0
+sc-6e2478   fam=volatility  runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-8a9fa1   fam=noise_trap  runs=1 strict=1/1 loose=1/1 FP=0 badjson=0 err=0
+sc-8d3b47   fam=systemic    runs=1 strict=2/2 loose=2/2 FP=0 badjson=0 err=0
+sc-9372cd   fam=drift       runs=1 strict=1/1 loose=1/1 FP=1 badjson=0 err=0
+sc-9660b9   fam=noise_trap  runs=1 strict=0/4 loose=0/4 FP=5 badjson=0 err=0
+sc-abbec4   fam=systemic    runs=1 strict=2/2 loose=2/2 FP=0 badjson=0 err=0
+sc-bba653   fam=systemic    runs=1 strict=4/4 loose=4/4 FP=3 badjson=0 err=0
+sc-d72b95   fam=systemic    runs=1 strict=2/4 loose=2/4 FP=0 badjson=0 err=0
+sc-da1123   fam=systemic    runs=1 strict=4/4 loose=4/4 FP=0 badjson=0 err=0
+sc-f520e5   fam=mixed       runs=1 strict=1/2 loose=1/2 FP=1 badjson=0 err=0
+sc-f69eea   fam=drift       runs=1 strict=1/1 loose=1/1 FP=1 badjson=0 err=0
+  TOTALS: runs=23 strict-recall=32/44=72.7% loose=75.0% FP/run=0.78 badjson=0 errors=0
+  CLEAN-data honesty: claimed an anomaly on 0/1 clean run(s)
+  DRIFT-WINDOW STRATA (per control-run): persistent-to-horizon strict 8/10 (loose 8/10) | bounded-then-reverting strict 3/5 (loose 4/5)
+
+wrote results/harness_opt_p2/scores.json

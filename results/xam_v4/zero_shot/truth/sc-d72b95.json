@@ -1,0 +1,74 @@
+{
+  "eval_id": "sc-d72b95",
+  "descriptive_id": "sys_cascade_shock_drift_2020",
+  "schema_version": 1,
+  "scenario_id": "sys_cascade_shock_drift_2020",
+  "family": "systemic",
+  "split": "optimization",
+  "scale": "full",
+  "seed": 42,
+  "n_policies": 250000,
+  "targets": {
+    "Death": 5000,
+    "CI": 12000,
+    "TPD": 8000,
+    "IP": 15000
+  },
+  "study_window": [
+    2015,
+    2024
+  ],
+  "no_op": false,
+  "controls": [
+    {
+      "type": "shock",
+      "benefit": [
+        "Death",
+        "CI"
+      ],
+      "window": [
+        2020,
+        2020
+      ],
+      "factor": {
+        "Death": 1.4,
+        "CI": 1.2
+      },
+      "signature": {
+        "direction": "increase",
+        "magnitude": "Death x1.4, CI x1.2"
+      }
+    },
+    {
+      "type": "drift",
+      "benefit": "Death",
+      "window": [
+        2021,
+        2024
+      ],
+      "factor": 0.05,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.05/yr"
+      }
+    },
+    {
+      "type": "drift",
+      "benefit": "CI",
+      "window": [
+        2021,
+        2024
+      ],
+      "factor": 0.04,
+      "signature": {
+        "direction": "increase",
+        "magnitude": "+0.04/yr"
+      }
+    }
+  ],
+  "benefit_lines_untouched": [
+    "TPD",
+    "IP"
+  ],
+  "primary": null
+}

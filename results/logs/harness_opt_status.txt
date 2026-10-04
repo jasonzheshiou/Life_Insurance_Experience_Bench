@@ -1,0 +1,8 @@
+==== harness optimization loop (pass 7) — status ====
+state:    STEP_DONE
+updated:  2026-09-13T23:50:38Z
+corpus:   results/harness_opt_p7  (model=Qwen3.8-27B-Q8_0, harness=h1, runs/scenario=1)
+SCENARIOS FINISHED: 23/23
+last:     sc-9660b9 done — review results/logs/harness_opt_loop.md, edit the harness, re-run this command
+loop log: results/logs/harness_opt_loop.md
+next:     bash scripts/harness_opt_step.sh

@@ -1,0 +1,52 @@
+{
+  "run_id": "gatecheck_heldout",
+  "created_at": "2026-08-30T15:59:14.840973+00:00",
+  "script_version": "0.3.0",
+  "split": "heldout",
+  "scenarios": [
+    "sc-0ce4d6",
+    "sc-11135c",
+    "sc-12be68",
+    "sc-21b383",
+    "sc-3411b2",
+    "sc-3627d2",
+    "sc-62c222",
+    "sc-696b93",
+    "sc-6fe297",
+    "sc-73fd27",
+    "sc-7e3a65",
+    "sc-87e6e7",
+    "sc-88fa33",
+    "sc-90a5be",
+    "sc-9db072",
+    "sc-a15166",
+    "sc-a3e6a6",
+    "sc-c9d78b",
+    "sc-ca7798",
+    "sc-e28a00",
+    "sc-e549ad",
+    "sc-e6ffa4",
+    "sc-f19bae",
+    "sc-f916b9"
+  ],
+  "model": "qwen3.8-27b",
+  "base_url": "http://192.168.1.59:1234/v1",
+  "temperature": 0.2,
+  "sampling": {},
+  "max_tokens": null,
+  "stateless_calls": true,
+  "seed": 1234,
+  "runs": 3,
+  "detail": "full",
+  "dataset_fingerprint": "2deda8760407c9b270a1f443acbbeda641d225eb67d8afb6e8ca15afb01433a2",
+  "leak_check": {
+    "status": "clean",
+    "leak_scan_scenarios": 24,
+    "descriptive_ids_from": "data/truth/id_map.csv",
+    "integrity": {
+      "status": "ok",
+      "files_verified": 816,
+      "seal_match": true
+    }
+  }
+}

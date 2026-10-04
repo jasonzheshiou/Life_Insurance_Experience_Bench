@@ -1,0 +1,9 @@
+
+====================================================================================================
+RUN DIR: results/harness_q36_step2/zero_shot   [scorer v3: null-window=full-period, per-benefit units, clean-statements excluded, ip_recovery direction live]
+====================================================================================================
+sc-3c83fd   fam=drift       runs=3 strict=3/3 loose=3/3 FP=1 badjson=0 err=0
+  TOTALS: runs=3 strict-recall=3/3=100.0% loose=100.0% FP/run=0.33 badjson=0 errors=0
+  DRIFT-WINDOW STRATA (per control-run): persistent-to-horizon strict 0/0 (loose 0/0) | bounded-then-reverting strict 3/3 (loose 3/3)
+
+wrote results/harness_q36_step2/scores.json

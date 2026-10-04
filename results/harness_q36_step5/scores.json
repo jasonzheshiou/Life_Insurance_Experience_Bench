@@ -1,0 +1,204 @@
+{
+  "results/harness_q36_step5/zero_shot": {
+    "sc-f520e5": [
+      {
+        "run": 1,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "mixed",
+        "n_controls": 2,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "IP",
+            "unit_benefit": "IP",
+            "window": [
+              2018,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2019,
+                2022
+              ],
+              "want_years": [
+                2018,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "volatility",
+            "benefit": "Death",
+            "unit_benefit": "Death",
+            "window": [
+              2019,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [
+          1
+        ],
+        "_drift_units": [
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 7321
+      },
+      {
+        "run": 2,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "mixed",
+        "n_controls": 2,
+        "strict": 1,
+        "loose": 1,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "IP",
+            "unit_benefit": "IP",
+            "window": [
+              2018,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 1,
+              "years": [
+                2019,
+                2022
+              ],
+              "want_years": [
+                2018,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "volatility",
+            "benefit": "Death",
+            "unit_benefit": "Death",
+            "window": [
+              2019,
+              2022
+            ],
+            "loose": false,
+            "strict": false,
+            "via": null
+          }
+        ],
+        "matched_idx": [
+          1
+        ],
+        "_drift_units": [
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 2,
+        "fp": 1,
+        "error": null,
+        "completion_tokens": 8483
+      },
+      {
+        "run": 3,
+        "json": "valid",
+        "overall": "anomalies",
+        "clean_truth": false,
+        "family": "mixed",
+        "n_controls": 2,
+        "strict": 2,
+        "loose": 2,
+        "per_control": [
+          {
+            "type": "drift",
+            "benefit": "IP",
+            "unit_benefit": "IP",
+            "window": [
+              2018,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 3,
+              "years": [
+                2015,
+                2023
+              ],
+              "want_years": [
+                2018,
+                2022
+              ],
+              "direction": "increase"
+            }
+          },
+          {
+            "type": "volatility",
+            "benefit": "Death",
+            "unit_benefit": "Death",
+            "window": [
+              2019,
+              2022
+            ],
+            "loose": true,
+            "strict": true,
+            "via": {
+              "finding_idx": 0,
+              "years": [
+                2020,
+                2023
+              ],
+              "want_years": [
+                2019,
+                2022
+              ],
+              "direction": "dispersion"
+            }
+          }
+        ],
+        "matched_idx": [
+          0,
+          3
+        ],
+        "_drift_units": [
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "supp_idx": [],
+        "n_findings": 4,
+        "fp": 2,
+        "error": null,
+        "completion_tokens": 8574
+      }
+    ]
+  }
+}
