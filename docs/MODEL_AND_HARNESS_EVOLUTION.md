@@ -65,17 +65,17 @@ together. Full definitions, formulas and worked arithmetic: §2.7.
 
 All figures are on the **same 23 scenarios**, three runs each, so every row is
 like-for-like. The top two rows are the deployed configuration — each model on the harness
-tuned for it. The cross-loaded rows show what the other model's harness buys, and the last
-two are the unharnessed baseline.
+tuned for it. The cross-loaded row shows what the other model's harness buys, and the last
+two are the unharnessed baseline. Precision is left out because it is exactly 1 − FP/claim;
+it is given in prose below and in the body tables.
 
-| configuration | accuracy | FP/claim | precision |
-|---|---|---|---|
-| **Qwen3.8-27B + its own harness** | **71.2 %** | 41.9 % | 58.1 % |
-| **Qwen3.6-27B + its own harness** | 65.8 % | **38.7 %** | **61.3 %** |
-| Qwen3.8-27B + Qwen3.6's harness | 70.3 % | 43.1 % | 56.9 % |
-| Qwen3.6-27B + Qwen3.8's harness | 64.9 % | 43.3 % | 56.7 % |
-| Qwen3.8-27B, no harness | 64.0 % | 65.7 % | 34.3 % |
-| Qwen3.6-27B, no harness | 59.5 % | 40.0 % | 60.0 % |
+| configuration | accuracy | FP/claim |
+|---|---|---|
+| **Qwen3.8-27B + its own harness** | **71.2 %** | 41.9 % |
+| **Qwen3.6-27B + its own harness** | 65.8 % | **38.7 %** |
+| Qwen3.8-27B + Qwen3.6's harness | 70.3 % | 43.1 % |
+| Qwen3.8-27B, no harness | 64.0 % | 65.7 % |
+| Qwen3.6-27B, no harness | 59.5 % | 40.0 % |
 
 - **With its own harness 3.8 finds 71.2 % of what was planted and 3.6 finds 65.8 %**; 3.6 is
   the more reliable speaker, 61.3 % precision against 58.1 %. The ranking is a trade, not a
@@ -83,8 +83,8 @@ two are the unharnessed baseline.
   mean to use it.
 - **The harness did a different job for each model** — about 24 points of precision for 3.8,
   about 6 points of accuracy for 3.6.
-- **Each model does best on the harness tuned for it.** Handing one model the other's harness
-  cost both of them 0.9 points — the harness does not transfer (§3.2).
+- **Each model does best on the harness tuned for it.** Handing 3.8 the harness built for 3.6
+  cost it 0.9 points and 3.2 points of precision — the harness does not transfer (§3.2).
 - **Cost is roughly 3× apart** for the same exam: about 4.8 min and 5.7k completion tokens per
   answer for 3.6, about 13.5 min and 13.8k for 3.8 (§3.8).
 
