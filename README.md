@@ -1,18 +1,18 @@
 # ⚖️ Life Insurance Experience Bench
 
-*also known as **Data Pipeline Arena*** — an A/E experience-analysis benchmark for LLM agents
+**A framework for generating life-insurance experience data, testing an LLM on it, and
+measuring what it finds.** The data is life-insurance experience measured as actual over
+expected (A/E). The question is whether a model can identify what an actuary would
+identify — and how much of what it finds comes from the model rather than the harness
+wrapped around it.
 
-**Can an LLM see what an actuary would see in actual-versus-expected (A/E) data? And how
-much of what it finds comes from the model, versus the harness wrapped around it?**
-
-Both questions are answered here with measurements, not opinions.
+Every claim below is a measurement, not an opinion.
 
 | if you want | go to |
 |---|---|
-| the findings, written as a story | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
-| every corpus, path and replication command | [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) |
-| the original plan, and what changed | [BENCHMARK_IMPLEMENTATION_GUIDE.md](BENCHMARK_IMPLEMENTATION_GUIDE.md) |
-| how to make the data yourself | [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
+| the findings, in prose: how this platform is used to show that a harness must evolve as a model's characteristics change | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
+| the platform itself, and how to replicate the experiment | [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) |
+| how to generate the data yourself | [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
 
 ---
 
@@ -32,9 +32,10 @@ someone has to be able to answer four questions. One convincing demo answers non
 | **Is the pipeline around it right, or does it need updating — and on what evidence?** | Every corpus stores the exact harness bytes and prompt that produced it. The optimization-vs-heldout gap is a published metric. Every harness edit records its hypothesis, its test and its regression check. | It needed updating **per model**. The record shows which edit fixed which failure, and one fix that was deliberately not applied (INDEX §8). |
 
 **What you govern is the model and the harness together, not the model alone.** A vendor
-notice saying "we upgraded the model" is not enough to re-assess, and it is not an
-assessment either. What changes between model versions is behaviour: how it reasons, how
-much it checks before asserting, whether it uses a tool at all. So re-measure the pair.
+notice saying "we upgraded the model" is not an assessment, and on its own it is not a
+reason to re-assess. What changes between model versions is behaviour: how the model
+reasons, how much it checks before asserting, whether it uses a tool at all. When behaviour
+changes, re-measure the pair.
 
 Two rules follow from that, and both are kept visibly in this repo:
 
@@ -47,8 +48,8 @@ Two rules follow from that, and both are kept visibly in this repo:
   split; the reported number comes from the 24-book held-out split, scored once. The
   frozen harnesses scored **97.7 %** and **95.5 %** on tuning, and **69.1 %** and
   **64.2 %** on held-out data — an optimism gap of about 30 points for *both* models. A
-  sign-off based on tuning scores would have been wrong by that much. The same honesty is
-  why `sc-e6ffa4` is published as a **recorded failure** instead of quietly fixed.
+  sign-off based on tuning scores would have been wrong by that much. For the same reason,
+  `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
 
 ### 1 · Measuring an LLM's ability to find insight in actuarial A/E data
 
@@ -76,7 +77,8 @@ Two notes on that design:
 
 ### 2 · Quantifying how much the harness is worth
 
-This is the axis the project cares most about, and the two campaigns are the experiment.
+This is the measurement the project is most concerned with, and the two campaigns are the
+experiment.
 
 Held-out split, 23 books, same books in every row. Cells are **accuracy | FP/claim**, and
 precision = 1 − FP/claim. `sc-e6ffa4` is excluded from every row because it never
@@ -94,14 +96,15 @@ harness has to compensate for that, and it compensates differently for each mode
 
 - **3.8 without a harness finds a lot and says too much.** It found 64.0 % of what was
   there, but 65.7 % of its claims were wrong — 34.3 % precision. Its problem is not
-  seeing, it is asserting. Its own harness moved it +7.2 points on recall and **+23.8
+  seeing; it is asserting. Its own harness moved it +7.2 points on recall and **+23.8
   points on precision** (34.3 % → 58.1 %).
 - **3.6 without a harness fails the other way.** It found 59.5 % and was already 60.0 %
   precise. The same harness gave +6.3 recall and **+1.3** precision (60.0 % → 61.3 %),
   because 3.6 did not have 3.8's problem to fix.
 - **Each model does best with the harness tuned for it**: 3.8 gets 71.2 own vs 70.3 on
   3.6's; 3.6 gets 65.8 own vs 64.9 on 3.8's. An earlier claim that a harness transfers
-  with +8.3 points was based on 9 books; at 23 books it became −1, and it was withdrawn.
+  (+8.3 points) rested on 9 books; at 23 books the same comparison gave −1, so the claim
+  was withdrawn.
 - **Behaviour decides whether a harness feature exists at all.** Both models were offered
   up to 4 sandboxed python calls. 3.8 used them in about 24 % of runs. **3.6 used them 0
   times in 144 runs**, after two separate attempts to get it to use them.
@@ -119,7 +122,7 @@ base and ended in different places.
 
 The harness was not written in one sitting. **A model built it.** The operator-side agent
 that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliberately not
-one of the two subjects, so no subject tuned the exam it later sat. It worked from
+one of the two subjects, so no subject tuned the exam it later took. It worked from
 recorded artifacts, not impressions, in a fixed loop:
 
 1. Run the frozen harness over all 23 **optimization** books. Keep the corpus and the
@@ -137,7 +140,7 @@ recorded artifacts, not impressions, in a fixed loop:
 That produced seven harness versions for 3.8 (v1.0 → v1.6e), driven by **307
 per-scenario diary entries**, 268 of which involved reviewing or editing the harness. For
 3.6 it produced two kept edits from the same base. Both lineages are frozen here, so you
-can inspect the method rather than take it on description — including the fix that was
+can inspect the method instead of taking it on trust — including the fix that was
 **declined** (runbook §36), not just the ones kept.
 
 **The method costs time, and that cost is part of the design.** On one llama.cpp slot, one
@@ -165,7 +168,7 @@ the runner and its sandboxed python tool loop
 ([`scripts/score_xam.py`](scripts/score_xam.py)) and the freeze gate. Both model campaigns
 ran on that stack, and every published number comes from it.
 
-**What was never built** is the packaged arena core this README once announced: there is no
+**What was never built** is the packaged core this README once announced: there is no
 `pyproject.toml`, no `src/abench/` package and no `abench` CLI. The **M0–M4** milestones
 below describe a design that flat scripts satisfied without being packaged. They are kept
 as labelled design context, not rewritten after the fact.
@@ -203,12 +206,12 @@ Every book is produced by a **separate public project**:
 > experience (Death, CI, TPD, IP) with A/E analysis built in. Baseline A/E ≈ 1.0 by
 > construction, and every planted control edits the *actuals* only, inside a date window.
 
-Two repos on purpose: the generator is a data tool with its own release cycle; the arena is
-the exam built on top of it. The arena never reimplements it —
+Two repos on purpose: the generator is a data tool with its own release cycle, and this repo
+is the exam built on top of it. This repo never reimplements the generator —
 `scripts/generate_scenarios.py` imports it as a library and calls its pipeline once per
 book.
 
-### Step 1 — put the generator where the arena looks for it
+### Step 1 — put the generator where this repo looks for it
 
 `generate_scenarios.py` resolves the generator as a **sibling directory** with a fixed
 name:
@@ -233,9 +236,9 @@ git clone https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generat
 | `generate_scenarios.py` (reading the registry, `--split-only`) | `PyYAML ≥ 6` |
 | `generate_scenarios.py` (actually generating) | `numpy ≥ 1.26`, `pandas ≥ 2.0`, `pydantic ≥ 2.5`, `PyYAML ≥ 6` (the generator's own dependencies), Python ≥ 3.11 |
 
-The arena puts `<generator>/src` on `sys.path` itself, so installing the generator with
-`pip install -e` is optional. What is **not** optional is using an interpreter that has
-those packages. The simplest correct invocation uses the generator's own environment:
+This repo puts `<generator>/src` on `sys.path` itself, so installing the generator with
+`pip install -e` is optional. What is **not** optional is that the interpreter has those
+packages. The simplest correct invocation uses the generator's own environment:
 
 ```bash
 ../Life_insurance_data_generator_new/.venv/bin/python scripts/generate_scenarios.py --scale full
@@ -286,7 +289,7 @@ first API call.
 | scale | `full` — 250 000 policies; claim targets 5000 / 12000 / 8000 / 15000 for Death / CI / TPD / IP |
 | registry | `config/scenarios.yaml`, 47 books (23 optimization / 24 heldout) |
 
-After regenerating, these tell you the tree is sound:
+After regenerating, run these to confirm the tree is sound:
 
 ```bash
 pytest tests/                        # registry invariants: split disjointness, manifest contract, scale presets
@@ -320,7 +323,7 @@ itself. It returns one JSON answer. The scorer expands each planted control to a
 (a book-wide control becomes four units, one per benefit line), and a unit is a hit only
 if benefit, pattern, window and direction all agree.
 
-Two things are measured at once, and they should be kept apart when reading any number:
+Three things are measured at once, and they should be kept apart when reading any number:
 
 | axis | question | answered in |
 |---|---|---|
@@ -330,7 +333,7 @@ Two things are measured at once, and they should be kept apart when reading any 
 
 The planned Stage-2 variant — a model that writes and refines its own *pipeline* over many
 turns — was never built. What was built is the single-turn evidence-pack harness above. The
-original intent is kept in the guide and summarised below.
+original intent is kept in the implementation guide and summarised below.
 
 ### What This Proves
 
@@ -374,8 +377,8 @@ The scorer, gate, leak scan and pack builder all run offline. Full replication c
 single book, unattended 23-book pass, held-out exam with retry wrapper — are in
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) §7.
 
-The packaged CLI (`abench init|generate|run|score|report|validate`) from guide §10 was
-never wired up; see **Status** above.
+The packaged CLI (`abench init|generate|run|score|report|validate`), designed in §10 of the
+implementation guide, was never wired up; see **Status** above.
 
 </details>
 
@@ -395,7 +398,7 @@ with up to four analysis tool calls**, not a multi-turn agent that builds and re
 pipeline. So the conclusions here are about how much a static evidence pack, rules block
 and prompt are worth — not about long-horizon autonomy.
 
-**Locked guarantees** (guide §2) and what happened to each:
+**Locked guarantees** (§2 of the implementation guide) and what happened to each:
 
 | guarantee | status |
 |---|---|
@@ -410,9 +413,9 @@ and prompt are worth — not about long-horizon autonomy.
 <details>
 <summary><strong>🎛️ Scenario Controls</strong> — what gets planted</summary>
 
-Four primitives, planted by the generator into the actuals only:
+The generator plants these controls into the actuals only:
 
-| Control | Effect | Observable signature (starter set from guide §5.3) |
+| Control | Effect | Observable signature (starter set, §5.3 of the implementation guide) |
 |---------|--------|------------------------------------|
 | **Drift** | Per-year slope on a benefit's A/E | `drift_death_up_2018_2024`: Death A/E ~0.74 → 1.30 in 2018–24 |
 | **Shock** | One-off multiplier over a window | `shock_covid_2020_2022`: Death spike 1.31/1.34/1.25 in 2020–22 |
@@ -420,8 +423,8 @@ Four primitives, planted by the generator into the actuals only:
 | **IP recovery** | Termination-rate multiplier (IP) | `ip_recovery_mental_health_x2`: MH termination A/E ≈ 2.0, incidence untouched |
 | **No-op** | All neutral | `noop_neutral_controls`: bit-identical to `baseline` |
 
-The shipped 47 books combine those primitives into eight **families**, and it is the
-families that a finding is classified against:
+The shipped 47 books combine those controls into eight **families**. Findings are
+classified against the families:
 
 | family | what is planted | held-out count |
 |---|---|---|
@@ -443,8 +446,8 @@ full catalog is in [docs/scenario-catalog.md](docs/scenario-catalog.md).
 <details>
 <summary><strong>📐 Scoring Metrics</strong> — what "good" means</summary>
 
-**What scorer v3 computes** (`scripts/score_xam.py`) and what the campaign reports. A
-*unit* is one (control × run) pair; a book-wide control expands to one unit per benefit
+These are the numbers scorer v3 (`scripts/score_xam.py`) computes and the campaigns report.
+A *unit* is one (control × run) pair; a book-wide control expands to one unit per benefit
 line.
 
 | Metric | Definition |
@@ -469,13 +472,14 @@ and wall-clock (iteration count and human interventions were never counted).
 <details>
 <summary><strong>📁 Project Structure</strong> — as it exists</summary>
 
-This is the shipped tree. The guide's §10 layout (a packaged `src/abench/` with an `abench`
-CLI) was never built; where the plan and reality disagreed, reality won.
+This is the shipped tree. The layout designed in §10 of the implementation guide (a packaged
+`src/abench/` with an `abench` CLI) was never built; where the plan and reality disagreed,
+reality won.
 
 ```
 data_pipeline_arena/
 ├── README.md                           # this file
-├── BENCHMARK_IMPLEMENTATION_GUIDE.md   # the original plan, annotated plan-vs-built
+├── BENCHMARK_IMPLEMENTATION_GUIDE.md   # the pre-experiment plan, annotated — guide context
 ├── config/
 │   └── scenarios.yaml                  # the 47-book registry — single source of truth for the dataset
 ├── scripts/                            # 30 modules: generator driver, stats pack, runner, scorer, gate, drivers
@@ -487,7 +491,7 @@ data_pipeline_arena/
 │   └── truth/                          # ZONE B: manifests + id map + seal (scorer-only, published)
 └── results/<corpus>/                   # zero_shot/, scores.json, scoreboard.txt, prompts/, harness_snapshot/
 
-# from the guide's plan, never built:  pyproject.toml · src/abench/ · submissions/ · human_review/
+# planned but never built:  pyproject.toml · src/abench/ · submissions/ · human_review/
 ```
 
 </details>
@@ -521,8 +525,9 @@ Record which tier ran, and state it in every reported result.
 <summary><strong>⚠️ Limitations & Assumptions</strong></summary>
 
 - **Not packaged, and single-purpose.** The scorer, gate and runner are `scripts/` modules
-  wired for this benchmark, not a reusable library or CLI. The scenario dataset pipeline
-  **is** implemented and generating (`scripts/generate_scenarios.py`).
+  wired for this benchmark, not a reusable library or CLI. The dataset pipeline, by
+  contrast, is fully implemented and does all the generating
+  (`scripts/generate_scenarios.py`).
 - **The sandbox is advisory, not enforced.** See **Sandbox** above.
 - Synthetic data from the
   [generator project](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator).
@@ -548,7 +553,7 @@ Record which tier ran, and state it in every reported result.
 </details>
 
 <details>
-<summary><strong>📊 Dataset</strong> — the generated arena scenarios</summary>
+<summary><strong>📊 Dataset</strong> — the generated benchmark scenarios</summary>
 
 The data comes from the sibling project
 **[Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)**,
@@ -586,8 +591,9 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 - [Experiment index](docs/EXPERIMENT_INDEX.md) — **the master locator**: benchmark,
   harness, both campaigns, every corpus and its path, final tables, replication commands,
   known failures
-- [Cross-model report](docs/REPORT_qwen36_vs_qwen38.md) — the standalone write-up: method,
-  results by model and family, the `sc-e6ffa4` failure, cost analysis
+- [Cross-model report](docs/REPORT_qwen36_vs_qwen38.md) — the standalone write-up. It uses
+  this platform to analyse the need for harness evolution as a model's characteristics
+  change: method, results by model and family, the `sc-e6ffa4` failure, cost analysis
 - [Harness growth diary](docs/HARNESS_GROWTH.md) — how Qwen3.8's harness grew, version by
   version
 - [Campaign runbook](results/logs/harness_q36_next_steps.md) — §1–37 of the Qwen3.6
@@ -597,8 +603,6 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 
 **Design and data reference:**
 
-- [Implementation guide](BENCHMARK_IMPLEMENTATION_GUIDE.md) — the original plan, with a
-  plan-vs-status header
 - [Dataset usage](docs/dataset-usage.md) — generate and extend the dataset; registry
   format; CLI reference; manifests
 - [Scenario catalog](docs/scenario-catalog.md) — all 47 scenarios, families, splits,
@@ -610,6 +614,9 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 
 **Historical / planning documents** — accurate as records, superseded as instructions:
 
+- [Implementation guide](BENCHMARK_IMPLEMENTATION_GUIDE.md) — the plan written before the
+  first experiment ran, annotated section by section with what actually shipped. Guide
+  context only: read it to see how the design was decided, not to get instructions.
 - [Usage guide](docs/usage.md) — the *planned* `abench` CLI and `experiment.yaml`, never
   wired up
 - [M0 handover](docs/m0-handover.md), [zero-shot experiment](docs/zero-shot-experiment.md),
@@ -660,7 +667,7 @@ records — and is provided for research, learning and testing.
 
 **Acknowledgments**: the
 [Synthetic Life Insurance Data Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)
-project, which produces every book in the arena.
+project, which produces every book in the benchmark.
 
 </details>
 
