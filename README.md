@@ -23,22 +23,21 @@ are for illustration.
 
 ### What the model is fed
 
-One folder per scenario, `data/eval/<split>/<sc-id>/`. This is what reaches the model:
+One folder per scenario, `data/eval/<split>/<sc-id>/`. Only three files go into the prompt:
 
-- `artifacts/ae_<benefit>_by_year.csv` — the four yearly series, i.e. the charts below:
-  **inlined in the prompt**, ten rows each, e.g. `2018: Actual=257 Expected=389.6 AE=0.660`
-- `artifacts/summary.json` — overall A/E and claim counts per line: **inlined**
-- `artifacts/ae_ip_termination.csv` — IP recovery A/E by diagnosis: **inlined**
-- `artifacts/ae_<benefit>.csv`, `ae_<benefit>_age_gender.csv` — the same A/E at age × gender × year
-  grain: listed by path, read with a sandboxed python call if the model wants it
-- `artifacts/*.png` — the charts on this page: listed by path, of no use to a text-only model
-- `<benefit>_claims.csv`, `exposure.csv`, `benchmarks/<benefit>.csv` — the raw claims and exposure
-  behind every ratio: listed by path, **not published** in the clone (regenerable; see
-  [What ships](#-what-ships-in-a-clone-and-what-you-regenerate))
+- `ae_<benefit>_by_year.csv` — the four yearly series, i.e. the charts below, ten rows each
+  (e.g. `2018: Actual=257 Expected=389.6 AE=0.660`)
+- `summary.json` — overall A/E and claim counts per line
+- `ae_ip_termination.csv` — IP recovery A/E by diagnosis
 
-That is the whole feed: about 130 numbers plus a file list — roughly **2.7k prompt tokens** bare,
-and about **6.6k** once the evidence pack of section 2 is added. Every finer grain is on disk and
-one tool call away. A full prompt exactly as it was sent, for the complex scenario below:
+Everything else in the folder is only **listed by path**, and the model can read it with a
+sandboxed python call if it wants: the age × gender detail, the PNG charts, and the raw claims and
+exposure behind every ratio (not published in the clone, because they regenerate — see
+[What ships](#-what-ships-in-a-clone-and-what-you-regenerate)).
+
+So the whole feed is about **130 numbers plus a file list**: roughly **2.7k prompt tokens** bare,
+about **6.6k** once the evidence pack from section 2 is added. Here is the prompt exactly as it was
+sent for the complex scenario below:
 [`results/harness_final/zero_shot/sc-c9d78b_prompt.md`](results/harness_final/zero_shot/sc-c9d78b_prompt.md).
 
 ### The simple case: `sc-f69eea` — one line, one movement
@@ -49,20 +48,14 @@ one tool call away. A full prompt exactly as it was sent, for the complex scenar
 | **TPD** | **IP** |
 | ![TPD A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_tpd_by_year.png) | ![IP A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_ip_by_year.png) |
 
-**The truth, and the only finding in this scenario:**
+**What is really in this scenario:**
 
 - **Death is deteriorating and has not stopped.** A/E climbs in every year from 2018 (0.66) to
-  2024 (1.31), ending 31 % above expected. The published manifest
-  `data/truth/manifests/sc-f69eea.json` says drift of **+0.15/yr on Death, 2018–2024**.
+  2024 (1.31), ending 31 % above expected. The manifest `data/truth/manifests/sc-f69eea.json`
+  says drift of **+0.15/yr on Death, 2018–2024**.
 - **The other three lines are flat** — CI within 0.96–1.05, TPD within 0.96–1.04, IP within
-  0.98–1.03, across all ten years. One line moving while its neighbours do not rules out a
-  portfolio-wide cause: not a claims-reporting change, not a population shift, not a macro shock.
-- **The insight:** a line-specific frequency trend on Death, so refer that line to pricing and
-  reserving and leave CI, TPD and IP as priced. "Death A/E rose" is a description; the line, the
-  years, the pattern and the action together are the finding.
-
-Every harnessed configuration saturates on scenarios like this one, and on `recovery` and
-`volatility`, so the interesting results come from the hard ones.
+  0.98–1.03, across all ten years.
+- **The insight:** Death is deteriorating over 2018–2024 while nothing else moves.
 
 ### The complex case: `sc-c9d78b` — four findings in one scenario
 
