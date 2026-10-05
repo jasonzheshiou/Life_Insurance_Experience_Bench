@@ -2,23 +2,233 @@
 
 **A framework for generating life-insurance experience data, testing an LLM on it, and
 measuring what it finds.** The data is life-insurance experience measured as actual over
-expected (A/E). The question is whether a model can identify what an actuary would
-identify — and how much of what it finds comes from the model rather than the harness
-wrapped around it.
-
-Every claim below is a measurement, not an opinion.
+expected (A/E).
 
 | if you want | go to |
 |---|---|
-| the findings, in prose: how this platform is used to show that a harness must evolve as a model's characteristics change | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
+| the findings from using this framework — what it shows about the need for harness evolution as a model's characteristics change | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
 | the platform itself, and how to replicate the experiment | [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) |
 | how to generate the data yourself | [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
 
 ---
 
-## 🎯 Why This Project Exists — Four Purposes
+## 1 · The data: A/E tables, charts, and the insight inside them
 
-### 0 · Why this matters for governance
+A **book** is one scenario: the actual-versus-expected (A/E) tables and charts for four
+benefit lines — Death, CI, TPD, IP — over 2015–2024, built from 250 000 synthetic policies.
+A/E is actual claims divided by expected claims. On clean data it sits close to 1.0, wobbling
+by about 1 ÷ √(expected claims) per year. The skill under test is telling a wobble of that
+size apart from a real experience movement.
+
+### A real book with a real insight in it: `sc-f69eea`
+
+Death, A/E by year, straight out of
+`data/eval/optimization/sc-f69eea/artifacts/ae_death_by_year.csv`:
+
+| Year | Actual | Expected | A/E |
+|---|---|---|---|
+| 2015 | 150 | 239.5 | 0.626 |
+| 2016 | 203 | 289.7 | 0.701 |
+| 2017 | 215 | 337.3 | 0.637 |
+| 2018 | 257 | 389.6 | **0.660** |
+| 2019 | 350 | 446.6 | 0.784 |
+| 2020 | 500 | 508.4 | 0.983 |
+| 2021 | 612 | 575.7 | 1.063 |
+| 2022 | 726 | 652.1 | 1.113 |
+| 2023 | 927 | 735.0 | 1.261 |
+| 2024 | 1080 | 826.1 | **1.307** |
+
+![Death A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_death_by_year.png)
+
+The chart is the same data: the A/E line with a dashed reference at 1.0. What an actuary
+reads off it, and what the model is asked to produce:
+
+- **Death is deteriorating, steadily, and it has not stopped.** A/E rises in every year from
+  2018 to 2024, from 0.66 to 1.31 — ending 31 % above expected. The planted truth
+  (`data/truth/manifests/sc-f69eea.json`, published) is a drift of **+0.15 per year over
+  2018–2024**.
+- **Nothing else moved.** Across all ten years CI stays within 0.96–1.05, TPD within
+  0.96–1.04 and IP within 0.98–1.03. A movement confined to one benefit line is not a
+  portfolio-wide event: it is not a claims-reporting change, a population shift or a
+  macroeconomic shock.
+- **So the finding is a line-specific frequency trend.** That makes it a pricing and
+  reserving question for the Death book — investigate claim frequency, mix and definition
+  changes — rather than a data-quality ticket. Saying "Death A/E rose" is a description;
+  saying which line, which years, which pattern and what to do about it is the insight.
+
+### A chart that looks like an insight and is not one: `sc-0ce4d6`
+
+CI, same kind of chart, held-out split:
+
+![CI A/E by year, sc-0ce4d6](data/eval/heldout/sc-0ce4d6/artifacts/ae_ci_by_year.png)
+
+CI stays between 0.82 and 0.95 through 2021, jumps to 1.41 in 2022 and 1.24 in 2023, then
+falls back to 0.89 in 2024. The obvious reading is a two-year shock on critical illness. The truth is
+**volatility** (σ = 0.3 on CI, 2017–2023): the dispersion rose and the level did not. The
+arithmetic separates the two, and this is exactly where models go wrong:
+
+| reading | evidence |
+|---|---|
+| looks like a shock | the 2022–23 excursion is +0.44 in level, score 4.9 — big and obvious |
+| it is volatility | year-to-year σ is 0.2435 against a Poisson expectation of 0.0305: overdispersion **×7.97**, which makes the Poisson z-scores on this line invalid |
+| and not drift either | the largest one-year move (0.53) is **bigger than the whole excursion it belongs to** (0.44, a ratio of 1.22), so the line is swinging rather than holding a new level |
+
+A model that reports "shock, CI, 2022–2023" gets the benefit right, the pattern wrong, and
+is scored as both a miss and a false alarm. These lookalikes are a scenario family of their
+own (`noise_trap`, 2 held-out books) and they are hard for every configuration tested.
+
+### What the model has to return
+
+One JSON object per book. The shape, verified against the pinned prompt
+(`data/prompts/system_v2_baseline.txt`):
+
+```json
+{"scenario_id": "sc-f69eea",
+ "overall_assessment": "anomalies",
+ "findings": [{
+   "benefit": "Death",
+   "years": [2018, 2024],
+   "pattern": "drift",
+   "direction": "increase",
+   "magnitude": "+0.15/yr, A/E 0.66 -> 1.31",
+   "confidence": 0.9,
+   "evidence": ["ae_death_by_year.csv: monotone rise 2018-2024, CI unchanged"],
+   "recommended_action": "refer Death claim frequency to pricing and reserving"}]}
+```
+
+`pattern` is one of `drift | shock | volatility | recovery | other`, `direction` is one of
+`increase | decrease | dispersion`. A clean book requires `overall_assessment: "clean"` and
+an empty `findings` list; claiming anything on a clean book is a false alarm. Scoring is
+strict: benefit, pattern, window and direction must all agree.
+
+---
+
+## 2 · Two ways to ask a model: the model alone, or the model with a harness
+
+The same book is put to the model in two configurations. Nothing differs between them except
+the harness — same model, same endpoint, same sampler, one turn.
+
+**A — the model alone (`--harness off`).** A system prompt giving the role, the A/E
+definition, the pattern taxonomy and the JSON contract; the list of files in the scenario
+folder; and the CSVs on disk. The model reads tables and answers.
+
+**B — the model with a harness (`--harness full --tool-calls 4`).** All of A, plus three
+things:
+
+1. **A computed evidence pack.** Deterministic statistics for every benefit line, generated
+   from the CSVs by [`scripts/stats_pack.py`](scripts/stats_pack.py) before the model is
+   called, and appended to the prompt. Real block, from a published prompt
+   (`results/harness_final/zero_shot/sc-0ce4d6_prompt.md`, CI line):
+
+   ```text
+   [CI] mean A/E 0.975 | evidence profile: scatter-dominant: the largest single-year move
+        exceeds the net level change ... Poisson z-scores are INVALID here
+     trend: gradient 0.0275/yr, R2 0.19, total 0.247
+     step:  +0.292 at 2022 (score 1.9)
+     excursions (windows whose level differs from the rest, best first): 2022-2023 (2y) +0.436 score 4.9
+     YoY sd: empirical 0.2435 vs Poisson 0.0305 -> overdispersion x7.97 (Poisson null INVALID on this line)
+     onset: max 1yr move / excursion size = 1.22 (the whole excursion arrives in ONE year, then holds)
+     yearly: 2021:0.88(z-4.4) 2022:1.41(z+16.2) 2023:1.24(z+9.8) 2024:0.89(z-4.7)
+   ```
+
+   Plus a reading guide that says what does *not* count: mild overdispersion is the normal
+   texture of these books, and tiny age or duration cells are unreliable however extreme
+   their A/E looks.
+2. **Discipline rules.** Where the taxonomy gets explicit — for example, that a trend which
+   reverts at the end is still drift, and that a one-year spike inside a swinging line is
+   volatility rather than drift.
+3. **Up to four sandboxed python calls.** "You are not limited to eyeballing the tables":
+   the model can run its own calculations over the `artifacts/` folder. Execution is
+   `python -I -c`, 10 s timeout, 4 000-char output, working directory set to the book. That
+   is a guardrail, **not a jail**: there is no network block and no filesystem confinement,
+   so treat it as advisory (see **Sandbox** below).
+
+```bash
+python3 scripts/stats_pack.py data/eval/optimization/sc-f69eea --text      # just the pack
+python3 scripts/run_zero_shot.py --scenarios sc-f69eea --harness off       # A
+python3 scripts/run_zero_shot.py --scenarios sc-f69eea --harness full --tool-calls 4   # B
+python3 scripts/score_xam.py results/<corpus>/zero_shot                    # score either
+```
+
+Both configurations are run over the same books on purpose: **B − A is the measured value of
+the harness**, which is the number this repo exists to publish. Every run records the full
+prompt it was given, and every corpus snapshots the harness code and prompt bytes that
+produced it (`results/<corpus>/harness_snapshot/`), so a comparison can be audited instead
+of trusted.
+
+---
+
+## 3 · How the answers are measured: accuracy, false alarms, precision, tokens, time
+
+A **unit** is one planted control in one run. A control planted across a whole book counts
+as four units, one per benefit line. A unit is a **hit** only if benefit, pattern, window and
+direction all agree with the manifest. A **claim that counts** is a finding that was either a
+hit or a false alarm; duplicate findings are ignored both ways.
+
+| metric | formula | the question it answers |
+|---|---|---|
+| **accuracy** (strict recall) | strict hits ÷ units | did it find what was there? |
+| **FP/claim** | false alarms ÷ claims that counted | when it spoke, how often was it wrong? |
+| **precision** | hits ÷ claims = 1 − FP/claim | the same thing, phrased the other way |
+| **tokens** | prompt + completion, from the API `usage` field | what one answer consumes |
+| **wall time** | per run, request sent to answer complete | what one answer costs in time |
+
+Accuracy and FP/claim have different denominators. Within the units ledger, accuracy +
+miss-rate = 100 %. Within the findings ledger, precision + FP/claim = 100 %. Reporting only
+one of them hides half of what happens, and the two subjects fail in opposite directions.
+
+### Worked example: 3.8 with its own harness
+
+Held-out split, 23 books × 3 runs, `sc-e6ffa4` excluded from every cell (it never completed
+under one configuration; see INDEX §8). Numbers from
+`results/harness_final/scores.json` and the per-run records:
+
+| step | value |
+|---|---|
+| units | 111 |
+| strict hits | 79 |
+| false alarms | 57 |
+| claims that counted | 79 + 57 = 136 |
+| **accuracy** | 79 ÷ 111 = **71.2 %** |
+| **FP/claim** | 57 ÷ 136 = **41.9 %** |
+| **precision** | 79 ÷ 136 = **58.1 %** |
+| median tokens per answer | 6 714 prompt + 13 763 completion |
+| median wall time per answer | 813 s ≈ 13 min 33 s |
+
+The same ledger for Qwen3.6 with its own harness (`results/harness_q36_final/`): 73 hits, 46
+false alarms, 119 claims → **accuracy 65.8 %, FP/claim 38.7 %, precision 61.3 %**, median
+6 603 + 5 779 tokens, 289 s ≈ 4 min 49 s per answer.
+
+Read the two together and the point appears. 3.6 finds less but is more trustworthy when it
+speaks; 3.8 finds more and talks far too much. Accuracy alone ranks 3.8 first; precision
+reverses that.
+
+### Cost, next to the score
+
+One 72-call held-out exam, measured over the whole published corpora including retries:
+
+| configuration | tokens | wall clock | accuracy | precision |
+|---|---|---|---|---|
+| 3.6 + its own harness | 0.89 M | 5.9 h | 65.8 % | 61.3 % |
+| 3.8 + its own harness | 1.95 M | 21.9 h | 71.2 % | 58.1 % |
+
+Accuracy and precision are the 23-book cells from above. The token and wall-clock totals are
+every call actually made in those two corpora, all 72 of them, retries included — which is
+why 21.9 h is more than the median per answer multiplied out.
+
+At the median per answer rather than the corpus total the same comparison is about **6 hours
+versus about 16 hours** — 3.6 reaching roughly 93 % of 3.8's accuracy for about a third of
+the time and tokens, at better precision. Cost is reported beside accuracy everywhere in
+this repo because it changes the ranking, not because it is a footnote.
+
+---
+
+## 🔍 The Study Behind It — Four Questions This Has to Answer
+
+Sections 1–3 explain how the platform works. This section is what the two model campaigns
+were run for, and what they settled.
+
+### Governance — what someone signing this off actually needs
 
 Suppose you want an LLM to help with experience studies: reading A/E tables, flagging
 lines that need investigation, drafting experience commentary. Before you can rely on it,
@@ -28,7 +238,7 @@ someone has to be able to answer four questions. One convincing demo answers non
 |---|---|---|
 | **How good is the model?** | A generated answer key that cannot change after the exam (`data/truth/seal.json`). A held-out split, mounted and scored **once**. Strict matching, so a vague or mislabelled answer scores nothing. | Accuracy: 3.8 **71.2 %**, 3.6 **65.8 %**. Precision tells the opposite story, which is why both are headline numbers. |
 | **What does it miss, and what does it invent?** | Two separate metrics, never blended: accuracy (found ÷ what was there) and FP/claim (wrong ÷ what it said). | They fail in opposite directions. 3.8 invents: **34.3 %** precision with no harness. 3.6 is cautious: already **60.0 %** precise. |
-| **What does it cost?** | Wall-clock, reasoning volume and completion tokens recorded on every run, reported next to the score. | **About 3× apart.** 3.6 ≈ 4.8 min per book, 3.8 ≈ 13.5. A 72-call exam: ≈ 6 h vs ≈ 16 h. 3.6 gets ~93 % of the accuracy for a third of the cost, with better precision. |
+| **What does it cost?** | Wall clock, reasoning volume and completion tokens are recorded on every run and reported beside the score. | **About 3× apart.** Per answer: 3.6 ≈ 4.8 min and 5.7k completion tokens, 3.8 ≈ 13.5 min and 13.8k. Worked through in section 3. |
 | **Is the pipeline around it right, or does it need updating — and on what evidence?** | Every corpus stores the exact harness bytes and prompt that produced it. The optimization-vs-heldout gap is a published metric. Every harness edit records its hypothesis, its test and its regression check. | It needed updating **per model**. The record shows which edit fixed which failure, and one fix that was deliberately not applied (INDEX §8). |
 
 **What you govern is the model and the harness together, not the model alone.** A vendor
@@ -51,20 +261,16 @@ Two rules follow from that, and both are kept visibly in this repo:
   sign-off based on tuning scores would have been wrong by that much. For the same reason,
   `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
 
-### 1 · Measuring an LLM's ability to find insight in actuarial A/E data
+### The model's eye — can it find the insight?
 
-There are 47 books. Each is a set of A/E tables: actual versus expected claim counts by
-benefit line — Death, CI, TPD, IP — by year, 2015–2024. Patterns are planted by
-construction: drift, shock, volatility, a change in recovery rates, a lookalike that is
-none of those, and clean books where any finding is a false alarm.
+Can a model find the insight an actuary would find? The campaigns answer **yes, with
+limits**. Harnessed, the two models recovered 65.8 % and 71.2 % of what was
+planted on the held-out split, naming the line, the years and the pattern correctly. The
+limits are shared rather than model-specific: `drift`, `recovery` and `volatility` saturate
+for every harnessed configuration, `noise_trap` lookalikes are hard for all of them, and the
+coordinated multi-line `systemic` books are where the two separate (INDEX §6).
 
-For each book the model must return what an actuary would write up: which benefit line,
-which years, which pattern, which direction, how large, how confident, on what evidence,
-and what it would do next. It answers in structured JSON, and scoring is strict: benefit,
-pattern, window and direction must all agree. `PATTERN_EQUIV` is exact, so one wrong
-pattern word costs a hit *and* adds a false alarm.
-
-Two notes on that design:
+Two design notes carry beyond this dataset:
 
 - `recommended_action` is part of the answer on purpose — the goal is a finding worth
   escalating, not a labelled time series. It is recorded in every corpus and, to be
@@ -75,14 +281,12 @@ Two notes on that design:
   Extending to those means a new scenario family and a new section in `stats_pack.py`. It
   does not mean a new benchmark, a new scorer or a new governance argument.
 
-### 2 · Quantifying how much the harness is worth
+### The harness — what it is worth, and whether it transfers
 
-This is the measurement the project is most concerned with, and the two campaigns are the
-experiment.
-
-Held-out split, 23 books, same books in every row. Cells are **accuracy | FP/claim**, and
-precision = 1 − FP/claim. `sc-e6ffa4` is excluded from every row because it never
-finished under one configuration (INDEX §8).
+This is the measurement the project exists to make. The two campaigns are the experiment and
+the table below is its result: the held-out split, the same 23 books in every cell, cells
+written as **accuracy | FP/claim** (definitions and arithmetic in section 3). `sc-e6ffa4` is
+excluded from every cell because it never finished under one configuration (INDEX §8).
 
 | model | no harness | its own tuned harness | the *other* model's harness |
 |---|---|---|---|
@@ -118,7 +322,7 @@ part of a model's deployment, and it has to be rebuilt when the behaviour under 
 changes. That is why this repo publishes two harness lineages that started from the same
 base and ended in different places.
 
-### 3 · A method for building and testing the harness
+### The method — building a harness from evidence
 
 The harness was not written in one sitting. **A model built it.** The operator-side agent
 that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliberately not
@@ -317,18 +521,16 @@ exam honest as the catalog grows.
 
 ## 🧾 What the exam asks of a model
 
-A subject gets one scenario directory of A/E files and one turn. It may answer straight
-from what it is shown, or spend up to four sandboxed python calls recomputing the numbers
-itself. It returns one JSON answer. The scorer expands each planted control to a **unit**
-(a book-wide control becomes four units, one per benefit line), and a unit is a hit only
-if benefit, pattern, window and direction all agree.
-
-Three things are measured at once, and they should be kept apart when reading any number:
+A subject gets one scenario directory of A/E files and one turn. It answers from what it is
+shown, or spends up to four sandboxed python calls recomputing the numbers itself, and
+returns one JSON answer. Sections 2 and 3 cover the two ways to ask and how an answer is
+scored. Three things are measured at once, and they should be kept apart when reading any
+number:
 
 | axis | question | answered in |
 |---|---|---|
 | **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted without inventing? | [the report](docs/REPORT_qwen36_vs_qwen38.md), INDEX §6 |
-| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | purposes 2–3 above; INDEX §3, §5–6 |
+| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | the study section above; INDEX §3, §5–6 |
 | **cost** | what does one answer cost, and did the harness pay for itself? | report §2.4.6 — run time, reasoning volume, tokens, throughput |
 
 The planned Stage-2 variant — a model that writes and refines its own *pipeline* over many
