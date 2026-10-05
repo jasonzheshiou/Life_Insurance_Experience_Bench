@@ -67,7 +67,7 @@ sent for the complex scenario below:
 | **TPD** | **IP** |
 | ![TPD A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_tpd_by_year.png) | ![IP A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_ip_by_year.png) |
 
-**The truth: four planted findings, on two lines, of two different kinds.**
+**What is really in this scenario: four planted findings on two benefit lines.**
 
 | planted | window | size |
 |---|---|---|
@@ -75,29 +75,14 @@ sent for the complex scenario below:
 | IP drift | 2016–2019 | +0.03/yr |
 | Death shock | 2020 | ×1.3 |
 | IP shock | 2020 | ×1.2 |
-| CI and TPD | — | untouched, a check on the rest |
+
+CI and TPD were left unchanged.
 
 **Why it is hard.** Only the 2020 Death shock is visible to the eye, at 1.294. The 2016–2019
 Death drift wanders 0.925 → 0.996 → 1.070 → 1.030 and then reverts, and its slope (+0.05/yr) is
 about the size of the year-to-year Poisson noise on that line (±0.045 at these claim counts). IP
 is the same problem one step smaller: +0.03/yr against ±0.026. This is what a marginal experience
 movement looks like, and it is a hard call even holding the answer key.
-
-**What actually happened.** Four units per run, three runs, each model on its own tuned harness —
-and **both finished on exactly 6 of 12**, by different routes
-(`results/harness_final/scores.json`, `results/harness_q36_final/scores.json`):
-
-| planted finding | reported in |
-|---|---|
-| Death shock 2020 | **6 of 6 runs** — every run of both models |
-| IP drift 2016–19 | 4 of 6, each time with a window so wide it only counted because it overlapped |
-| IP shock 2020 | 2 of 6 |
-| Death drift 2016–19 | **0 of 6** — three runs said nothing, three pointed at 2022–2024, which is a different movement |
-
-The loud event is always found and the quiet one is not, and neither model holds four findings in
-one answer. Missing is not the only failure: Qwen3.8's run 3 offered five findings, three of them
-false — the 2022–2024 Death "drift", plus two volatility claims covering the post-shock give-back,
-where nothing was planted.
 
 The hardest version of this pattern is `sc-73fd27`: three parallel drifts (+0.05, +0.03 and
 +0.02/yr on Death, CI and IP), all confined to 2016–2019 and all reverting afterwards, TPD flat.
