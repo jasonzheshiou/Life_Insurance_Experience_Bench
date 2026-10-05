@@ -265,8 +265,8 @@ Two rules follow from that, and both are kept visibly in this repo:
   folder. A byte-level leak scan runs at build time and again before the first prompt.
   `dataset.json` hashes every model-facing file, so "both models saw the same exam" is
   provable rather than assumed.
-- **Tuning must not touch the reported number.** Tuning used the 23-book optimization
-  split; the reported number comes from the 24-book held-out split, scored once. The
+- **Tuning must not touch the reported number.** Tuning used the 23-scenario optimization
+  split; the reported number comes from the 24-scenario held-out split, scored once. The
   frozen harnesses scored **97.7 %** and **95.5 %** on tuning, and **69.1 %** and
   **64.2 %** on held-out data — an optimism gap of about 30 points for *both* models. A
   sign-off based on tuning scores would have been wrong by that much. For the same reason,
@@ -279,7 +279,7 @@ limits**. Harnessed, the two models recovered 65.8 % and 71.2 % of what was
 planted on the held-out split, naming the line, the years and the pattern correctly. The
 limits are shared rather than model-specific: `drift`, `recovery` and `volatility` saturate
 for every harnessed configuration, `noise_trap` lookalikes are hard for all of them, and the
-coordinated multi-line `systemic` books are where the two separate (INDEX §6).
+coordinated multi-line `systemic` scenarios are where the two separate (INDEX §6).
 
 Two design notes carry beyond this dataset:
 
@@ -295,7 +295,7 @@ Two design notes carry beyond this dataset:
 ### The harness — what it is worth, and whether it transfers
 
 This is the measurement the project exists to make. The two campaigns are the experiment and
-the table below is its result: the held-out split, the same 23 books in every cell, cells
+the table below is its result: the held-out split, the same 23 scenarios in every cell, cells
 written as **accuracy | FP/claim** (definitions and arithmetic in section 3). `sc-e6ffa4` is
 excluded from every cell because it never finished under one configuration (INDEX §8).
 
@@ -318,7 +318,7 @@ harness has to compensate for that, and it compensates differently for each mode
   because 3.6 did not have 3.8's problem to fix.
 - **Each model does best with the harness tuned for it**: 3.8 gets 71.2 own vs 70.3 on
   3.6's; 3.6 gets 65.8 own vs 64.9 on 3.8's. An earlier claim that a harness transfers
-  (+8.3 points) rested on 9 books; at 23 books the same comparison gave −1, so the claim
+  (+8.3 points) rested on 9 scenarios; at 23 scenarios the same comparison gave −1, so the claim
   was withdrawn.
 - **Behaviour decides whether a harness feature exists at all.** Both models were offered
   up to 4 sandboxed python calls. 3.8 used them in about 24 % of runs. **3.6 used them 0
@@ -340,13 +340,13 @@ that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliber
 one of the two subjects, so no subject tuned the exam it later took. It worked from
 recorded artifacts, not impressions, in a fixed loop:
 
-1. Run the frozen harness over all 23 **optimization** books. Keep the corpus and the
+1. Run the frozen harness over all 23 **optimization** scenarios. Keep the corpus and the
    per-unit scorer output.
 2. Read what actually happened: the recorded prompt, the answer, the tool log, and the
    scorer's per-unit diff. Say *why* each failed unit failed.
 3. Form **one** hypothesis and make **one** edit — a new section in `stats_pack.py`, a
    discipline clause in `HARNESS_RULES`, or a new pinned system prompt.
-4. Test it on the affected books in a scratch corpus, then re-check the neighbouring books
+4. Test it on the affected scenarios in a scratch corpus, then re-check the neighbouring scenarios
    the edit could have disturbed.
 5. Keep or revert. Snapshot the harness bytes **and** the prompt into
    `results/<corpus>/harness_snapshot/` before the next run.
@@ -359,7 +359,7 @@ can inspect the method instead of taking it on trust — including the fix that 
 **declined** (runbook §36), not just the ones kept.
 
 **The method costs time, and that cost is part of the design.** On one llama.cpp slot, one
-23-book optimization pass takes about **7 hours** for 3.8 and about **2 hours** for 3.6; a
+23-scenario optimization pass takes about **7 hours** for 3.8 and about **2 hours** for 3.6; a
 72-call held-out exam takes about **16 hours** and about **6 hours**. Every harness version
 costs a pass. That is why the loop allows one hypothesis per pass instead of searching the
 prompt space — and it is also why the cheaper model's harness needed two edits, not seven.
@@ -414,7 +414,7 @@ Do not chase a prompt-hash mismatch until you have regenerated the full tree.
 
 ## 🏭 Where the data comes from, and how to generate it yourself
 
-Every book is produced by a **separate public project**:
+Every scenario is produced by a **separate public project**:
 
 > **[Synthetic_Life_Insurance_Data_Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)**
 > — a deterministic, pure-Python generator of synthetic Australian life-insurance claims
@@ -424,7 +424,7 @@ Every book is produced by a **separate public project**:
 Two repos on purpose: the generator is a data tool with its own release cycle, and this repo
 is the exam built on top of it. This repo never reimplements the generator —
 `scripts/generate_scenarios.py` imports it as a library and calls its pipeline once per
-book.
+scenario.
 
 ### Step 1 — put the generator where this repo looks for it
 
@@ -463,7 +463,7 @@ packages. The simplest correct invocation uses the generator's own environment:
 
 > ⚠️ **Read this before you run any `--scale` on a fresh clone.** Assembly **deletes and
 > rebuilds** the scenario directories under `data/eval/` and rewrites `data/truth/`. A
-> published clone already holds the exact 47 books every number in this repo was measured
+> published clone already holds the exact 47 scenarios every number in this repo was measured
 > on, so `--scale tiny` there replaces the real exam with a 5 000-policy one and re-seals
 > the truth store. Undo it with `git checkout -- data/eval data/truth`, or experiment in a
 > scratch clone. The script's scale guard protects `data/raw/` from mixed scales; it
@@ -480,7 +480,7 @@ Other flags: `--only <ids>` (subset), `--force` (regenerate existing raw stores)
 disk — needs no pandas and no generator), `--no-checks`, `--force-split`.
 
 Scale presets live in [`config/scenarios.yaml`](config/scenarios.yaml), the single source
-of truth for the 47-book set. The script hard-codes no scenario, and
+of truth for the 47-scenario set. The script hard-codes no scenario, and
 `config/scenarios.d/*.yaml` is merged in when present.
 
 ### Step 4 — what lands where
@@ -499,10 +499,10 @@ first API call.
 
 | pin | value |
 |---|---|
-| generator commit | **`66a73d0`** (recorded per book in `data/raw/<id>/run_info.json`) |
+| generator commit | **`66a73d0`** (recorded per scenario in `data/raw/<id>/run_info.json`) |
 | seed | `42` — the generator is bit-deterministic: same scenario id, same bytes |
 | scale | `full` — 250 000 policies; claim targets 5000 / 12000 / 8000 / 15000 for Death / CI / TPD / IP |
-| registry | `config/scenarios.yaml`, 47 books (23 optimization / 24 heldout) |
+| registry | `config/scenarios.yaml`, 47 scenarios (23 optimization / 24 heldout) |
 
 After regenerating, run these to confirm the tree is sound:
 
@@ -524,8 +524,8 @@ produces byte-different prompts.
 Add an entry to `config/scenarios.yaml` (or a file in `config/scenarios.d/`), keeping
 controls inside the generator's validated ranges: drift slope ∈ [−0.9, 5.0], volatility
 σ ∈ [0, 1.0], shock and recovery factors > 0. Then regenerate and re-run `pytest tests/`
-and the preflight. The split-disjointness check will reject a held-out book that overlaps
-an optimization book on benefit × control × window × factor. That check is what keeps the
+and the preflight. The split-disjointness check will reject a held-out scenario that overlaps
+an optimization scenario on benefit × control × window × factor. That check is what keeps the
 exam honest as the catalog grows.
 
 ---
@@ -552,7 +552,7 @@ original intent is kept in the implementation guide and summarised below.
 
 | Capability | Status |
 |-----------|--------|
-| Deterministic scenario generation + disjoint split; truth generated, not curated | ✅ **built and used** — 47 books, sealed, leak-gated |
+| Deterministic scenario generation + disjoint split; truth generated, not curated | ✅ **built and used** — 47 scenarios, sealed, leak-gated |
 | Structured verdict contract; malformed answer = miss | ✅ **built and used** — JSON, with `strict=False` tolerance |
 | Evidence pack + rules block + pinned prompt, versioned and snapshotted | ✅ **built and used** — two lineages, frozen hashes |
 | Strict scoring (benefit × pattern × window × direction) with FP accounting | ✅ **built and used** — scorer v3 |
@@ -587,7 +587,7 @@ python3 scripts/harness_gate.py results/<corpus>/zero_shot --split heldout --run
 
 Anything that *answers* a scenario needs a live OpenAI-compatible endpoint (`--base-url`).
 The scorer, gate, leak scan and pack builder all run offline. Full replication commands —
-single book, unattended 23-book pass, held-out exam with retry wrapper — are in
+single scenario, unattended 23-scenario pass, held-out exam with retry wrapper — are in
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) §7.
 
 The packaged CLI (`abench init|generate|run|score|report|validate`), designed in §10 of the
@@ -600,7 +600,7 @@ implementation guide, was never wired up; see **Status** above.
 
 | Stage | What happens | Status |
 |-------|--------------|--------|
-| **Stage 0 — Data** | Deterministic scenario generation + disjoint `optimization`/`heldout` split (no LLM) | ✅ built — 47 sealed, leak-gated books |
+| **Stage 0 — Data** | Deterministic scenario generation + disjoint `optimization`/`heldout` split (no LLM) | ✅ built — 47 sealed, leak-gated scenarios |
 | **Stage 1 — Zero-shot** | Model returns one JSON answer from the artifacts alone, no pipeline | ✅ built — every published number comes from here |
 | **Stage 1+ — Evidence-pack harness** | *Not in the original plan.* Deterministic stats pack + rules block + pinned prompt + ≤4 sandboxed python calls, iterated by an operator-side agent on the optimization split | ✅ built — the axis the study is about |
 | **Stage 2 — Free-code pipeline** | Model writes and refines its own detector pipeline over 3–5 rounds of optimization-set feedback, then a frozen submission | 📐 Specified (M1/M2), **never built** |
@@ -618,7 +618,7 @@ and prompt are worth — not about long-horizon autonomy.
 | Ground truth is always *generated*, never hand-curated | ✅ met |
 | Heldout set mounted once, scored once, never fed back | ✅ met — the held-out split is now spent |
 | Malformed verdict JSON scores as a miss | ✅ met, with `strict=False` tolerance for raw control characters (INDEX §8) |
-| Median + spread over N×K runs | ⚠️ **not built** — runs were summed into one accuracy, so per-book variance is visible in `scores.json` but median and spread were never reported |
+| Median + spread over N×K runs | ⚠️ **not built** — runs were summed into one accuracy, so per-scenario variance is visible in `scores.json` but median and spread were never reported |
 | Two cheap baselines always shown | ⚠️ **partial** — the same model's no-harness baseline exists (`xam_q36`, `xam_v5`); the classical control-chart / CUSUM detector was never implemented |
 
 </details>
@@ -636,7 +636,7 @@ The generator plants these controls into the actuals only:
 | **IP recovery** | Termination-rate multiplier (IP) | `ip_recovery_mental_health_x2`: MH termination A/E ≈ 2.0, incidence untouched |
 | **No-op** | All neutral | `noop_neutral_controls`: bit-identical to `baseline` |
 
-The shipped 47 books combine those controls into eight **families**. Findings are
+The shipped 47 scenarios combine those controls into eight **families**. Findings are
 classified against the families:
 
 | family | what is planted | held-out count |
@@ -646,7 +646,7 @@ classified against the families:
 | `volatility` | increased year-to-year dispersion, flat level | 2 |
 | `recovery` | IP termination-rate recovery | 3 |
 | `systemic` | coordinated multi-line event, 2–4 lines at once | 8 |
-| `mixed` | two or more different events in one book | 2 |
+| `mixed` | two or more different events in one scenario | 2 |
 | `noise_trap` | a lookalike — reads as drift or a spike, but the truth is volatility | 2 |
 | `CLEAN` | nothing planted; any finding is a false alarm | 1 |
 
@@ -694,7 +694,7 @@ data_pipeline_arena/
 ├── README.md                           # this file
 ├── BENCHMARK_IMPLEMENTATION_GUIDE.md   # the pre-experiment plan, annotated — guide context
 ├── config/
-│   └── scenarios.yaml                  # the 47-book registry — single source of truth for the dataset
+│   └── scenarios.yaml                  # the 47-scenario registry — single source of truth for the dataset
 ├── scripts/                            # 30 modules: generator driver, stats pack, runner, scorer, gate, drivers
 ├── docs/                               # EXPERIMENT_INDEX, REPORT, HARNESS_GROWTH, dataset + design refs
 ├── tests/test_registry.py              # registry + split-invariant tests (the only unit tests)
@@ -749,12 +749,12 @@ Record which tier ran, and state it in every reported result.
   manifest. Real A/E review involves judgement calls with no answer key, and this benchmark
   cannot measure that.
 - **The harness claim rests on two subjects.** "The harness must be re-derived per model"
-  comes from a 2×2 matrix of two models × two harnesses over 23–24 books. That is a real
+  comes from a 2×2 matrix of two models × two harnesses over 23–24 scenarios. That is a real
   signal at real replication cost, but it is two subjects on one serving stack — not a
   general theory of harness portability.
-- **The held-out split is spent.** These 24 books are published together with their
+- **The held-out split is spent.** These 24 scenarios are published together with their
   answers, so they cannot serve as an unseen exam for anything that reads this repo. A new
-  exam needs new books from `generate_scenarios.py` with fresh controls.
+  exam needs new scenarios from `generate_scenarios.py` with fresh controls.
 - Two units are **benchmark artifacts, not model failures**, and are documented as such:
   `sc-d72b95` plants a drift of +0.0253/yr with SE 0.0251 (t = 1.01; minimum detectable
   slope +0.088), and `sc-f520e5` is genuinely ambiguous (volatility F = 17.1 *and* a real
@@ -880,7 +880,7 @@ records — and is provided for research, learning and testing.
 
 **Acknowledgments**: the
 [Synthetic Life Insurance Data Generator](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator)
-project, which produces every book in the benchmark.
+project, which produces every scenario in the benchmark.
 
 </details>
 
