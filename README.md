@@ -14,31 +14,31 @@ expected (A/E).
 
 ## 1 · The data: A/E tables, charts, and the insight inside them
 
-A **book** is one scenario: actual-versus-expected (A/E) numbers for four benefit lines — Death,
-CI, TPD, IP — by year, 2015–2024, built from 250 000 synthetic policies. A/E is actual claims ÷
-expected claims. Clean data sits near 1.0 and wobbles by about 1 ÷ √(expected claims) per year,
-so the whole exercise is separating that wobble from a real experience movement.
+A **scenario** is one synthetic portfolio: 250 000 policies, four benefit lines — Death, CI, TPD,
+IP — and their actual-versus-expected (A/E) numbers by year, 2015–2024. A/E is actual claims ÷
+expected claims.
 
-Both examples below are real books in this repo. The subject is a text-only model and never sees
-charts: it gets numbers. The charts are here so you can see what it has to infer from digits, and
-what an actuary would see in ten seconds.
+Both examples below are real scenarios in this repo. The model is fed text only; the charts here
+are for illustration.
 
 ### What the model is fed
 
-One folder per book, `data/eval/<split>/<sc-id>/`. This is what reaches the model:
+One folder per scenario, `data/eval/<split>/<sc-id>/`. This is what reaches the model:
 
-| what is in the folder | how the model gets it |
-|---|---|
-| `artifacts/ae_<benefit>_by_year.csv` — the four yearly series, i.e. the charts below | **inlined in the prompt**, ten rows each: `2018: Actual=257 Expected=389.6 AE=0.660` |
-| `artifacts/summary.json` — overall A/E and claim counts per line | **inlined** |
-| `artifacts/ae_ip_termination.csv` — IP recovery A/E by diagnosis | **inlined** |
-| `artifacts/ae_<benefit>.csv`, `ae_<benefit>_age_gender.csv` — the same A/E at age × gender × year grain | listed by path; read with a sandboxed python call if the model wants it |
-| `artifacts/*.png` — the charts on this page | listed by path; of no use to a text-only subject |
-| `<benefit>_claims.csv`, `exposure.csv`, `benchmarks/<benefit>.csv` — the raw claims and exposure behind every ratio | listed by path, **not published** in the clone (regenerable; see [What ships](#-what-ships-in-a-clone-and-what-you-regenerate)) |
+- `artifacts/ae_<benefit>_by_year.csv` — the four yearly series, i.e. the charts below:
+  **inlined in the prompt**, ten rows each, e.g. `2018: Actual=257 Expected=389.6 AE=0.660`
+- `artifacts/summary.json` — overall A/E and claim counts per line: **inlined**
+- `artifacts/ae_ip_termination.csv` — IP recovery A/E by diagnosis: **inlined**
+- `artifacts/ae_<benefit>.csv`, `ae_<benefit>_age_gender.csv` — the same A/E at age × gender × year
+  grain: listed by path, read with a sandboxed python call if the model wants it
+- `artifacts/*.png` — the charts on this page: listed by path, of no use to a text-only model
+- `<benefit>_claims.csv`, `exposure.csv`, `benchmarks/<benefit>.csv` — the raw claims and exposure
+  behind every ratio: listed by path, **not published** in the clone (regenerable; see
+  [What ships](#-what-ships-in-a-clone-and-what-you-regenerate))
 
 That is the whole feed: about 130 numbers plus a file list — roughly **2.7k prompt tokens** bare,
-and about **6.6k** once the evidence pack of section 2 is added. Every finer grain is
-on disk and one tool call away. A full prompt exactly as it was sent, for the complex book below:
+and about **6.6k** once the evidence pack of section 2 is added. Every finer grain is on disk and
+one tool call away. A full prompt exactly as it was sent, for the complex scenario below:
 [`results/harness_final/zero_shot/sc-c9d78b_prompt.md`](results/harness_final/zero_shot/sc-c9d78b_prompt.md).
 
 ### The simple case: `sc-f69eea` — one line, one movement
@@ -49,7 +49,7 @@ on disk and one tool call away. A full prompt exactly as it was sent, for the co
 | **TPD** | **IP** |
 | ![TPD A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_tpd_by_year.png) | ![IP A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_ip_by_year.png) |
 
-**The truth, and the only finding in this book:**
+**The truth, and the only finding in this scenario:**
 
 - **Death is deteriorating and has not stopped.** A/E climbs in every year from 2018 (0.66) to
   2024 (1.31), ending 31 % above expected. The published manifest
@@ -57,14 +57,14 @@ on disk and one tool call away. A full prompt exactly as it was sent, for the co
 - **The other three lines are flat** — CI within 0.96–1.05, TPD within 0.96–1.04, IP within
   0.98–1.03, across all ten years. One line moving while its neighbours do not rules out a
   portfolio-wide cause: not a claims-reporting change, not a population shift, not a macro shock.
-- **What an actuary does with it.** Treat it as a line-specific frequency trend and refer the
-  Death book to pricing and reserving. "Death A/E rose" is a description; the line, the years,
-  the pattern and the action together are the insight.
+- **The insight:** a line-specific frequency trend on Death, so refer that line to pricing and
+  reserving and leave CI, TPD and IP as priced. "Death A/E rose" is a description; the line, the
+  years, the pattern and the action together are the finding.
 
-Both models get books like this one. Every harnessed configuration saturates on `drift`,
-`recovery` and `volatility`, so the interesting results come from the hard books.
+Every harnessed configuration saturates on scenarios like this one, and on `recovery` and
+`volatility`, so the interesting results come from the hard ones.
 
-### The complex case: `sc-c9d78b` — four findings in one book
+### The complex case: `sc-c9d78b` — four findings in one scenario
 
 `sys_cascade_drift_shock_2018`, held-out split:
 
@@ -108,12 +108,12 @@ where nothing was planted.
 
 The hardest version of this pattern is `sc-73fd27`: three parallel drifts (+0.05, +0.03 and
 +0.02/yr on Death, CI and IP), all confined to 2016–2019 and all reverting afterwards, TPD flat.
-**Both models scored 0 of 9 there**, with 8 and 10 false alarms between them. Books like these,
+**Both models scored 0 of 9 there**, with 8 and 10 false alarms between them. Scenarios like these,
 not the simple ones, are what the harness work below was chasing.
 
 ### What the model has to return
 
-One JSON object per book. The shape, verified against the pinned prompt
+One JSON object per scenario. The shape, verified against the pinned prompt
 (`data/prompts/system_v2_baseline.txt`):
 
 ```json
@@ -131,8 +131,8 @@ One JSON object per book. The shape, verified against the pinned prompt
 ```
 
 `pattern` is one of `drift | shock | volatility | recovery | other`, `direction` is one of
-`increase | decrease | dispersion`. A clean book requires `overall_assessment: "clean"` and
-an empty `findings` list; claiming anything on a clean book is a false alarm. Scoring is
+`increase | decrease | dispersion`. A clean scenario requires `overall_assessment: "clean"` and
+an empty `findings` list; claiming anything on a clean scenario is a false alarm. Scoring is
 strict: benefit, pattern, window and direction must all agree.
 
 ---
