@@ -21,7 +21,7 @@ with status notes added rather than rewrites, so you can still see the gap betwe
 and outcome. For what was built and what was measured, read
 [README.md](README.md) (purpose and status),
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) (everything, with paths) and
-[docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) (the findings).
+[docs/REPORT_models_and_harnesses.md](docs/REPORT_models_and_harnesses.md) (the findings).
 
 **Built, and used for every published number**
 

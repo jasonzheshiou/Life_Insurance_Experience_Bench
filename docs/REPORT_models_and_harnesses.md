@@ -1,17 +1,26 @@
-# Cross-Model Evaluation Report
-## Qwen3.6-27B vs Qwen3.8-27B on the Data Pipeline Arena anomaly-detection benchmark
+# Life Insurance Experience Bench — Model and Harness Report
+## Two Qwen 27B models and the harnesses around them, measured on synthetic A/E experience data
 
 **Scope:** held-out split, 24 scenarios, 3 runs each, single-slot inference.
-**Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.6 and §2.7).
+**Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.7 and §3.11).
 
 ---
 
-# PART 0 — WHAT THIS BENCHMARK IS FOR
+---
 
-README sections 1–3 explain how the platform works. This part is what the two model campaigns were
-run for, and what they settled.
+# 1 · Executive summary
 
-## 0.1 Governance — what someone signing this off actually needs
+## 1.1 Purpose
+
+To determine whether two language models, **Qwen3.6-27B** and **Qwen3.8-27B**, differ
+in their ability to find planted anomalies in synthetic life-insurance experience
+data, and specifically **whether a similar level of harness optimisation produces a
+similar result for both**. The benchmark exists because actuarial anomaly detection
+is a task where a model must do more than read a table: it must decide *whether* an
+anomaly exists, *which* pattern it is, *which years* it covers, and *which benefit
+lines* it affects — and where a confident wrong answer is worse than no answer.
+
+## 1.2 Background — what someone signing this off needs
 
 Suppose you want an LLM to help with experience studies: reading A/E tables, flagging
 lines that need investigation, drafting experience commentary. Before you can rely on it,
@@ -44,121 +53,7 @@ Two rules follow from that, and both are kept visibly in this repo:
   sign-off based on tuning scores would have been wrong by that much. For the same reason,
   `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
 
-## 0.2 The model's eye — can it find the insight?
-
-Can a model find the insight an actuary would find? The campaigns answer **yes, with
-limits**. Harnessed, the two models recovered 65.8 % and 71.2 % of what was
-planted on the held-out split, naming the line, the years and the pattern correctly. The
-limits are shared rather than model-specific: `drift`, `recovery` and `volatility` saturate
-for every harnessed configuration, `noise_trap` lookalikes are hard for all of them, and the
-coordinated multi-line `systemic` scenarios are where the two separate (INDEX §6).
-
-Two design notes carry beyond this dataset:
-
-- `recommended_action` is part of the answer on purpose — the goal is a finding worth
-  escalating, not a labelled time series. It is recorded in every corpus and, to be
-  clear, **it is not scored**. Grading free-text advice is a separate unsolved problem.
-- **Claims A/E is the first surface, not the limit.** The skill being tested is deciding
-  whether a gap between actual and expected is signal. That is the same move in lapse and
-  persistency, expense A/E, mortality and morbidity studies, and reserve-adequacy work.
-  Extending to those means a new scenario family and a new section in `stats_pack.py`. It
-  does not mean a new benchmark, a new scorer or a new governance argument.
-
-## 0.3 The harness — what it is worth, and whether it transfers
-
-This is the measurement the project exists to make. The two campaigns are the experiment and
-the table below is its result: the held-out split, the same 23 scenarios in every cell, cells
-written as **accuracy | FP/claim** (definitions and arithmetic in README §3). `sc-e6ffa4` is
-excluded from every cell because it never finished under one configuration (INDEX §8).
-
-| model | no harness | its own tuned harness | the *other* model's harness |
-|---|---|---|---|
-| Qwen3.6-27B | 59.5 \| 40.0 | **65.8 \| 38.7** | 64.9 \| 43.3 |
-| Qwen3.8-27B | 64.0 \| 65.7 | **71.2 \| 41.9** | 70.3 \| 43.1 |
-
-Both subjects are 27 B models, on one llama.cpp slot, with identical samplers. The
-difference between them is not architecture. It is behaviour that reinforcement learning
-taught each model: how it reasons, how much it verifies, how eager it is to run code. The
-harness has to compensate for that, and it compensates differently for each model:
-
-- **3.8 without a harness finds a lot and says too much.** It found 64.0 % of what was
-  there, but 65.7 % of its claims were wrong — 34.3 % precision. Its problem is not
-  seeing; it is asserting. Its own harness moved it +7.2 points on recall and **+23.8
-  points on precision** (34.3 % → 58.1 %).
-- **3.6 without a harness fails the other way.** It found 59.5 % and was already 60.0 %
-  precise. The same harness gave +6.3 recall and **+1.3** precision (60.0 % → 61.3 %),
-  because 3.6 did not have 3.8's problem to fix.
-- **Each model does best with the harness tuned for it**: 3.8 gets 71.2 own vs 70.3 on
-  3.6's; 3.6 gets 65.8 own vs 64.9 on 3.8's. An earlier claim that a harness transfers
-  (+8.3 points) rested on 9 scenarios; at 23 scenarios the same comparison gave −1, so the claim
-  was withdrawn.
-- **Behaviour decides whether a harness feature exists at all.** Both models were offered
-  up to 4 sandboxed python calls. 3.8 used them in about 24 % of runs. **3.6 used them 0
-  times in 144 runs**, after two separate attempts to get it to use them.
-- **Over-claiming is a separate behaviour from mislabelling.** Splitting false alarms
-  into "explained by a mislabel" and "invented from nothing": under 3.8's own harness, 31
-  of 69 false alarms were invented; under 3.6's, 6 of 50.
-
-The conclusion this repo exists to record: **harness requirements follow model behaviour,
-not model weights.** A harness is not infrastructure you qualify once and reuse. It is
-part of a model's deployment, and it has to be rebuilt when the behaviour under it
-changes. That is why this repo publishes two harness lineages that started from the same
-base and ended in different places.
-
-## 0.4 The method — building a harness from evidence
-
-The harness was not written in one sitting. **A model built it.** The operator-side agent
-that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliberately not
-one of the two subjects, so no subject tuned the exam it later took. It worked from
-recorded artifacts, not impressions, in a fixed loop:
-
-1. Run the frozen harness over all 23 **optimization** scenarios. Keep the corpus and the
-   per-unit scorer output.
-2. Read what actually happened: the recorded prompt, the answer, the tool log, and the
-   scorer's per-unit diff. Say *why* each failed unit failed.
-3. Form **one** hypothesis and make **one** edit — a new section in `stats_pack.py`, a
-   discipline clause in `HARNESS_RULES`, or a new pinned system prompt.
-4. Test it on the affected scenarios in a scratch corpus, then re-check the neighbouring scenarios
-   the edit could have disturbed.
-5. Keep or revert. Snapshot the harness bytes **and** the prompt into
-   `results/<corpus>/harness_snapshot/` before the next run.
-6. Never tune against `heldout`, and never let a held-out result influence an edit.
-
-That produced seven harness versions for 3.8 (v1.0 → v1.6e), driven by **307
-per-scenario diary entries**, 268 of which involved reviewing or editing the harness. For
-3.6 it produced two kept edits from the same base. Both lineages are frozen here, so you
-can inspect the method instead of taking it on trust — including the fix that was
-**declined** (runbook §36), not just the ones kept.
-
-**The method costs time, and that cost is part of the design.** On one llama.cpp slot, one
-23-scenario optimization pass takes about **7 hours** for 3.8 and about **2 hours** for 3.6; a
-72-call held-out exam takes about **16 hours** and about **6 hours**. Every harness version
-costs a pass. That is why the loop allows one hypothesis per pass instead of searching the
-prompt space — and it is also why the cheaper model's harness needed two edits, not seven.
-
-Two limits of this method, stated plainly:
-
-- A human chose which failures to chase. The model proposed and applied edits; it did not
-  set the agenda.
-- The frozen record proves **which harness bytes produced which numbers**
-  (`harness_snapshot/MANIFEST.txt`). It does not prove which model wrote each line. The
-  runbooks narrate that; it is not part of the evidence.
-
----
-
-# PART 1 — EXECUTIVE SUMMARY
-
-## 1.1 Purpose
-
-To determine whether two language models, **Qwen3.6-27B** and **Qwen3.8-27B**, differ
-in their ability to find planted anomalies in synthetic life-insurance experience
-data, and specifically **whether a similar level of harness optimisation produces a
-similar result for both**. The benchmark exists because actuarial anomaly detection
-is a task where a model must do more than read a table: it must decide *whether* an
-anomaly exists, *which* pattern it is, *which years* it covers, and *which benefit
-lines* it affects — and where a confident wrong answer is worse than no answer.
-
-## 1.2 Method, in brief
+## 1.3 Method, in brief
 
 Each model answers the same 24 unseen books, 3 times each, at temperature 1.0, with
 no truth visible to it. Answers are scored against planted ground truth. Two
@@ -173,7 +68,7 @@ Qwen3.8's harness was built over seven optimisation passes (v1.0 → v1.6e, 307
 per-scenario iterations). Qwen3.6 received that finished harness as a starting point
 and then four optimisation passes plus a targeted per-scenario repair loop.
 
-## 1.3 Definitions — the two metrics used throughout
+## 1.4 The two metrics used throughout
 
 **Accuracy (recall)** — *did the model find what was there?*
 
@@ -210,10 +105,10 @@ is missed **and** the wrong claim is a false alarm. This is why the two metrics 
 together for mislabels but independently for omissions (a missed control with no
 claim) and inventions (a claim with no corresponding control).
 
-## 1.4 Headline results — accuracy and false alarms by model and harness
+## 1.5 Headline results — accuracy and false alarms by model and harness
 
 All figures on the **same 23 books** (the one book that failed is treated separately
-in §1.6, so every row is like-for-like). **Cell = accuracy | FP/claim.**
+in §1.7, so every row is like-for-like). **Cell = accuracy | FP/claim.**
 
 | # | configuration | accuracy | FP/claim | precision |
 |---|---|---|---|---|
@@ -245,7 +140,7 @@ in §1.6, so every row is like-for-like). **Cell = accuracy | FP/claim.**
 as accurate as 3.6 *with* a full harness (65.8 %) — but at **34.3 % precision versus
 61.3 %**. Comparable recall, radically different trustworthiness.
 
-## 1.5 Results by scenario family
+## 1.6 Results by scenario family
 
 The same six configurations, broken down by the type of anomaly planted. Families
 are the benchmark's "question types": **drift** (sustained multi-year move), **shock**
@@ -288,13 +183,13 @@ volatility), and **CLEAN** (nothing planted).
    correctly stay silent on the clean book. Without one, **3.8 falsely accused it**,
    while 3.6 did not.
 
-## 1.6 The failed scenario `sc-e6ffa4` and its effect on the data
+## 1.7 The one failed scenario `sc-e6ffa4`
 
 **What happened.** `sc-e6ffa4` is `sys_vol_macro_2020_2024` — **all four benefit lines
 volatile 2020-2024**. Under **Qwen3.8-27B running Qwen3.6's harness** it produced
 **no usable run at all**: six or more attempts, one lasting **2 hours 25 minutes**,
 every one failing. Under the three *other* configurations it completes 3/3 every
-time (§2.7 gives the full diagnosis). It is therefore a genuine failure of that one
+time (§3.11 gives the full diagnosis). It is therefore a genuine failure of that one
 configuration, not a missing data point.
 
 **How it affects the data.** The book contributes **12 units** (4 benefit lines × 3
@@ -313,7 +208,7 @@ as noise.
 
 **Effect on conclusions: none.** The reference point is what 3.8 scored on this book
 under its own harness — **6/12** — which would put the true figure near **68 %**,
-between the two bounds. Every conclusion in §1.4 has a margin far larger than
+between the two bounds. Every conclusion in §1.5 has a margin far larger than
 ±7 points: the recall gap is 5.4, the precision gap 3.2, and 3.8's unharnessed
 precision sits 24 points below its harnessed figure. None of them move.
 
@@ -322,7 +217,7 @@ A defect that exists only as a documented failure remains auditable; one that ha
 been patched away becomes a silent gap. `sc-e6ffa4` must always be reported as
 **failed**, never as absent or excluded.
 
-## 1.7 Conclusions from the entire research
+## 1.8 Conclusions
 
 1. **The two models are differently shaped, not ranked.** 3.8 is the higher-recall
    model (+5.4 points); 3.6 is the more precise one (+3.2 points precision). Neither
@@ -369,9 +264,13 @@ been patched away becomes a silent gap. `sc-e6ffa4` must always be reported as
 
 ---
 
-# PART 2 — BODY
+---
 
-## 2.1 Purpose and background
+# 2 · Methodology
+
+Expands §1.1 to §1.4: the task, how the data were made, what the harness is, how it was grown, how it was evaluated.
+
+## 2.1 The task and the research question
 
 Actuarial experience analysis asks whether observed claims deviate from expected, and
 if so *how*. The hard part is not arithmetic but **classification**: distinguishing a
@@ -422,16 +321,14 @@ Three safeguards protect the benchmark's integrity:
   truth tokens and for the taxonomy vocabulary leaking into the evidence pack, and
   must pass before any pass is run.
 
-## 2.3 Methodology
-
-### 2.3.1 Zero-shot baselines
+## 2.3 Zero-shot baselines
 
 Each model first answered all 47 books three times with **no harness** — raw scenario
 data plus the task prompt and output schema. These are the baselines
 (`results/xam_v5/` for 3.8, `results/xam_q36/` for 3.6) and establish each model's
 unaided ability. They are the reference against which the harness is measured.
 
-### 2.3.2 Harness growth methodology
+## 2.4 The harness, in three parts
 
 The harness has three components:
 
@@ -445,6 +342,8 @@ The harness has three components:
    anomaly, and offers up to 4 sandboxed Python tool calls.
 3. **System prompt** — supplied as a file, so a model can evolve its own prompt
    without editing the runner (`PINNED_PROMPT_FILE`).
+
+## 2.5 Growing the harness from evidence
 
 Growth proceeded by **two alternating methods**:
 
@@ -467,7 +366,46 @@ recoverable.
 than kept; a negative result is reported as such; a failure is recorded rather than
 worked around. Three edits were reverted during the 3.6 campaign on this basis.
 
-### 2.3.3 Evaluation protocol
+The harness was not written in one sitting. **A model built it.** The operator-side agent
+that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliberately not
+one of the two subjects, so no subject tuned the exam it later took. It worked from
+recorded artifacts, not impressions, in a fixed loop:
+
+1. Run the frozen harness over all 23 **optimization** scenarios. Keep the corpus and the
+   per-unit scorer output.
+2. Read what actually happened: the recorded prompt, the answer, the tool log, and the
+   scorer's per-unit diff. Say *why* each failed unit failed.
+3. Form **one** hypothesis and make **one** edit — a new section in `stats_pack.py`, a
+   discipline clause in `HARNESS_RULES`, or a new pinned system prompt.
+4. Test it on the affected scenarios in a scratch corpus, then re-check the neighbouring scenarios
+   the edit could have disturbed.
+5. Keep or revert. Snapshot the harness bytes **and** the prompt into
+   `results/<corpus>/harness_snapshot/` before the next run.
+6. Never tune against `heldout`, and never let a held-out result influence an edit.
+
+That produced seven harness versions for 3.8 (v1.0 → v1.6e), driven by **307
+per-scenario diary entries**, 268 of which involved reviewing or editing the harness. For
+3.6 it produced two kept edits from the same base. Both lineages are frozen here, so you
+can inspect the method instead of taking it on trust — including the fix that was
+**declined** (runbook §36), not just the ones kept.
+
+**The method costs time, and that cost is part of the design.** On one llama.cpp slot, one
+23-scenario optimization pass takes about **7 hours** for 3.8 and about **2 hours** for 3.6; a
+72-call held-out exam takes about **16 hours** and about **6 hours**. Every harness version
+costs a pass. That is why the loop allows one hypothesis per pass instead of searching the
+prompt space — and it is also why the cheaper model's harness needed two edits, not seven.
+
+Two limits of this method, stated plainly:
+
+- A human chose which failures to chase. The model proposed and applied edits; it did not
+  set the agenda.
+- The frozen record proves **which harness bytes produced which numbers**
+  (`harness_snapshot/MANIFEST.txt`). It does not prove which model wrote each line. The
+  runbooks narrate that; it is not part of the evidence.
+
+---
+
+## 2.6 Evaluation protocol
 
 * 24 held-out books × 3 runs = 72 calls per exam.
 * Canonical samplers (temperature 1.0, top_p 0.95, top_k 20), streaming, no
@@ -479,13 +417,92 @@ worked around. Three edits were reverted during the 3.6 campaign on this basis.
 * Every corpus is scored with the same scorer (`score_xam.py`, v3) against the same
   fixed truth manifests.
 
-## 2.4 Detailed results
+---
 
-### 2.4.1 Headline table
+# 3 · Results
 
-See §1.4. Tables there are on the common 23 books so all rows are like-for-like.
+Expands §1.5 to §1.7: what the models found, what the harness changed, and every table behind the headline.
 
-### 2.4.2 Full held-out results (24 books, where available)
+## 3.1 Can a model find the insight?
+
+The campaigns answer **yes, with limits**. Harnessed, the two models recovered 65.8 % and 71.2 % of what was
+planted on the held-out split, naming the line, the years and the pattern correctly. The
+limits are shared rather than model-specific: `drift`, `recovery` and `volatility` saturate
+for every harnessed configuration, `noise_trap` lookalikes are hard for all of them, and the
+coordinated multi-line `systemic` scenarios are where the two separate (INDEX §6).
+
+Two design notes carry beyond this dataset:
+
+- `recommended_action` is part of the answer on purpose — the goal is a finding worth
+  escalating, not a labelled time series. It is recorded in every corpus and, to be
+  clear, **it is not scored**. Grading free-text advice is a separate unsolved problem.
+- **Claims A/E is the first surface, not the limit.** The skill being tested is deciding
+  whether a gap between actual and expected is signal. That is the same move in lapse and
+  persistency, expense A/E, mortality and morbidity studies, and reserve-adequacy work.
+  Extending to those means a new scenario family and a new section in `stats_pack.py`. It
+  does not mean a new benchmark, a new scorer or a new governance argument.
+
+## 3.2 What the harness is worth, and whether it transfers
+
+This is the measurement the project exists to make. The two campaigns are the experiment and
+the table below is its result: the held-out split, the same 23 scenarios in every cell, cells
+written as **accuracy | FP/claim** (definitions and arithmetic in README §3). `sc-e6ffa4` is
+excluded from every cell because it never finished under one configuration (INDEX §8).
+
+| model | no harness | its own tuned harness | the *other* model's harness |
+|---|---|---|---|
+| Qwen3.6-27B | 59.5 \| 40.0 | **65.8 \| 38.7** | 64.9 \| 43.3 |
+| Qwen3.8-27B | 64.0 \| 65.7 | **71.2 \| 41.9** | 70.3 \| 43.1 |
+
+Both subjects are 27 B models, on one llama.cpp slot, with identical samplers. The
+difference between them is not architecture. It is behaviour that reinforcement learning
+taught each model: how it reasons, how much it verifies, how eager it is to run code. The
+harness has to compensate for that, and it compensates differently for each model:
+
+- **3.8 without a harness finds a lot and says too much.** It found 64.0 % of what was
+  there, but 65.7 % of its claims were wrong — 34.3 % precision. Its problem is not
+  seeing; it is asserting. Its own harness moved it +7.2 points on recall and **+23.8
+  points on precision** (34.3 % → 58.1 %).
+- **3.6 without a harness fails the other way.** It found 59.5 % and was already 60.0 %
+  precise. The same harness gave +6.3 recall and **+1.3** precision (60.0 % → 61.3 %),
+  because 3.6 did not have 3.8's problem to fix.
+- **Each model does best with the harness tuned for it**: 3.8 gets 71.2 own vs 70.3 on
+  3.6's; 3.6 gets 65.8 own vs 64.9 on 3.8's. An earlier claim that a harness transfers
+  (+8.3 points) rested on 9 scenarios; at 23 scenarios the same comparison gave −1, so the claim
+  was withdrawn.
+- **Behaviour decides whether a harness feature exists at all.** Both models were offered
+  up to 4 sandboxed python calls. 3.8 used them in about 24 % of runs. **3.6 used them 0
+  times in 144 runs**, after two separate attempts to get it to use them.
+- **Over-claiming is a separate behaviour from mislabelling.** Splitting false alarms
+  into "explained by a mislabel" and "invented from nothing": under 3.8's own harness, 31
+  of 69 false alarms were invented; under 3.6's, 6 of 50.
+
+The conclusion this repo exists to record: **harness requirements follow model behaviour,
+not model weights.** A harness is not infrastructure you qualify once and reuse. It is
+part of a model's deployment, and it has to be rebuilt when the behaviour under it
+changes. That is why this repo publishes two harness lineages that started from the same
+base and ended in different places.
+
+## 3.3 What the harness changed, edit by edit
+
+| edit | target | outcome |
+|---|---|---|
+| smoothed-window labelling (the 3-yr MA labelled its windows one-sidedly, so a smoothed shape appeared to stop two years before the data did) | `sc-3c83fd` drift read as shock | **kept** — part of the +4 unit gain at pass 2 |
+| cross-line note over-claim removed ("not a multi-year erratic stretch") | over-suppression of multi-year readings | **kept** — wording correction only |
+| onset caution (names a competing sustained-run reading when the onset ratio is measured against too narrow a window) | `sc-3c83fd` | **kept with guard** — 0/3 → 3/3 |
+| coordination guard (suppresses that caution when several lines move together, where a "long run" is the shared event) | `sc-bba653` regression caused by the caution | **kept with the caution** — 4/4 → 11/12, pack byte-identical to the pre-edit state |
+| clause-3b efficiency rewrite | activate 3.6's tool loop | **reverted** — inert, 0 tool calls before and after |
+| GIVE-BACK scoping | `sc-d72b95` missing drift | **reverted** — no change (9/12 both sides); the unit is undetectable |
+| TAIL rebound guard | `sc-f520e5` volatility read as drift | **reverted** — made it worse (3/6 vs 4/6) |
+
+The per-scenario loop fixed more in 25 minutes than four full optimisation passes had
+managed, because a 23-book sweep moves three units of noise while a single-book loop
+isolates one cause.
+
+## 3.4 Full held-out results (24 books, where available)
+
+§1.5 is on the common 23 books so every row is like-for-like. The table below is the full
+24-book view, where a configuration completed the whole exam.
 
 | configuration | accuracy | FP/claim | precision | FP/run |
 |---|---|---|---|---|
@@ -493,7 +510,7 @@ See §1.4. Tables there are on the common 23 books so all rows are like-for-like
 | 3.6 + own harness (tuned + 3053 prompt) | 64.2 % | **38.8 %** | **61.2 %** | 0.69 |
 | 3.6 + 3.8's harness (v1.6e + 3866 prompt) | 63.4 % | 44.7 % | 55.3 % | 0.88 |
 
-### 2.4.3 The controlled cross-model comparison
+## 3.5 The controlled cross-model comparison
 
 Exam B gave Qwen3.6-27B **exactly** Qwen3.8-27B's instrument: identical harness bytes
 (`stats_pack.py 16e53e0ef0b097ab`, `run_zero_shot.py a4b967de975625f9`), identical
@@ -510,7 +527,7 @@ fully controlled comparison in the study.
 indistinguishable on precision.** The recall gap is real; the reliability difference
 disappears once both models are harnessed.
 
-### 2.4.4 Optimisation split vs held-out — the optimism gap
+## 3.6 Optimisation split vs held-out — the optimism gap
 
 | model | best optimisation | held-out | gap |
 |---|---|---|---|
@@ -522,7 +539,7 @@ Both models lose roughly **30 points** moving from the 23 books they were tuned 
 model, and it is the single most important methodological finding: **optimisation-split
 scores are a ranking device and must never be quoted as expected performance.**
 
-### 2.4.5 Precision, false alarms and over-claiming
+## 3.7 Precision, false alarms and over-claiming
 
 False alarms decompose into two kinds:
 
@@ -549,7 +566,7 @@ work. Applying precision-suppression to 3.6 would be the wrong medicine, and thi
 confirmed experimentally — the 3.6-specific pattern-vocabulary edits worked, while
 attempts to make 3.6 report *less* did not.
 
-### 2.4.6 Cost — run time, tokens, throughput
+## 3.8 Cost — run time, tokens, throughput
 
 Measured on the same hardware and server throughout.
 
@@ -571,7 +588,7 @@ costs **~6 hours** for 3.6 and **~16 hours** for 3.8.
 Cost therefore matters to the conclusions: **3.6 achieves 93 % of 3.8's held-out
 accuracy at roughly one third of the time and tokens**, with better precision.
 
-### 2.4.7 Tool use
+## 3.9 Tool use
 
 The harness offers up to 4 sandboxed Python calls per run.
 
@@ -584,25 +601,9 @@ The harness offers up to 4 sandboxed Python calls per run.
 attempts to activate it (a rewritten efficiency clause, and mandatory-use wording).
 It correctly judges that the evidence pack already contains the arithmetic. **This
 asymmetry is not a defect but it is a robustness advantage**: the one hard failure in
-this study (§2.7) was a malformed tool request, which 3.6 cannot produce.
+this study (§3.11) was a malformed tool request, which 3.6 cannot produce.
 
-## 2.5 What the harness changed, edit by edit
-
-| edit | target | outcome |
-|---|---|---|
-| smoothed-window labelling (the 3-yr MA labelled its windows one-sidedly, so a smoothed shape appeared to stop two years before the data did) | `sc-3c83fd` drift read as shock | **kept** — part of the +4 unit gain at pass 2 |
-| cross-line note over-claim removed ("not a multi-year erratic stretch") | over-suppression of multi-year readings | **kept** — wording correction only |
-| onset caution (names a competing sustained-run reading when the onset ratio is measured against too narrow a window) | `sc-3c83fd` | **kept with guard** — 0/3 → 3/3 |
-| coordination guard (suppresses that caution when several lines move together, where a "long run" is the shared event) | `sc-bba653` regression caused by the caution | **kept with the caution** — 4/4 → 11/12, pack byte-identical to the pre-edit state |
-| clause-3b efficiency rewrite | activate 3.6's tool loop | **reverted** — inert, 0 tool calls before and after |
-| GIVE-BACK scoping | `sc-d72b95` missing drift | **reverted** — no change (9/12 both sides); the unit is undetectable |
-| TAIL rebound guard | `sc-f520e5` volatility read as drift | **reverted** — made it worse (3/6 vs 4/6) |
-
-The per-scenario loop fixed more in 25 minutes than four full optimisation passes had
-managed, because a 23-book sweep moves three units of noise while a single-book loop
-isolates one cause.
-
-## 2.6 Identifiability — not every miss is a model failure
+## 3.10 Identifiability — not every miss is a model failure
 
 Two apparent 3.6 failures were audited statistically:
 
@@ -622,7 +623,7 @@ alternative "drift" reading is **defensible from the data**; the truth merely pr
 the volatility label. Attempts to push the model toward the truth made the score
 *worse*, because they asked it to ignore a real feature.
 
-## 2.7 The `sc-e6ffa4` failure — full diagnosis
+## 3.11 The `sc-e6ffa4` failure — full diagnosis
 
 `sc-e6ffa4` (`sys_vol_macro_2020_2024`, all four lines volatile) produced **zero
 usable runs** under 3.8 + 3.6's harness, across six or more attempts, one running
@@ -659,7 +660,9 @@ back to computation; 3.6 never uses tools, so it simply answers.
 **Impact:** 12 units, counted as a total miss. 70.3 % (exclude) vs 63.4 % (count).
 FP/claim unchanged. **No conclusion in this report moves.**
 
-## 2.8 Conclusion
+---
+
+# 4 · Conclusion
 
 **On the research question:** a similar level of harness optimisation does produce
 different results for the two models, and the difference is a **shape, not a rank**.
@@ -689,5 +692,5 @@ produces a different benefit for each model, and does not transfer between them.
 **On the benchmark itself:** four of eight families are saturated for both models and
 two carry nearly all the discriminating power. The split should be extended in
 `systemic`, `noise_trap` and `mixed` before it is used to rank further models, and
-the two unidentifiable units identified in §2.6 should be reclassified rather than
+the two unidentifiable units identified in §3.10 should be reclassified rather than
 counted against any model.
