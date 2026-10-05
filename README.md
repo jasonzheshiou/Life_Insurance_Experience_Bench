@@ -14,109 +14,102 @@ expected (A/E).
 
 ## 1 · The data: A/E tables, charts, and the insight inside them
 
-A **book** is one scenario: the actual-versus-expected (A/E) tables and charts for four
-benefit lines — Death, CI, TPD, IP — over 2015–2024, built from 250 000 synthetic policies.
-A/E is actual claims divided by expected claims. On clean data it sits close to 1.0, wobbling
-by about 1 ÷ √(expected claims) per year. The skill under test is telling a wobble of that
-size apart from a real experience movement.
+A **book** is one scenario: actual-versus-expected (A/E) numbers for four benefit lines — Death,
+CI, TPD, IP — by year, 2015–2024, built from 250 000 synthetic policies. A/E is actual claims ÷
+expected claims. Clean data sits near 1.0 and wobbles by about 1 ÷ √(expected claims) per year,
+so the whole exercise is separating that wobble from a real experience movement.
 
-### The simple case: one line, one movement — `sc-f69eea`
+Both examples below are real books in this repo. The subject is a text-only model and never sees
+charts: it gets numbers. The charts are here so you can see what it has to infer from digits, and
+what an actuary would see in ten seconds.
 
-Death, A/E by year, straight out of
-`data/eval/optimization/sc-f69eea/artifacts/ae_death_by_year.csv`:
+### What the model is fed
 
-| Year | Actual | Expected | A/E |
-|---|---|---|---|
-| 2015 | 150 | 239.5 | 0.626 |
-| 2016 | 203 | 289.7 | 0.701 |
-| 2017 | 215 | 337.3 | 0.637 |
-| 2018 | 257 | 389.6 | **0.660** |
-| 2019 | 350 | 446.6 | 0.784 |
-| 2020 | 500 | 508.4 | 0.983 |
-| 2021 | 612 | 575.7 | 1.063 |
-| 2022 | 726 | 652.1 | 1.113 |
-| 2023 | 927 | 735.0 | 1.261 |
-| 2024 | 1080 | 826.1 | **1.307** |
+One folder per book, `data/eval/<split>/<sc-id>/`. This is what reaches the model:
 
-![Death A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_death_by_year.png)
+| what is in the folder | how the model gets it |
+|---|---|
+| `artifacts/ae_<benefit>_by_year.csv` — the four yearly series, i.e. the charts below | **inlined in the prompt**, ten rows each: `2018: Actual=257 Expected=389.6 AE=0.660` |
+| `artifacts/summary.json` — overall A/E and claim counts per line | **inlined** |
+| `artifacts/ae_ip_termination.csv` — IP recovery A/E by diagnosis | **inlined** |
+| `artifacts/ae_<benefit>.csv`, `ae_<benefit>_age_gender.csv` — the same A/E at age × gender × year grain | listed by path; read with a sandboxed python call if the model wants it |
+| `artifacts/*.png` — the charts on this page | listed by path; of no use to a text-only subject |
+| `<benefit>_claims.csv`, `exposure.csv`, `benchmarks/<benefit>.csv` — the raw claims and exposure behind every ratio | listed by path, **not published** in the clone (regenerable; see [What ships](#-what-ships-in-a-clone-and-what-you-regenerate)) |
 
-The chart is the same data: the A/E line with a dashed reference at 1.0. One finding, and it
-is unmissable once you know what to look for:
+That is the whole feed: about 130 numbers plus a file list — roughly **2.7k prompt tokens** bare,
+and about **6.6k** once the evidence pack of section 2 is added. Every finer grain is
+on disk and one tool call away. A full prompt exactly as it was sent, for the complex book below:
+[`results/harness_final/zero_shot/sc-c9d78b_prompt.md`](results/harness_final/zero_shot/sc-c9d78b_prompt.md).
 
-- **Death is deteriorating and has not stopped.** A/E rises in every year from 2018 to 2024,
-  from 0.66 to 1.31 — ending 31 % above expected. The planted truth
-  (`data/truth/manifests/sc-f69eea.json`, published) is a drift of **+0.15 per year over
-  2018–2024**.
-- **Nothing else moved.** Across all ten years CI stays within 0.96–1.05, TPD within
-  0.96–1.04 and IP within 0.98–1.03. A movement confined to one benefit line is not a
-  portfolio-wide event: not a claims-reporting change, a population shift or a macro
-  shock.
-- **So the finding is a line-specific frequency trend** — a pricing and reserving question
-  for the Death book, not a data-quality ticket. "Death A/E rose" is a description; the line,
-  the years, the pattern and the action together are the insight.
+### The simple case: `sc-f69eea` — one line, one movement
 
-Both models get this kind of book. Every harnessed configuration saturates on `drift`,
-`recovery` and `volatility`; the work in this benchmark is not done by the easy books.
+| **Death** | **CI** |
+|---|---|
+| ![Death A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_death_by_year.png) | ![CI A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_ci_by_year.png) |
+| **TPD** | **IP** |
+| ![TPD A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_tpd_by_year.png) | ![IP A/E by year, sc-f69eea](data/eval/optimization/sc-f69eea/artifacts/ae_ip_by_year.png) |
 
-### The complex case: four findings in one book — `sc-c9d78b`
+**The truth, and the only finding in this book:**
 
-`sys_cascade_drift_shock_2018`, held-out split. One book, four planted controls, two benefit
-lines, two different kinds of event:
+- **Death is deteriorating and has not stopped.** A/E climbs in every year from 2018 (0.66) to
+  2024 (1.31), ending 31 % above expected. The published manifest
+  `data/truth/manifests/sc-f69eea.json` says drift of **+0.15/yr on Death, 2018–2024**.
+- **The other three lines are flat** — CI within 0.96–1.05, TPD within 0.96–1.04, IP within
+  0.98–1.03, across all ten years. One line moving while its neighbours do not rules out a
+  portfolio-wide cause: not a claims-reporting change, not a population shift, not a macro shock.
+- **What an actuary does with it.** Treat it as a line-specific frequency trend and refer the
+  Death book to pricing and reserving. "Death A/E rose" is a description; the line, the years,
+  the pattern and the action together are the insight.
 
-| planted control | window | size |
+Both models get books like this one. Every harnessed configuration saturates on `drift`,
+`recovery` and `volatility`, so the interesting results come from the hard books.
+
+### The complex case: `sc-c9d78b` — four findings in one book
+
+`sys_cascade_drift_shock_2018`, held-out split:
+
+| **Death** | **CI** |
+|---|---|
+| ![Death A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_death_by_year.png) | ![CI A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_ci_by_year.png) |
+| **TPD** | **IP** |
+| ![TPD A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_tpd_by_year.png) | ![IP A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_ip_by_year.png) |
+
+**The truth: four planted findings, on two lines, of two different kinds.**
+
+| planted | window | size |
 |---|---|---|
 | Death drift | 2016–2019 | +0.05/yr |
 | IP drift | 2016–2019 | +0.03/yr |
 | Death shock | 2020 | ×1.3 |
 | IP shock | 2020 | ×1.2 |
-| CI and TPD | — | untouched, as controls |
+| CI and TPD | — | untouched, a check on the rest |
 
-Death, the line that carries two of the four findings
-(`data/eval/heldout/sc-c9d78b/artifacts/ae_death_by_year.csv`):
+**Why it is hard.** Only the 2020 Death shock is visible to the eye, at 1.294. The 2016–2019
+Death drift wanders 0.925 → 0.996 → 1.070 → 1.030 and then reverts, and its slope (+0.05/yr) is
+about the size of the year-to-year Poisson noise on that line (±0.045 at these claim counts). IP
+is the same problem one step smaller: +0.03/yr against ±0.026. This is what a marginal experience
+movement looks like, and it is a hard call even holding the answer key.
 
-| Year | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| A/E | 1.027 | 0.925 | 0.996 | 1.070 | 1.030 | **1.294** | 1.009 | 0.892 | 0.912 | 0.969 |
+**What actually happened.** Four units per run, three runs, each model on its own tuned harness —
+and **both finished on exactly 6 of 12**, by different routes
+(`results/harness_final/scores.json`, `results/harness_q36_final/scores.json`):
 
-![Death A/E by year, sc-c9d78b](data/eval/heldout/sc-c9d78b/artifacts/ae_death_by_year.png)
-
-The 2020 shock stands out. The 2016–2019 drift does not: it wanders 0.925 → 0.996 → 1.070 →
-1.030 and then reverts, and the planted slope (+0.05/yr) is about the same size as the
-year-to-year Poisson noise on this line (±0.045 at these claim counts). IP is the same problem
-one step smaller: +0.03/yr against a noise band of ±0.026. This is what a marginal experience
-movement looks like in practice, and it is a hard call even with the answer key in hand.
-
-Here is what actually happened, taken from the scored runs
-(`results/harness_final/scores.json`, `results/harness_q36_final/scores.json`). Four units per
-run, three runs, so 12 units per model, and **both models finished on exactly 6/12**:
-
-| planted finding | reported by |
+| planted finding | reported in |
 |---|---|
 | Death shock 2020 | **6 of 6 runs** — every run of both models |
-| IP drift 2016–19 | 4 of 6 runs, and each time with an over-wide window (2015–2020, 2016–2024) that only counted because it overlaps |
-| IP shock 2020 | 2 of 6 runs |
-| Death drift 2016–19 | **0 of 6 runs.** Three runs said nothing; three pointed at 2022–2024 instead, which is a different movement |
+| IP drift 2016–19 | 4 of 6, each time with a window so wide it only counted because it overlapped |
+| IP shock 2020 | 2 of 6 |
+| Death drift 2016–19 | **0 of 6** — three runs said nothing, three pointed at 2022–2024, which is a different movement |
 
-The half-score is not bad luck, it is one failure repeated: the loud event is always found and
-the quiet one is not, and the models cannot hold both in one answer. Run 3 of Qwen3.8 shows
-the other half of the problem too. It offered five findings and three were false alarms — the
-2022–2024 Death "drift", plus two volatility findings for a post-shock give-back that had
-nothing planted behind it:
+The loud event is always found and the quiet one is not, and neither model holds four findings in
+one answer. Missing is not the only failure: Qwen3.8's run 3 offered five findings, three of them
+false — the 2022–2024 Death "drift", plus two volatility claims covering the post-shock give-back,
+where nothing was planted.
 
-```text
-Death  shock      [2020, 2020]   correct
-Death  drift      [2022, 2024]   wrong window for the real 2016-2019 drift
-Death  volatility [2020, 2024]   not planted — give-back after the peak
-IP     drift      [2015, 2020]   correct, window far too wide
-IP     volatility [2020, 2024]   not planted
-```
-
-Over-claiming and missing are different behaviours, and both appear in the same answer.
-
-The hardest version of this pattern is `sc-73fd27`: three parallel drifts (Death +0.05/yr, CI
-+0.03/yr, IP +0.02/yr), all confined to 2016–2019 and all reverting afterwards, with TPD flat.
+The hardest version of this pattern is `sc-73fd27`: three parallel drifts (+0.05, +0.03 and
++0.02/yr on Death, CI and IP), all confined to 2016–2019 and all reverting afterwards, TPD flat.
 **Both models scored 0 of 9 there**, with 8 and 10 false alarms between them. Books like these,
-not the simple ones, are what the harness tuning in the study below was chasing.
+not the simple ones, are what the harness work below was chasing.
 
 ### What the model has to return
 
