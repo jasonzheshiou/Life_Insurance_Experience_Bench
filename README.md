@@ -235,6 +235,11 @@ it changes the ranking, not because it is a footnote.
 
 ## ✅ Status — what is built, and what a clone contains
 
+<details>
+<summary><strong>Click to expand — the shipped stack, what a clone holds, and one prompt-hash caveat</strong></summary>
+
+
+
 The experiment stack is [`scripts/`](scripts/): the scenario generator driver, the evidence-pack
 harness ([`scripts/stats_pack.py`](scripts/stats_pack.py)), the runner and its sandboxed python
 tool loop ([`scripts/run_zero_shot.py`](scripts/run_zero_shot.py)), the scorer
@@ -259,9 +264,16 @@ integrity gate still passes, because it only re-hashes files that exist. A reduc
 **runs**, and reproduces the published scores. Do not chase a prompt-hash mismatch until you have
 regenerated the full tree.
 
+</details>
+
 ---
 
 ## 🏭 Where the data comes from, and how to generate it yourself
+
+<details>
+<summary><strong>Click to expand — where the data comes from, five steps to regenerate it, adding your own scenario</strong></summary>
+
+
 
 Every scenario is produced by a **separate public project**:
 
@@ -377,9 +389,16 @@ and the preflight. The split-disjointness check will reject a held-out scenario 
 an optimization scenario on benefit × control × window × factor. That check is what keeps the
 exam honest as the catalog grows.
 
+</details>
+
 ---
 
 ## 🧾 What the exam asks of a model
+
+<details>
+<summary><strong>Click to expand — one scenario, one turn, and what each measured axis answers</strong></summary>
+
+
 
 A subject gets one scenario directory of A/E files and one turn. It answers from what it is
 shown, or spends up to four sandboxed python calls recomputing the numbers itself, and
@@ -402,6 +421,8 @@ number:
 | Evidence pack + rules block + pinned prompt, versioned and snapshotted | ✅ **built and used** — two lineages, frozen hashes |
 | Strict scoring (benefit × pattern × window × direction) with FP accounting | ✅ **built and used** — scorer v3 |
 | Frozen-pipeline provenance (hash the exact bytes behind a number) | ✅ **built and used** — `harness_snapshot/` + `MANIFEST.txt` |
+
+</details>
 
 ---
 
@@ -697,11 +718,16 @@ project, which produces every scenario in the benchmark.
 
 ## 📬 Feedback
 
+<details>
+<summary><strong>Click to expand</strong> — how to send a correction and where the decision record lives</summary>
+
 Questions, corrections and "your scorer is wrong about X" are welcome. The record of every
 decision — including the fixes deliberately not applied — is in
 [results/logs/harness_q36_next_steps.md](results/logs/harness_q36_next_steps.md) and
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md), so a disagreement can be argued
 against the evidence instead of against a summary.
+
+</details>
 
 ---
 
