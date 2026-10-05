@@ -84,7 +84,8 @@ it is given in prose below and in the body tables.
 - **The harness did a different job for each model** — about 24 points of precision for 3.8,
   about 6 points of accuracy for 3.6.
 - **Each model does best on the harness tuned for it.** Handing 3.8 the harness built for 3.6
-  cost it 0.9 points and 3.2 points of precision — the harness does not transfer (§3.2).
+  cost it 0.9 accuracy points and 1.2 points of precision — the harness does not transfer
+  (§3.2).
 - **Cost is roughly 3× apart** for the same exam: about 4.8 min and 5.7k completion tokens per
   answer for 3.6, about 13.5 min and 13.8k for 3.8 (§3.8).
 
