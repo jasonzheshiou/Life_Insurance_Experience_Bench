@@ -78,16 +78,15 @@ sent for the complex scenario below:
 
 CI and TPD were left unchanged.
 
-**Why it is hard.** Only the 2020 Death shock is visible to the eye, at 1.294. The 2016–2019
-Death drift wanders 0.925 → 0.996 → 1.070 → 1.030 and then reverts, and its slope (+0.05/yr) is
-about the size of the year-to-year Poisson noise on that line (±0.045 at these claim counts). IP
-is the same problem one step smaller: +0.03/yr against ±0.026. This is what a marginal experience
-movement looks like, and it is a hard call even holding the answer key.
+**Why it is hard.**
 
-The hardest version of this pattern is `sc-73fd27`: three parallel drifts (+0.05, +0.03 and
-+0.02/yr on Death, CI and IP), all confined to 2016–2019 and all reverting afterwards, TPD flat.
-**Both models scored 0 of 9 there**, with 8 and 10 false alarms between them. Scenarios like these,
-not the simple ones, are what the harness work below was chasing.
+- Only the 2020 Death shock is visible to the eye, at 1.294.
+- The 2016–2019 Death drift wanders 0.925 → 0.996 → 1.070 → 1.030 and then reverts, and its slope
+  (+0.05/yr) is about the size of the year-to-year Poisson noise on that line (±0.045 at these
+  claim counts).
+- IP is the same problem one step smaller: +0.03/yr against ±0.026.
+- So three of the four findings sit inside the noise. That is what a marginal experience movement
+  looks like, and it is a hard call even holding the answer key.
 
 ### What the model has to return
 
