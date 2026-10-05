@@ -116,22 +116,21 @@ strict: benefit, pattern, window and direction must all agree.
 
 ## 2 · Two ways to ask a model: the model alone, or the model with a harness
 
-The same book is put to the model in two configurations. Nothing differs between them except
-the harness — same model, same endpoint, same sampler, one turn.
+The same scenario is put to the model two ways. Nothing differs except the harness: same model,
+same endpoint, same sampler, one turn.
 
-**A — the model alone (`--harness off`).** A system prompt giving the role, the A/E
-definition, the pattern taxonomy and the JSON contract; the list of files in the scenario
-folder; and the CSVs on disk. The model reads tables and answers.
+**A — the model alone (`--harness off`).** A system prompt with the role, the A/E definition, the
+pattern taxonomy and the JSON contract; the file list for the scenario; the CSVs on disk. The
+model reads tables and answers.
 
-**B — the model with a harness (`--harness full --tool-calls 4`).** All of A, plus three
-things:
+**B — the model with a harness (`--harness full --tool-calls 4`).** All of A, plus three things:
 
-1. **A computed evidence pack.** Deterministic statistics for every benefit line, generated
-   from the CSVs by [`scripts/stats_pack.py`](scripts/stats_pack.py) before the model is
-   called, and appended to the prompt. A real block, from a published prompt
-   (`results/harness_final/zero_shot/sc-0ce4d6_prompt.md`). The book is a CI volatility case and
-   the pack is what tells drift from scatter — that line moved +0.44 in level in 2022–23 and the
-   pack still calls the line scatter-dominated:
+1. **A computed evidence pack.** Deterministic statistics for every benefit line, built from the
+   CSVs by [`scripts/stats_pack.py`](scripts/stats_pack.py) before the model is called, then
+   appended to the prompt. A real block from a published prompt
+   (`results/harness_final/zero_shot/sc-0ce4d6_prompt.md`). The scenario is a CI volatility case:
+   the line moved +0.44 in level over 2022–23 and the pack still calls it scatter-dominated, which
+   is the distinction the model needs to get right:
 
    ```text
    [CI] mean A/E 0.975 | evidence profile: scatter-dominant: the largest single-year move
@@ -144,17 +143,16 @@ things:
      yearly: 2021:0.88(z-4.4) 2022:1.41(z+16.2) 2023:1.24(z+9.8) 2024:0.89(z-4.7)
    ```
 
-   Plus a reading guide that says what does *not* count: mild overdispersion is the normal
-   texture of these books, and tiny age or duration cells are unreliable however extreme
-   their A/E looks.
-2. **Discipline rules.** Where the taxonomy gets explicit — for example, that a trend which
+   The pack comes with a reading guide that says what does *not* count: mild overdispersion is the
+   normal texture of these scenarios, and tiny age or duration cells are unreliable however
+   extreme their A/E looks.
+2. **Discipline rules.** The explicit parts of the taxonomy — for example, that a trend which
    reverts at the end is still drift, and that a one-year spike inside a swinging line is
    volatility rather than drift.
-3. **Up to four sandboxed python calls.** "You are not limited to eyeballing the tables":
-   the model can run its own calculations over the `artifacts/` folder. Execution is
-   `python -I -c`, 10 s timeout, 4 000-char output, working directory set to the book. That
-   is a guardrail, **not a jail**: there is no network block and no filesystem confinement,
-   so treat it as advisory (see **Sandbox** below).
+3. **Up to four sandboxed python calls.** The model can run its own calculations over the
+   `artifacts/` folder. Execution is `python -I -c`, 10 s timeout, 4 000-char output, working
+   directory set to the scenario folder. That is a guardrail, **not a jail**: there is no network
+   block and no filesystem confinement, so treat it as advisory (see **Sandbox** below).
 
 ```bash
 python3 scripts/stats_pack.py data/eval/optimization/sc-f69eea --text      # just the pack
@@ -163,18 +161,17 @@ python3 scripts/run_zero_shot.py --scenarios sc-f69eea --harness full --tool-cal
 python3 scripts/score_xam.py results/<corpus>/zero_shot                    # score either
 ```
 
-Both configurations are run over the same books on purpose: **B − A is the measured value of
-the harness**, which is the number this repo exists to publish. Every run records the full
-prompt it was given, and every corpus snapshots the harness code and prompt bytes that
-produced it (`results/<corpus>/harness_snapshot/`), so a comparison can be audited instead
-of trusted.
+Both configurations run over the same scenarios on purpose: **B − A is the measured value of the
+harness**, which is the number this repo exists to publish. Every run records the full prompt it
+was given, and every corpus snapshots the harness code and prompt bytes that produced it
+(`results/<corpus>/harness_snapshot/`), so a comparison can be checked instead of trusted.
 
 ---
 
 ## 3 · How the answers are measured: accuracy, false alarms, precision, tokens, time
 
-A **unit** is one planted control in one run. A control planted across a whole book counts
-as four units, one per benefit line. A unit is a **hit** only if benefit, pattern, window and
+A **unit** is one planted control in one run. A control planted across a whole scenario counts as
+four units, one per benefit line. A unit is a **hit** only if benefit, pattern, window and
 direction all agree with the manifest. A **claim that counts** is a finding that was either a
 hit or a false alarm; duplicate findings are ignored both ways.
 
@@ -186,15 +183,15 @@ hit or a false alarm; duplicate findings are ignored both ways.
 | **tokens** | prompt + completion, from the API `usage` field | what one answer consumes |
 | **wall time** | per run, request sent to answer complete | what one answer costs in time |
 
-Accuracy and FP/claim have different denominators. Within the units ledger, accuracy +
-miss-rate = 100 %. Within the findings ledger, precision + FP/claim = 100 %. Reporting only
-one of them hides half of what happens, and the two subjects fail in opposite directions.
+Accuracy and FP/claim have different denominators. In the units ledger, accuracy + miss-rate =
+100 %. In the findings ledger, precision + FP/claim = 100 %. Reporting only one of them hides half
+of what happens, and the two subjects fail in opposite directions.
 
 ### Worked example: 3.8 with its own harness
 
-Held-out split, 23 books × 3 runs, `sc-e6ffa4` excluded from every cell (it never completed
-under one configuration; see INDEX §8). Numbers from
-`results/harness_final/scores.json` and the per-run records:
+Held-out split, 23 scenarios × 3 runs. `sc-e6ffa4` is excluded from every cell (it never completed
+under one configuration; see INDEX §8). Numbers from `results/harness_final/scores.json` and the
+per-run records:
 
 | step | value |
 |---|---|
@@ -212,9 +209,9 @@ The same ledger for Qwen3.6 with its own harness (`results/harness_q36_final/`):
 false alarms, 119 claims → **accuracy 65.8 %, FP/claim 38.7 %, precision 61.3 %**, median
 6 603 + 5 779 tokens, 289 s ≈ 4 min 49 s per answer.
 
-Read the two together and the point appears. 3.6 finds less but is more trustworthy when it
-speaks; 3.8 finds more and talks far too much. Accuracy alone ranks 3.8 first; precision
-reverses that.
+The two models fail in opposite directions. 3.6 finds less but is more trustworthy when it speaks;
+3.8 finds more and claims more than it should. Accuracy alone ranks 3.8 first; precision reverses
+that.
 
 ### Cost, next to the score
 
@@ -225,14 +222,13 @@ One 72-call held-out exam, measured over the whole published corpora including r
 | 3.6 + its own harness | 0.89 M | 5.9 h | 65.8 % | 61.3 % |
 | 3.8 + its own harness | 1.95 M | 21.9 h | 71.2 % | 58.1 % |
 
-Accuracy and precision are the 23-book cells from above. The token and wall-clock totals are
-every call actually made in those two corpora, all 72 of them, retries included — which is
-why 21.9 h is more than the median per answer multiplied out.
+Those token and wall-clock totals are every call actually made in those two corpora, all 72 of
+them, retries included — which is why 21.9 h is more than the median per answer multiplied out.
 
 At the median per answer rather than the corpus total the same comparison is about **6 hours
-versus about 16 hours** — 3.6 reaching roughly 93 % of 3.8's accuracy for about a third of
-the time and tokens, at better precision. Cost is reported beside accuracy everywhere in
-this repo because it changes the ranking, not because it is a footnote.
+versus about 16 hours**: 3.6 reaching roughly 93 % of 3.8's accuracy for about a third of the time
+and tokens, at better precision. Cost is reported beside accuracy everywhere in this repo because
+it changes the ranking, not because it is a footnote.
 
 ---
 
