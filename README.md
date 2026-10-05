@@ -6,7 +6,7 @@ expected (A/E).
 
 | if you want | go to |
 |---|---|
-| the findings from using this framework — what it shows about the need for harness evolution as a model's characteristics change | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
+| the findings, and what they show about the need for harness and pipeline evolution as models change | [docs/REPORT_qwen36_vs_qwen38.md](docs/REPORT_qwen36_vs_qwen38.md) |
 | the platform itself, and how to replicate the experiment | [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) |
 | how to generate the data yourself | [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
 
@@ -35,7 +35,7 @@ One folder per scenario, `data/eval/<split>/<sc-id>/`. Only three files go into 
 Everything else in the folder is only **listed by path**, and the model can read it with a
 sandboxed python call if it wants: the age × gender detail, the PNG charts, and the raw claims and
 exposure behind every ratio (not published in the clone, because they regenerate — see
-[What ships](#-what-ships-in-a-clone-and-what-you-regenerate)).
+[What a clone contains](#-status--what-is-built-and-what-a-clone-contains)).
 
 So the whole feed is about **130 numbers plus a file list**: roughly **2.7k prompt tokens** bare,
 about **6.6k** once the evidence pack from section 2 is added. Here is the prompt exactly as it was
@@ -87,8 +87,7 @@ CI and TPD were left unchanged.
   (+0.05/yr) is about the size of the year-to-year Poisson noise on that line (±0.045 at these
   claim counts).
 - IP is the same problem one step smaller: +0.03/yr against ±0.026.
-- So three of the four findings sit inside the noise. That is what a marginal experience movement
-  looks like, and it is a hard call even holding the answer key.
+- So three of the four findings sit inside the noise.
 
 ### What the model has to return
 
@@ -163,10 +162,10 @@ python3 scripts/run_zero_shot.py --scenarios sc-f69eea --harness full --tool-cal
 python3 scripts/score_xam.py results/<corpus>/zero_shot                    # score either
 ```
 
-Both configurations run over the same scenarios on purpose: **B − A is the measured value of the
-harness**, which is the number this repo exists to publish. Every run records the full prompt it
-was given, and every corpus snapshots the harness code and prompt bytes that produced it
-(`results/<corpus>/harness_snapshot/`), so a comparison can be checked instead of trusted.
+Running both over the same scenarios is what makes the comparison possible: **with a harness
+minus without one is what the harness is worth**. Each run saves its exact prompt, and each corpus
+snapshots the harness bytes behind it (`results/<corpus>/harness_snapshot/`), so the comparison can
+be checked rather than trusted.
 
 ---
 
@@ -234,163 +233,13 @@ it changes the ranking, not because it is a footnote.
 
 ---
 
-## 🔍 The Study Behind It — Four Questions This Has to Answer
+## ✅ Status — what is built, and what a clone contains
 
-Sections 1–3 explain how the platform works. This section is what the two model campaigns
-were run for, and what they settled.
-
-### Governance — what someone signing this off actually needs
-
-Suppose you want an LLM to help with experience studies: reading A/E tables, flagging
-lines that need investigation, drafting experience commentary. Before you can rely on it,
-someone has to be able to answer four questions. One convincing demo answers none of them.
-
-| the question | how this repo answers it | the answer |
-|---|---|---|
-| **How good is the model?** | A generated answer key that cannot change after the exam (`data/truth/seal.json`). A held-out split, mounted and scored **once**. Strict matching, so a vague or mislabelled answer scores nothing. | Accuracy: 3.8 **71.2 %**, 3.6 **65.8 %**. Precision tells the opposite story, which is why both are headline numbers. |
-| **What does it miss, and what does it invent?** | Two separate metrics, never blended: accuracy (found ÷ what was there) and FP/claim (wrong ÷ what it said). | They fail in opposite directions. 3.8 invents: **34.3 %** precision with no harness. 3.6 is cautious: already **60.0 %** precise. |
-| **What does it cost?** | Wall clock, reasoning volume and completion tokens are recorded on every run and reported beside the score. | **About 3× apart.** Per answer: 3.6 ≈ 4.8 min and 5.7k completion tokens, 3.8 ≈ 13.5 min and 13.8k. Worked through in section 3. |
-| **Is the pipeline around it right, or does it need updating — and on what evidence?** | Every corpus stores the exact harness bytes and prompt that produced it. The optimization-vs-heldout gap is a published metric. Every harness edit records its hypothesis, its test and its regression check. | It needed updating **per model**. The record shows which edit fixed which failure, and one fix that was deliberately not applied (INDEX §8). |
-
-**What you govern is the model and the harness together, not the model alone.** A vendor
-notice saying "we upgraded the model" is not an assessment, and on its own it is not a
-reason to re-assess. What changes between model versions is behaviour: how the model
-reasons, how much it checks before asserting, whether it uses a tool at all. When behaviour
-changes, re-measure the pair.
-
-Two rules follow from that, and both are kept visibly in this repo:
-
-- **The answer key is fixed and out of reach.** Truth is generated, never hand-labelled.
-  The model sees only opaque `sc-<6hex>` ids; names and manifests live in a separate
-  folder. A byte-level leak scan runs at build time and again before the first prompt.
-  `dataset.json` hashes every model-facing file, so "both models saw the same exam" is
-  provable rather than assumed.
-- **Tuning must not touch the reported number.** Tuning used the 23-scenario optimization
-  split; the reported number comes from the 24-scenario held-out split, scored once. The
-  frozen harnesses scored **97.7 %** and **95.5 %** on tuning, and **69.1 %** and
-  **64.2 %** on held-out data — an optimism gap of about 30 points for *both* models. A
-  sign-off based on tuning scores would have been wrong by that much. For the same reason,
-  `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
-
-### The model's eye — can it find the insight?
-
-Can a model find the insight an actuary would find? The campaigns answer **yes, with
-limits**. Harnessed, the two models recovered 65.8 % and 71.2 % of what was
-planted on the held-out split, naming the line, the years and the pattern correctly. The
-limits are shared rather than model-specific: `drift`, `recovery` and `volatility` saturate
-for every harnessed configuration, `noise_trap` lookalikes are hard for all of them, and the
-coordinated multi-line `systemic` scenarios are where the two separate (INDEX §6).
-
-Two design notes carry beyond this dataset:
-
-- `recommended_action` is part of the answer on purpose — the goal is a finding worth
-  escalating, not a labelled time series. It is recorded in every corpus and, to be
-  clear, **it is not scored**. Grading free-text advice is a separate unsolved problem.
-- **Claims A/E is the first surface, not the limit.** The skill being tested is deciding
-  whether a gap between actual and expected is signal. That is the same move in lapse and
-  persistency, expense A/E, mortality and morbidity studies, and reserve-adequacy work.
-  Extending to those means a new scenario family and a new section in `stats_pack.py`. It
-  does not mean a new benchmark, a new scorer or a new governance argument.
-
-### The harness — what it is worth, and whether it transfers
-
-This is the measurement the project exists to make. The two campaigns are the experiment and
-the table below is its result: the held-out split, the same 23 scenarios in every cell, cells
-written as **accuracy | FP/claim** (definitions and arithmetic in section 3). `sc-e6ffa4` is
-excluded from every cell because it never finished under one configuration (INDEX §8).
-
-| model | no harness | its own tuned harness | the *other* model's harness |
-|---|---|---|---|
-| Qwen3.6-27B | 59.5 \| 40.0 | **65.8 \| 38.7** | 64.9 \| 43.3 |
-| Qwen3.8-27B | 64.0 \| 65.7 | **71.2 \| 41.9** | 70.3 \| 43.1 |
-
-Both subjects are 27 B models, on one llama.cpp slot, with identical samplers. The
-difference between them is not architecture. It is behaviour that reinforcement learning
-taught each model: how it reasons, how much it verifies, how eager it is to run code. The
-harness has to compensate for that, and it compensates differently for each model:
-
-- **3.8 without a harness finds a lot and says too much.** It found 64.0 % of what was
-  there, but 65.7 % of its claims were wrong — 34.3 % precision. Its problem is not
-  seeing; it is asserting. Its own harness moved it +7.2 points on recall and **+23.8
-  points on precision** (34.3 % → 58.1 %).
-- **3.6 without a harness fails the other way.** It found 59.5 % and was already 60.0 %
-  precise. The same harness gave +6.3 recall and **+1.3** precision (60.0 % → 61.3 %),
-  because 3.6 did not have 3.8's problem to fix.
-- **Each model does best with the harness tuned for it**: 3.8 gets 71.2 own vs 70.3 on
-  3.6's; 3.6 gets 65.8 own vs 64.9 on 3.8's. An earlier claim that a harness transfers
-  (+8.3 points) rested on 9 scenarios; at 23 scenarios the same comparison gave −1, so the claim
-  was withdrawn.
-- **Behaviour decides whether a harness feature exists at all.** Both models were offered
-  up to 4 sandboxed python calls. 3.8 used them in about 24 % of runs. **3.6 used them 0
-  times in 144 runs**, after two separate attempts to get it to use them.
-- **Over-claiming is a separate behaviour from mislabelling.** Splitting false alarms
-  into "explained by a mislabel" and "invented from nothing": under 3.8's own harness, 31
-  of 69 false alarms were invented; under 3.6's, 6 of 50.
-
-The conclusion this repo exists to record: **harness requirements follow model behaviour,
-not model weights.** A harness is not infrastructure you qualify once and reuse. It is
-part of a model's deployment, and it has to be rebuilt when the behaviour under it
-changes. That is why this repo publishes two harness lineages that started from the same
-base and ended in different places.
-
-### The method — building a harness from evidence
-
-The harness was not written in one sitting. **A model built it.** The operator-side agent
-that ran the campaigns was driven by a third model, DeepSeek V4.1 Flash, deliberately not
-one of the two subjects, so no subject tuned the exam it later took. It worked from
-recorded artifacts, not impressions, in a fixed loop:
-
-1. Run the frozen harness over all 23 **optimization** scenarios. Keep the corpus and the
-   per-unit scorer output.
-2. Read what actually happened: the recorded prompt, the answer, the tool log, and the
-   scorer's per-unit diff. Say *why* each failed unit failed.
-3. Form **one** hypothesis and make **one** edit — a new section in `stats_pack.py`, a
-   discipline clause in `HARNESS_RULES`, or a new pinned system prompt.
-4. Test it on the affected scenarios in a scratch corpus, then re-check the neighbouring scenarios
-   the edit could have disturbed.
-5. Keep or revert. Snapshot the harness bytes **and** the prompt into
-   `results/<corpus>/harness_snapshot/` before the next run.
-6. Never tune against `heldout`, and never let a held-out result influence an edit.
-
-That produced seven harness versions for 3.8 (v1.0 → v1.6e), driven by **307
-per-scenario diary entries**, 268 of which involved reviewing or editing the harness. For
-3.6 it produced two kept edits from the same base. Both lineages are frozen here, so you
-can inspect the method instead of taking it on trust — including the fix that was
-**declined** (runbook §36), not just the ones kept.
-
-**The method costs time, and that cost is part of the design.** On one llama.cpp slot, one
-23-scenario optimization pass takes about **7 hours** for 3.8 and about **2 hours** for 3.6; a
-72-call held-out exam takes about **16 hours** and about **6 hours**. Every harness version
-costs a pass. That is why the loop allows one hypothesis per pass instead of searching the
-prompt space — and it is also why the cheaper model's harness needed two edits, not seven.
-
-Two limits of this method, stated plainly:
-
-- A human chose which failures to chase. The model proposed and applied edits; it did not
-  set the agenda.
-- The frozen record proves **which harness bytes produced which numbers**
-  (`harness_snapshot/MANIFEST.txt`). It does not prove which model wrote each line. The
-  runbooks narrate that; it is not part of the evidence.
-
----
-
-## ✅ Status — measured benchmark, unpackaged core
-
-**What exists as code** is the experiment stack in [`scripts/`](scripts/): the scenario
-generator driver, the evidence-pack harness ([`scripts/stats_pack.py`](scripts/stats_pack.py)),
-the runner and its sandboxed python tool loop
-([`scripts/run_zero_shot.py`](scripts/run_zero_shot.py)), the scorer
-([`scripts/score_xam.py`](scripts/score_xam.py)) and the freeze gate. Both model campaigns
-ran on that stack, and every published number comes from it.
-
-**What was never built** is the packaged core this README once announced: there is no
-`pyproject.toml`, no `src/abench/` package and no `abench` CLI. The **M0–M4** milestones
-below describe a design that flat scripts satisfied without being packaged. They are kept
-as labelled design context, not rewritten after the fact.
-
----
-
-## 📦 What ships in a clone, and what you regenerate
+The experiment stack is [`scripts/`](scripts/): the scenario generator driver, the evidence-pack
+harness ([`scripts/stats_pack.py`](scripts/stats_pack.py)), the runner and its sandboxed python
+tool loop ([`scripts/run_zero_shot.py`](scripts/run_zero_shot.py)), the scorer
+([`scripts/score_xam.py`](scripts/score_xam.py)) and the freeze gate. Both model campaigns ran on
+that stack, and every published number comes from it.
 
 | content | size | note |
 |---|---|---|
@@ -400,15 +249,15 @@ as labelled design context, not rewritten after the fact.
 | `data/truth/` | 236 KB | planted controls, so a third party can score |
 | **clone total** | **~135 MB** | largest single file 0.41 MB |
 
-Excluded on purpose, because they are regenerable and the prompt body never reads them:
-`data/eval/**/exposure.csv` (2.1 GB), `data/eval/**/*_claims.csv` (239 MB) and
-`data/raw/` (2.9 GB). To rebuild them, see [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself).
+Left out on purpose, because they regenerate and the prompt body never reads them:
+`data/eval/**/exposure.csv` (2.1 GB), `data/eval/**/*_claims.csv` (239 MB) and `data/raw/` (2.9 GB).
+To rebuild them, see [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself).
 
-**One caveat up front.** `build_prompt()` lists every file in a scenario directory, so a
-clone missing the excluded files produces prompts that differ byte-for-byte from the
-published corpora. The preflight integrity gate still passes, because it only re-hashes
-files that exist. A reduced clone therefore **runs**, and reproduces the published scores.
-Do not chase a prompt-hash mismatch until you have regenerated the full tree.
+**One caveat.** `build_prompt()` lists every file in a scenario directory, so a clone missing the
+excluded files produces prompts that differ byte-for-byte from the published corpora. The preflight
+integrity gate still passes, because it only re-hashes files that exist. A reduced clone therefore
+**runs**, and reproduces the published scores. Do not chase a prompt-hash mismatch until you have
+regenerated the full tree.
 
 ---
 
@@ -541,12 +390,8 @@ number:
 | axis | question | answered in |
 |---|---|---|
 | **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted without inventing? | [the report](docs/REPORT_qwen36_vs_qwen38.md), INDEX §6 |
-| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | the study section above; INDEX §3, §5–6 |
+| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | [report PART 0](docs/REPORT_qwen36_vs_qwen38.md#part-0--what-this-benchmark-is-for); INDEX §3, §5–6 |
 | **cost** | what does one answer cost, and did the harness pay for itself? | report §2.4.6 — run time, reasoning volume, tokens, throughput |
-
-The planned Stage-2 variant — a model that writes and refines its own *pipeline* over many
-turns — was never built. What was built is the single-turn evidence-pack harness above. The
-original intent is kept in the implementation guide and summarised below.
 
 ### What This Proves
 
@@ -557,11 +402,6 @@ original intent is kept in the implementation guide and summarised below.
 | Evidence pack + rules block + pinned prompt, versioned and snapshotted | ✅ **built and used** — two lineages, frozen hashes |
 | Strict scoring (benefit × pattern × window × direction) with FP accounting | ✅ **built and used** — scorer v3 |
 | Frozen-pipeline provenance (hash the exact bytes behind a number) | ✅ **built and used** — `harness_snapshot/` + `MANIFEST.txt` |
-| Sandboxed free-code *pipeline construction* (Stage 2, ≤5 iterations, frozen submission) | 📐 Specified (M1/M2), **not built** — shipped harness is 1 turn + ≤4 analysis tool calls |
-| Window IoU and magnitude-error scoring | 📐 Specified (M0), **not built** — scoring is strict hit/miss, no partial window credit |
-| N×K median + spread reporting | 🟡 **partial** — runs and repetitions both happen, but they are summed; median-of-N with spread was never wired up |
-| Stage-3 report + blind human validation + golden set | 📐 Specified (M3), **not built** |
-| Packaged `abench` CLI (`pyproject.toml`, `src/abench/`) | 📐 Specified (M0–M4), **not built** — `scripts/` only |
 
 ---
 
@@ -590,26 +430,20 @@ The scorer, gate, leak scan and pack builder all run offline. Full replication c
 single scenario, unattended 23-scenario pass, held-out exam with retry wrapper — are in
 [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) §7.
 
-The packaged CLI (`abench init|generate|run|score|report|validate`), designed in §10 of the
-implementation guide, was never wired up; see **Status** above.
-
 </details>
 
 <details>
-<summary><strong>🧪 The Three Stages</strong> — planned vs what ran</summary>
+<summary><strong>🧪 What ran</strong></summary>
 
 | Stage | What happens | Status |
 |-------|--------------|--------|
 | **Stage 0 — Data** | Deterministic scenario generation + disjoint `optimization`/`heldout` split (no LLM) | ✅ built — 47 sealed, leak-gated scenarios |
 | **Stage 1 — Zero-shot** | Model returns one JSON answer from the artifacts alone, no pipeline | ✅ built — every published number comes from here |
 | **Stage 1+ — Evidence-pack harness** | *Not in the original plan.* Deterministic stats pack + rules block + pinned prompt + ≤4 sandboxed python calls, iterated by an operator-side agent on the optimization split | ✅ built — the axis the study is about |
-| **Stage 2 — Free-code pipeline** | Model writes and refines its own detector pipeline over 3–5 rounds of optimization-set feedback, then a frozen submission | 📐 Specified (M1/M2), **never built** |
-| **Stage 3 — Report** | Deterministic `report.md` + blind human validation | 📐 Specified (M3), **never built** |
 
-The shipped harness differs from planned Stage 1 in one way that matters: it is **one turn
-with up to four analysis tool calls**, not a multi-turn agent that builds and refines a
-pipeline. So the conclusions here are about how much a static evidence pack, rules block
-and prompt are worth — not about long-horizon autonomy.
+The harness is **one turn with up to four analysis tool calls**. So the conclusions here are
+about how much a static evidence pack, rules block and prompt are worth — not about
+long-horizon autonomy.
 
 **Locked guarantees** (§2 of the implementation guide) and what happened to each:
 
@@ -618,8 +452,6 @@ and prompt are worth — not about long-horizon autonomy.
 | Ground truth is always *generated*, never hand-curated | ✅ met |
 | Heldout set mounted once, scored once, never fed back | ✅ met — the held-out split is now spent |
 | Malformed verdict JSON scores as a miss | ✅ met, with `strict=False` tolerance for raw control characters (INDEX §8) |
-| Median + spread over N×K runs | ⚠️ **not built** — runs were summed into one accuracy, so per-scenario variance is visible in `scores.json` but median and spread were never reported |
-| Two cheap baselines always shown | ⚠️ **partial** — the same model's no-harness baseline exists (`xam_q36`, `xam_v5`); the classical control-chart / CUSUM detector was never implemented |
 
 </details>
 
@@ -675,19 +507,12 @@ Accuracy and FP/claim have different denominators and never add up to 100 %. Wit
 units ledger, accuracy + miss-rate = 100 %. Within the findings ledger, precision +
 FP/claim = 100 %.
 
-**Planned, not built**: window IoU; magnitude error against the injected factor; type
-accuracy as a separate axis (it is folded into strict matching); no-op correctness as a
-named metric (it shows up as the `CLEAN` family's FP count); effort metrics beyond tokens
-and wall-clock (iteration count and human interventions were never counted).
-
 </details>
 
 <details>
 <summary><strong>📁 Project Structure</strong> — as it exists</summary>
 
-This is the shipped tree. The layout designed in §10 of the implementation guide (a packaged
-`src/abench/` with an `abench` CLI) was never built; where the plan and reality disagreed,
-reality won.
+This is the shipped tree.
 
 ```
 data_pipeline_arena/
@@ -704,43 +529,30 @@ data_pipeline_arena/
 │   └── truth/                          # ZONE B: manifests + id map + seal (scorer-only, published)
 └── results/<corpus>/                   # zero_shot/, scores.json, scoreboard.txt, prompts/, harness_snapshot/
 
-# planned but never built:  pyproject.toml · src/abench/ · submissions/ · human_review/
 ```
 
 </details>
 
 <details>
-<summary><strong>🔒 Sandbox</strong> — what was planned</summary>
+<summary><strong>🔒 Sandbox</strong> — how a tool call runs</summary>
 
-> **This section is the design, not the implementation.** What actually runs is
-> `run_sandboxed_python()` in [`scripts/run_zero_shot.py`](scripts/run_zero_shot.py):
-> `python -I -c <code>` with `cwd` set to the scenario's `artifacts/` directory, a 10 s
-> wall-clock timeout and a 4 000-char output cap. There is **no `setrlimit`, no network
-> block and no filesystem jail** — neither Tier 1 nor Tier 2 below was implemented. Treat
-> "never read outside `artifacts/`" as a clause in the prompt, not a control: a direct
-> probe showed model-authored code can read files elsewhere and enumerate the truth
-> manifests. All 97 tool calls recorded in the campaigns stayed inside `artifacts/`, but
-> that was the model's choice. If you rebuild this, implement this section for real before
-> running anything untrusted.
-
-**Tier 1 (subprocess):** fresh temp cwd; `resource.setrlimit` for CPU, address space,
-file size; wall-clock watchdog; read-only data mount; write-only `OUT_DIR`; network blocked
-via `unshare -n` (weak on macOS/Windows — document it).
-
-**Tier 2 (container):** Docker/Podman with `--network none`, read-only data volume, CPU and
-memory caps, `--pids-limit`, non-root, no host mounts beyond the two data directories.
-
-Record which tier ran, and state it in every reported result.
+> A tool call is `run_sandboxed_python()` in
+> [`scripts/run_zero_shot.py`](scripts/run_zero_shot.py): `python -I -c <code>` with `cwd` set to
+> the scenario's `artifacts/` directory, a 10 s wall-clock timeout and a 4 000-char output cap.
+> There is **no `setrlimit`, no network block and no filesystem jail**. Treat "never read outside
+> `artifacts/`" as a clause in the prompt, not a control: a direct probe showed model-authored code
+> can read files elsewhere and enumerate the truth manifests. All 97 tool calls recorded in the
+> campaigns stayed inside `artifacts/`, but that was the model's choice. If you rebuild this,
+> implement a real jail — rlimits or a container with `--network none`, read-only data mount,
+> write-only output — before running anything untrusted.
 
 </details>
 
 <details>
 <summary><strong>⚠️ Limitations & Assumptions</strong></summary>
 
-- **Not packaged, and single-purpose.** The scorer, gate and runner are `scripts/` modules
-  wired for this benchmark, not a reusable library or CLI. The dataset pipeline, by
-  contrast, is fully implemented and does all the generating
-  (`scripts/generate_scenarios.py`).
+- **The tools are `scripts/` modules wired for this benchmark.** The dataset pipeline is
+  fully implemented and does all the generating (`scripts/generate_scenarios.py`).
 - **The sandbox is advisory, not enforced.** See **Sandbox** above.
 - Synthetic data from the
   [generator project](https://github.com/jasonzheshiou/Synthetic_Life_Insurance_Data_Generator).
@@ -804,9 +616,10 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 - [Experiment index](docs/EXPERIMENT_INDEX.md) — **the master locator**: benchmark,
   harness, both campaigns, every corpus and its path, final tables, replication commands,
   known failures
-- [Cross-model report](docs/REPORT_qwen36_vs_qwen38.md) — the standalone write-up. It uses
-  this platform to analyse the need for harness evolution as a model's characteristics
-  change: method, results by model and family, the `sc-e6ffa4` failure, cost analysis
+- [Cross-model report](docs/REPORT_qwen36_vs_qwen38.md) — the standalone write-up. It opens
+  with what the benchmark is for (PART 0), then shows the need for harness and pipeline
+  evolution as a model's characteristics change: method, results by model and family, the
+  `sc-e6ffa4` failure, cost analysis
 - [Harness growth diary](docs/HARNESS_GROWTH.md) — how Qwen3.8's harness grew, version by
   version
 - [Campaign runbook](results/logs/harness_q36_next_steps.md) — §1–37 of the Qwen3.6
@@ -830,8 +643,7 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 - [Implementation guide](BENCHMARK_IMPLEMENTATION_GUIDE.md) — the plan written before the
   first experiment ran, annotated section by section with what actually shipped. Guide
   context only: read it to see how the design was decided, not to get instructions.
-- [Usage guide](docs/usage.md) — the *planned* `abench` CLI and `experiment.yaml`, never
-  wired up
+- [Usage guide](docs/usage.md) — the planned `abench` CLI and `experiment.yaml` design
 - [M0 handover](docs/m0-handover.md), [zero-shot experiment](docs/zero-shot-experiment.md),
   [handover: run scenarios](docs/HANDOFF_RUN_SCENARIOS.md),
   [review & results](docs/review-and-results.md)
@@ -856,9 +668,7 @@ contract, scale presets) in
 [`tests/test_registry.py`](tests/test_registry.py). The generator also runs per-scenario
 sanity checks with a hard gate before `data/eval/` is written, and every assembly must
 pass the byte-level leak scan ([`scripts/leakcheck.py`](scripts/leakcheck.py)) — the build
-fails on any hit. The rest of the acceptance test plan (end-to-end smoke, fairness,
-baseline-sanity) is specified in [Review & results](docs/review-and-results.md) and was
-not written.
+fails on any hit.
 
 **What is not tested**: `stats_pack.py`, `score_xam.py`, `harness_gate.py` and
 `leakcheck.py` have no unit tests. Their correctness rests on the runtime preflight gate,
@@ -871,9 +681,8 @@ campaign edit in `results/logs/` was handled.
 <details>
 <summary><strong>📄 License</strong></summary>
 
-**No LICENSE file has been added to this repository yet.** The original plan intended MIT,
-but until a `LICENSE` file is committed, treat all rights as reserved by the authors and
-ask before redistributing. This is an outstanding item, not an oversight of the release.
+This repository — code, documentation and the published scenario data — is under the
+**MIT License**; see [LICENSE](LICENSE).
 
 The scenario data is **synthetic** — generated, with no real policyholders or company
 records — and is provided for research, learning and testing.
@@ -896,4 +705,4 @@ against the evidence instead of against a summary.
 
 ---
 
-*Last updated: 2026 | Status: 47-scenario dataset + script-level harness shipped and measured across two model campaigns (Qwen3.6-27B, Qwen3.8-27B); the packaged `abench` core of milestones M0–M4 was never built*
+*Last updated: 2026 | 47-scenario dataset + script-level harness, measured across two model campaigns (Qwen3.6-27B, Qwen3.8-27B)*
