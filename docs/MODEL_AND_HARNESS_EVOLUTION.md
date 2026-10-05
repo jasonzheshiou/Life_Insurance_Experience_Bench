@@ -1,17 +1,6 @@
 # Model and Harness Evolution
 ## Two Qwen 27B models and the harnesses around them, measured on synthetic life-insurance A/E data
 
-- **Platform:** [Life Insurance Experience Bench](../README.md) — generated A/E scenarios with a
-  planted answer key.
-- **Scope:** held-out split, 24 scenarios, 3 runs each, single-slot inference.
-- **Status:** complete except one recorded failure (`sc-e6ffa4` — see §3.11).
-
----
-
----
-
----
-
 ---
 
 # 1 · Executive summary
@@ -44,10 +33,9 @@ off, four questions have to be answered, and one convincing demo answers none of
 - **Is the pipeline around the model right, or does it need updating — and on what
   evidence?** Who says the wrapper is still fit for purpose, and what would convince them.
 
-**What you govern is the model and the harness together, not the model alone.** A vendor
-notice saying "we upgraded the model" is not an assessment, and on its own it is not a
-reason to re-assess. What changes between model versions is behaviour: how the model
-reasons, how much it checks before asserting, whether it uses a tool at all. When behaviour
+**What you govern is the model and the harness together.** A notice saying "we upgraded the
+model" is not an assessment. What changes between versions is behaviour — how the model
+reasons, how much it checks before asserting, whether it uses a tool — so when behaviour
 changes, re-measure the pair.
 
 ## 1.3 Methodology
@@ -76,13 +64,16 @@ together. Full definitions, formulas and worked arithmetic: §2.7.
 ## 1.4 Headline results
 
 All figures are on the **same 23 scenarios**, three runs each, so every row is
-like-for-like. The headline is the deployed configuration — each model on the harness tuned
-for it — and the no-harness rows are what the harness was measured against.
+like-for-like. The top two rows are the deployed configuration — each model on the harness
+tuned for it. The cross-loaded rows show what the other model's harness buys, and the last
+two are the unharnessed baseline.
 
 | configuration | accuracy | FP/claim | precision |
 |---|---|---|---|
 | **Qwen3.8-27B + its own harness** | **71.2 %** | 41.9 % | 58.1 % |
 | **Qwen3.6-27B + its own harness** | 65.8 % | **38.7 %** | **61.3 %** |
+| Qwen3.8-27B + Qwen3.6's harness | 70.3 % | 43.1 % | 56.9 % |
+| Qwen3.6-27B + Qwen3.8's harness | 64.9 % | 43.3 % | 56.7 % |
 | Qwen3.8-27B, no harness | 64.0 % | 65.7 % | 34.3 % |
 | Qwen3.6-27B, no harness | 59.5 % | 40.0 % | 60.0 % |
 
@@ -93,38 +84,29 @@ for it — and the no-harness rows are what the harness was measured against.
 - **The harness did a different job for each model** — about 24 points of precision for 3.8,
   about 6 points of accuracy for 3.6.
 - **Each model does best on the harness tuned for it.** Handing one model the other's harness
-  lost ground rather than gaining it (§3.2).
+  cost both of them 0.9 points — the harness does not transfer (§3.2).
 - **Cost is roughly 3× apart** for the same exam: about 4.8 min and 5.7k completion tokens per
   answer for 3.6, about 13.5 min and 13.8k for 3.8 (§3.8).
 
 ## 1.5 Conclusions
 
-1. **A harness is part of the model's deployment, not neutral infrastructure.** Everything a
-   harness compensates for — how eagerly the model asserts, how much it verifies, whether it
-   reaches for a tool — is behaviour. Behaviour moves when a model is retrained even when the
+1. **A harness is part of the model's deployment, not neutral infrastructure.** What it
+   compensates for — how eagerly the model asserts, how much it verifies, whether it reaches
+   for a tool — is behaviour, and behaviour moves when a model is retrained even when its
    architecture does not.
 2. **So yes: moving from 3.6 to 3.8 required the harness to evolve with it.** One harness,
    tuned twice, was worth about 24 points of precision to 3.8 and about 6 points of accuracy
-   to 3.6. The same wrapper is worth different things to different models, because the models
-   were short of different things (§3.2).
+   to 3.6 — the same wrapper, worth different things, because the models lacked different
+   things (§3.2).
 3. **A harness does not transfer.** Every cross-loaded cell scored below the tuned one, and an
-   earlier claim of a positive transfer (+8.3 points at 9 scenarios) decayed to −1 at 23 and
-   was withdrawn. A new model version inherits an unproven harness, not a working one (§3.2).
-4. **Re-measure the pair, then re-tune the harness on recorded evidence.** Diagnose from the
-   saved artifacts, take one hypothesis, make one edit, regression-check the neighbours, keep
-   or revert. That loop is what turned a subject with 34.3 % precision into one at 58.1 %
-   (§2.5).
-5. **Whether a harness feature is worth building is an empirical question about the model in
-   front of you.** Both subjects were offered four sandboxed tool calls: 3.8 used them in about
-   a quarter of runs, 3.6 never once in 144 (§3.9).
-6. **Never quote tuning scores as expected performance.** Both models lost about 30 points
-   moving from the split they were tuned on to unseen scenarios, and every re-tune after a
-   model change inherits that rule (§3.6).
-7. **Governance wants a repeatable measurement, not a demo.** Because every corpus stores the
-   exact harness bytes and prompt behind its numbers, a model change can be re-measured and
-   audited instead of argued about (§2.8).
-8. **Two caveats about this exam.** Discriminating power is concentrated in two of eight
-   families, and two planted controls are not measurable at this sample size (§3.1, §3.10).
+   earlier claim of a positive transfer decayed to −1 once the sample grew. A new model
+   version inherits an unproven harness, not a working one (§3.2).
+4. **After any model change, re-measure the pair and re-tune on recorded evidence.** Tune on
+   the optimization split, report only the held-out number: tuning scores rank models and
+   overstate unseen performance by about 30 points here (§2.5, §3.6).
+
+The rest of the evidence — tool-use asymmetry, what the harness changed edit by edit, the
+two unmeasurable planted controls — is in §3.9, §3.3 and §3.10.
 
 ---
 
@@ -339,6 +321,8 @@ The machinery behind those rules: `data/truth/seal.json` freezes the answer key,
 is strict so a vague or mislabelled answer scores nothing, wall clock and token usage are
 recorded on every run, and every corpus stores the exact harness bytes and prompt that
 produced it (`results/<corpus>/harness_snapshot/`).
+
+---
 
 ---
 
@@ -671,6 +655,8 @@ precision sits 24 points below its harnessed figure. None of them move.
 A defect that exists only as a documented failure remains auditable; one that has
 been patched away becomes a silent gap. `sc-e6ffa4` must always be reported as
 **failed**, never as absent or excluded.
+
+---
 
 ---
 
