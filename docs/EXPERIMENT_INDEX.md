@@ -7,7 +7,7 @@ You should be able to work out what was done, why, and where the evidence lives.
 Last updated: end of the Qwen3.6-27B campaign and the cross-model harness matrix.
 
 **Why these two campaigns exist.** Short version; the full argument is in
-[report §1.2 Background](REPORT_models_and_harnesses.md#12-background--what-someone-signing-this-off-needs).
+[report §1.2 Background](MODEL_AND_HARNESS_EVOLUTION.md#12-background--what-someone-signing-this-off-needs).
 
 0. **Govern the model and its pipeline.** How good is the model at experience-study work,
    what does it cost, and is the pipeline around it right or in need of updating?
@@ -498,7 +498,7 @@ is achieved through *this index*, not by restructuring the tree.
 
 | question | go to |
 |---|---|
-| Why does this benchmark exist, and who is it for? | [report §1.2 Background](REPORT_models_and_harnesses.md#12-background--what-someone-signing-this-off-needs) |
+| Why does this benchmark exist, and who is it for? | [report §1.2 Background](MODEL_AND_HARNESS_EVOLUTION.md#12-background--what-someone-signing-this-off-needs) |
 | How do I regenerate the 47 books? | [README § Where the data comes from](../README.md#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
 | What was done and why, in order? | `results/logs/harness_q36_next_steps.md` |
 | How was the 3.8 harness built? | `results/logs/harness_opt_loop.md`, `docs/HARNESS_GROWTH.md` |
@@ -515,7 +515,7 @@ A standalone, self-contained write-up of this work — executive summary, method
 results by model and by family, the `sc-e6ffa4` failure and its impact, cost
 analysis (run time, tokens, throughput), and conclusions — is at:
 
-**`docs/REPORT_models_and_harnesses.md`**
+**`docs/MODEL_AND_HARNESS_EVOLUTION.md`**
 
 Read that if you want the findings without the operational detail; read this index
 if you need to locate a corpus or reproduce a number.

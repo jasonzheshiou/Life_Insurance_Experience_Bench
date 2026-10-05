@@ -1,8 +1,10 @@
-# Life Insurance Experience Bench — Model and Harness Report
-## Two Qwen 27B models and the harnesses around them, measured on synthetic A/E experience data
+# Model and Harness Evolution
+## Two Qwen 27B models and the harnesses around them, measured on synthetic life-insurance A/E data
 
-**Scope:** held-out split, 24 scenarios, 3 runs each, single-slot inference.
-**Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.7 and §3.11).
+- **Platform:** [Life Insurance Experience Bench](../README.md) — generated A/E scenarios with a
+  planted answer key.
+- **Scope:** held-out split, 24 scenarios, 3 runs each, single-slot inference.
+- **Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.7 and §3.11).
 
 ---
 

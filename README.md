@@ -6,7 +6,7 @@ expected (A/E).
 
 | if you want | go to |
 |---|---|
-| the findings, and what they show about the need for harness and pipeline evolution as models change | [docs/REPORT_models_and_harnesses.md](docs/REPORT_models_and_harnesses.md) |
+| the findings, and what they show about the need for harness and pipeline evolution as models change | [docs/MODEL_AND_HARNESS_EVOLUTION.md](docs/MODEL_AND_HARNESS_EVOLUTION.md) |
 | the platform itself, and how to replicate the experiment | [docs/EXPERIMENT_INDEX.md](docs/EXPERIMENT_INDEX.md) |
 | how to generate the data yourself | [Where the data comes from](#-where-the-data-comes-from-and-how-to-generate-it-yourself) |
 
@@ -408,8 +408,8 @@ number:
 
 | axis | question | answered in |
 |---|---|---|
-| **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted without inventing? | [the report](docs/REPORT_models_and_harnesses.md), INDEX §6 |
-| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | [report §1.2](docs/REPORT_models_and_harnesses.md#12-background--what-someone-signing-this-off-needs); INDEX §3, §5–6 |
+| **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted without inventing? | [the report](docs/MODEL_AND_HARNESS_EVOLUTION.md), INDEX §6 |
+| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | [report §1.2](docs/MODEL_AND_HARNESS_EVOLUTION.md#12-background--what-someone-signing-this-off-needs); INDEX §3, §5–6 |
 | **cost** | what does one answer cost, and did the harness pay for itself? | report §3.8 — run time, reasoning volume, tokens, throughput |
 
 ### What This Proves
@@ -637,7 +637,7 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 - [Experiment index](docs/EXPERIMENT_INDEX.md) — **the master locator**: benchmark,
   harness, both campaigns, every corpus and its path, final tables, replication commands,
   known failures
-- [Model and harness report](docs/REPORT_models_and_harnesses.md) — the standalone
+- [Model and harness evolution](docs/MODEL_AND_HARNESS_EVOLUTION.md) — the standalone
   write-up: executive summary, methodology, results, conclusion. Background (§1.2) states the
   four governance questions; the body shows the need for harness and pipeline evolution as a
   model's characteristics change, with results by model and family, the `sc-e6ffa4` failure
