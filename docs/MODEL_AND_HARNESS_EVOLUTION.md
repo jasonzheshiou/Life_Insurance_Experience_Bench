@@ -1,10 +1,11 @@
-# Model and Harness Evolution
-## Two Qwen 27B models and the harnesses around them, measured on synthetic life-insurance A/E data
+
 
 - **Platform:** [Life Insurance Experience Bench](../README.md) — generated A/E scenarios with a
   planted answer key.
 - **Scope:** held-out split, 24 scenarios, 3 runs each, single-slot inference.
-- **Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.7 and §3.11).
+- **Status:** complete except one recorded failure (`sc-e6ffa4` — see §1.6 and §3.11).
+
+---
 
 ---
 
@@ -16,24 +17,27 @@
 
 To determine whether two language models, **Qwen3.6-27B** and **Qwen3.8-27B**, differ
 in their ability to find planted anomalies in synthetic life-insurance experience
-data, and specifically **whether a similar level of harness optimisation produces a
-similar result for both**. The benchmark exists because actuarial anomaly detection
-is a task where a model must do more than read a table: it must decide *whether* an
-anomaly exists, *which* pattern it is, *which years* it covers, and *which benefit
-lines* it affects — and where a confident wrong answer is worse than no answer.
+data, and specifically **whether tuning each model's harness to the same depth produces
+the same result for both**. The benchmark exists because reading experience data is a
+classification task, not arithmetic: the model must decide *whether* an anomaly exists,
+*which* pattern it is, *which years* it covers and *which benefit lines* it affects.
 
 ## 1.2 Background — what someone signing this off needs
 
 Suppose you want an LLM to help with experience studies: reading A/E tables, flagging
 lines that need investigation, drafting experience commentary. Before you can rely on it,
-someone has to be able to answer four questions. One convincing demo answers none of them.
+someone has to answer four questions. One convincing demo answers none of them.
 
-| the question | how this repo answers it | the answer |
-|---|---|---|
-| **How good is the model?** | A generated answer key that cannot change after the exam (`data/truth/seal.json`). A held-out split, mounted and scored **once**. Strict matching, so a vague or mislabelled answer scores nothing. | Accuracy: 3.8 **71.2 %**, 3.6 **65.8 %**. Precision tells the opposite story, which is why both are headline numbers. |
-| **What does it miss, and what does it invent?** | Two separate metrics, never blended: accuracy (found ÷ what was there) and FP/claim (wrong ÷ what it said). | They fail in opposite directions. 3.8 invents: **34.3 %** precision with no harness. 3.6 is cautious: already **60.0 %** precise. |
-| **What does it cost?** | Wall clock, reasoning volume and completion tokens are recorded on every run and reported beside the score. | **About 3× apart.** Per answer: 3.6 ≈ 4.8 min and 5.7k completion tokens, 3.8 ≈ 13.5 min and 13.8k. Worked through in README §3. |
-| **Is the pipeline around it right, or does it need updating — and on what evidence?** | Every corpus stores the exact harness bytes and prompt that produced it. The optimization-vs-heldout gap is a published metric. Every harness edit records its hypothesis, its test and its regression check. | It needed updating **per model**. The record shows which edit fixed which failure, and one fix that was deliberately not applied (INDEX §8). |
+- **How good is the model?** Accuracy 3.8 **71.2 %**, 3.6 **65.8 %**. Precision tells the
+  opposite story, which is why both are headline numbers.
+- **What does it miss, and what does it invent?** They fail in opposite directions. 3.8
+  invents — **34.3 %** precision with no harness; 3.6 is cautious — already **60.0 %**
+  precise.
+- **What does it cost?** **About 3× apart.** Per answer: 3.6 ≈ 4.8 min and 5.7k completion
+  tokens, 3.8 ≈ 13.5 min and 13.8k. Detailed in §3.8.
+- **Is the pipeline around it right, or does it need updating — and on what evidence?** It
+  needed updating **per model**. The record shows which edit fixed which failure, and one
+  fix that was deliberately not applied (§2.5, §3.11).
 
 **What you govern is the model and the harness together, not the model alone.** A vendor
 notice saying "we upgraded the model" is not an assessment, and on its own it is not a
@@ -41,21 +45,10 @@ reason to re-assess. What changes between model versions is behaviour: how the m
 reasons, how much it checks before asserting, whether it uses a tool at all. When behaviour
 changes, re-measure the pair.
 
-Two rules follow from that, and both are kept visibly in this repo:
+How the benchmark earns the right to answer those questions — sealed answer key, held-out
+split scored once, provenance on every run — is §2.8.
 
-- **The answer key is fixed and out of reach.** Truth is generated, never hand-labelled.
-  The model sees only opaque `sc-<6hex>` ids; names and manifests live in a separate
-  folder. A byte-level leak scan runs at build time and again before the first prompt.
-  `dataset.json` hashes every model-facing file, so "both models saw the same exam" is
-  provable rather than assumed.
-- **Tuning must not touch the reported number.** Tuning used the 23-scenario optimization
-  split; the reported number comes from the 24-scenario held-out split, scored once. The
-  frozen harnesses scored **97.7 %** and **95.5 %** on tuning, and **69.1 %** and
-  **64.2 %** on held-out data — an optimism gap of about 30 points for *both* models. A
-  sign-off based on tuning scores would have been wrong by that much. For the same reason,
-  `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
-
-## 1.3 Method, in brief
+## 1.3 Methodology
 
 Each model answers the same 24 unseen books, 3 times each, at temperature 1.0, with
 no truth visible to it. Answers are scored against planted ground truth. Two
@@ -70,207 +63,83 @@ Qwen3.8's harness was built over seven optimisation passes (v1.0 → v1.6e, 307
 per-scenario iterations). Qwen3.6 received that finished harness as a starting point
 and then four optimisation passes plus a targeted per-scenario repair loop.
 
-## 1.4 The two metrics used throughout
+Two metrics are reported for every configuration and never blended: **accuracy** (how much
+of what was planted the model found) and **FP/claim** (how much of what it said was wrong).
+Definitions in §2.7.
 
-**Accuracy (recall)** — *did the model find what was there?*
+## 1.4 Headline results
 
-```
-accuracy = strict hits / units        units = planted controls × runs
-```
+All figures are on the **same 23 scenarios**, so every cell is like-for-like; the one
+scenario that failed is §1.6 and §3.11. **Cell = accuracy | FP/claim.**
 
-A **unit** is one (run, control) pair. A planted control is matched **strictly** only
-if the finding agrees on **benefit line + pattern type + window overlap + direction**.
-Pattern agreement is exact: a *drift* reported as a *shock* does **not** match.
-
-**FP/claim (false alarm rate)** — *is the model trustworthy when it speaks?*
-
-```
-FP/claim = false positives / claims emitted
-         = false positives / (strict hits + false positives)
-precision = 1 − FP/claim
-```
-
-A **false positive** is any reported finding that does not strictly match a planted
-control. This includes near-misses, and includes findings on CLEAN books (which have
-no controls at all, so any claim is a false alarm).
-
-**Why both, and why FP/claim specifically.** Accuracy alone can be gamed: a model
-that floods plausible claims raises recall while degrading the output. `FP/run`
-(the older diagnostic, false alarms per answer) shows absolute noise but not that the
-noise has come to dominate. FP/claim is normalised by what the model actually said,
-so it cannot be inflated that way. The two metrics also have **different
-denominators** (opportunities vs claims) and therefore do **not** sum — accuracy +
-FP/claim above 100 % is not an error.
-
-**A note on cost of error.** One wrongly-labelled pattern costs *twice*: the control
-is missed **and** the wrong claim is a false alarm. This is why the two metrics move
-together for mislabels but independently for omissions (a missed control with no
-claim) and inventions (a claim with no corresponding control).
-
-## 1.5 Headline results — accuracy and false alarms by model and harness
-
-All figures on the **same 23 books** (the one book that failed is treated separately
-in §1.7, so every row is like-for-like). **Cell = accuracy | FP/claim.**
-
-| # | configuration | accuracy | FP/claim | precision |
-|---|---|---|---|---|
-| 1 | **Qwen3.6-27B, no harness** | 59.5 % | **40.0 %** | 60.0 % |
-| 2 | **Qwen3.8-27B, no harness** | 64.0 % | **65.7 %** | 34.3 % |
-| 3 | Qwen3.6-27B + Qwen3.8's harness | 64.9 % | 43.3 % | 56.7 % |
-| 4 | **Qwen3.6-27B + own harness** | **65.8 %** | **38.7 %** | **61.3 %** |
-| 5 | Qwen3.8-27B + Qwen3.6's harness | 70.3 % | 43.1 % | 56.9 % |
-| 6 | **Qwen3.8-27B + own harness** | **71.2 %** | 41.9 % | 58.1 % |
-
-**Reading the progression:**
-
-* **Without a harness, 3.8 finds more but is far less reliable.** It leads 3.6 on
-  accuracy (64.0 % vs 59.5 %) but emits false alarms at **65.7 %** — meaning **almost
-  two thirds of everything it says without a harness is wrong.** 3.6 sits at 40.0 %.
-* **The harness helps 3.8 enormously on trustworthiness and 3.6 on recall.** For 3.8
-  it cuts FP/claim 65.7 % → 41.9 % (precision 34.3 % → 58.1 %) while adding only ~7
-  points of accuracy. For 3.6 it adds ~6 points of accuracy (59.5 % → 65.8 %) and
-  improves FP/claim only marginally (40.0 % → 38.7 %).
-* **Each model performs best on its own harness.** 3.8: 71.2 % own vs 70.3 % on
-  3.6's. 3.6: 65.8 % own vs 64.9 % on 3.8's. The harness does **not** transfer
-  between models.
-* **The final ranking is a trade, not a win.** 3.8 leads on **recall** (71.2 % vs
-  65.8 %, a 5.4-point gap); 3.6 leads on **precision** (61.3 % vs 58.1 %, a 3.2-point
-  gap). Which model is "better" depends on whether a missed anomaly or a false alarm
-  costs more in the intended deployment.
-
-**A striking individual result:** 3.8 *without* a harness (64.0 % accuracy) is nearly
-as accurate as 3.6 *with* a full harness (65.8 %) — but at **34.3 % precision versus
-61.3 %**. Comparable recall, radically different trustworthiness.
-
-## 1.6 Results by scenario family
-
-The same six configurations, broken down by the type of anomaly planted. Families
-are the benchmark's "question types": **drift** (sustained multi-year move), **shock**
-(abrupt single-year change), **volatility** (dispersion with flat level), **recovery**
-(IP termination recovery), **systemic** (coordinated multi-line event), **mixed**,
-**noise_trap** (a lookalike — the line *looks* like drift/spike but the truth is
-volatility), and **CLEAN** (nothing planted).
-
-**Cell = accuracy | FP/claim.**
-
-| family | 3.6 no harness | 3.8 no harness | 3.6 + own | 3.8 + own |
-|---|---|---|---|---|
-| **systemic** | 41 \| 52 | 54 \| 66 | 44 \| 51 | **56 \| 51** |
-| **shock** | 75 \| 25 | 67 \| 72 | **100 \| 8** | **100 \| 8** |
-| **drift** | 67 \| 25 | 67 \| 70 | 67 \| 33 | 67 \| 40 |
-| **mixed** | **93 \| 7** | 80 \| 48 | 87 \| 24 | 87 \| 28 |
-| **recovery** | 100 \| 0 | 100 \| 55 | **100 \| 0** | **100 \| 0** |
-| **volatility** | **100 \| 0** | 100 \| 60 | 100 \| 57 | 100 \| 60 |
-| **noise_trap** | 0 \| 100 | 17 \| 92 | **50 \| 62** | 50 \| 70 |
-| **CLEAN** | silent ✓ | **falsely accused** | silent ✓ | silent ✓ |
-
-**The four findings that matter:**
-
-1. **`systemic` is the only family where recall genuinely varies.** Three families
-   (drift, recovery, volatility) sit at 100 % accuracy for every harnessed
-   configuration — both models find everything there. The entire recall difference
-   between the models lives in systemic (44 % vs 56 %) and noise_trap (both 50 %).
-   **The benchmark's discriminating power is concentrated in a minority of families.**
-
-2. **The models' character difference is sharpest in `systemic` and `volatility`.**
-   On systemic, 3.8 finds 12 points more; on mixed, 3.6 actually leads (93 % vs 80 %).
-   There is no family where one model dominates on both metrics.
-
-3. **`noise_trap` is the hardest family for both.** Best case 50 % accuracy. Without a
-   harness, 3.6 scores **0 % accuracy with 100 % FP/claim** — it claimed anomalies and
-   got every one wrong. The trap works: the planted truth is *volatility* while the
-   line contains a lookalike spike or drift, and models report the lookalike.
-
-4. **CLEAN honesty separates the models without a harness.** With a harness, both
-   correctly stay silent on the clean book. Without one, **3.8 falsely accused it**,
-   while 3.6 did not.
-
-## 1.7 The one failed scenario `sc-e6ffa4`
-
-**What happened.** `sc-e6ffa4` is `sys_vol_macro_2020_2024` — **all four benefit lines
-volatile 2020-2024**. Under **Qwen3.8-27B running Qwen3.6's harness** it produced
-**no usable run at all**: six or more attempts, one lasting **2 hours 25 minutes**,
-every one failing. Under the three *other* configurations it completes 3/3 every
-time (§3.11 gives the full diagnosis). It is therefore a genuine failure of that one
-configuration, not a missing data point.
-
-**How it affects the data.** The book contributes **12 units** (4 benefit lines × 3
-runs). Two treatments are reported, and **they must not be confused**:
-
-| treatment | what it means | accuracy | FP/claim |
+| model | no harness | its own tuned harness | the *other* model's harness |
 |---|---|---|---|
-| **Exclude** (23 books) | "how did it do on what it attempted?" | **70.3 %** | 43.1 % |
-| **Count as failure** (24 books) | the book scores 0/12 | **63.4 %** | 43.1 % |
+| Qwen3.6-27B | 59.5 \| 40.0 | **65.8 \| 38.7** | 64.9 \| 43.3 |
+| Qwen3.8-27B | 64.0 \| 65.7 | **71.2 \| 41.9** | 70.3 \| 43.1 |
 
-**The failure costs 6.9 accuracy points and leaves FP/claim untouched.** That
-asymmetry is substantive, not arithmetic: the aborted runs emitted **no claims at
-all**, so the book adds 12 to the denominator of accuracy and nothing to either side
-of the FP/claim fraction. A book that cannot answer is penalised as a total miss, not
-as noise.
+- **Without a harness, 3.8 finds more but is far less reliable.** 64.0 % against 3.6's
+  59.5 %, but nearly two thirds of what it says is wrong (FP/claim 65.7 % against 40.0 %).
+- **The harness buys the two models different things:** about 24 points of precision for
+  3.8, about 6 points of accuracy for 3.6.
+- **Each model does best on its own harness.** The harness does not transfer between
+  models.
+- **The ranking is a trade, not a win.** 3.8 leads recall by 5.4 points, 3.6 leads
+  precision by 3.2. Which model is better depends on whether a missed anomaly or a false
+  alarm costs more where you intend to use it.
 
-**Effect on conclusions: none.** The reference point is what 3.8 scored on this book
-under its own harness — **6/12** — which would put the true figure near **68 %**,
-between the two bounds. Every conclusion in §1.5 has a margin far larger than
-±7 points: the recall gap is 5.4, the precision gap 3.2, and 3.8's unharnessed
-precision sits 24 points below its harnessed figure. None of them move.
+## 1.5 Results by scenario family
 
-**Decision recorded:** the underlying parser defect was **deliberately not patched**.
-A defect that exists only as a documented failure remains auditable; one that has
-been patched away becomes a silent gap. `sc-e6ffa4` must always be reported as
-**failed**, never as absent or excluded.
+Families are the benchmark's question types: drift, shock, volatility, recovery,
+systemic, mixed, noise_trap and CLEAN. Four things to know before reading §3.1:
 
-## 1.8 Conclusions
+- **Three families are saturated** — drift, recovery and volatility are found by every
+  harnessed configuration of both models.
+- **Nearly all the discriminating power is in two families:** `systemic` (44 % vs 56 %)
+  and `noise_trap` (50 % for both). The trap is the hardest thing in the benchmark.
+- **No family is won by one model on both metrics.** 3.6 actually leads on `mixed`
+  (93 % against 80 %).
+- **Only the clean book separates them without a harness:** 3.8 falsely accused it, 3.6
+  stayed silent.
 
-1. **The two models are differently shaped, not ranked.** 3.8 is the higher-recall
-   model (+5.4 points); 3.6 is the more precise one (+3.2 points precision). Neither
-   dominates. The choice depends on the relative cost of a missed anomaly versus a
-   false alarm in the intended use.
+## 1.6 The one failed scenario `sc-e6ffa4`
 
-2. **Without a harness, Qwen3.8-27B is not usable for this task.** 65.7 % of its
-   claims are false alarms — precision 34.3 %. This is the single most robust finding
-   in the study and holds at every sample size measured. The harness is worth **~24
-   points of precision** to it.
+- `sc-e6ffa4` produced **no usable run at all** under Qwen3.8 running Qwen3.6's harness,
+  across six or more attempts, one lasting 2 h 25 min. It completes 3/3 in the other three
+  configurations (§3.11).
+- Two published treatments, which must not be confused: excluded it scores **70.3 %**,
+  counted as a failure **63.4 %**, FP/claim 43.1 % either way. The failure costs 6.9
+  accuracy points and nothing on precision.
+- It is reported as **failed**, never as absent or excluded, and the underlying parser
+  defect was deliberately not patched (§3.11).
 
-3. **Qwen3.6-27B is already well-behaved without a harness** (40.0 % FP/claim, 60.0 %
-   precision) and never falsely accused the clean book. Its deficiency is recall.
+## 1.7 Conclusions
 
-4. **Harness optimisation does not transfer between models.** The effect of swapping
-   harnesses between models was **+8.3 accuracy points at 9 books and decayed to −1 by
-   23 books** — i.e. zero. Each model's best result came from its own harness. This
-   was tested directly and is reported as a negative result.
-
-5. **The optimisation split badly overstates held-out performance — by ~30 points for
-   both models.** 3.6: 95.5 % optimising → 63.4 % held-out. 3.8: 97.7 % → 69.1 %.
-   Optimisation-split numbers rank models; they do **not** predict unseen
-   performance. Any future tuning on this benchmark should be treated as a ranking
-   tool only.
-
-6. **The task's difficulty is concentrated.** Four of eight families are saturated
-   (everything found) and two carry nearly all the signal (`systemic`, `noise_trap`).
-   A benchmark revision should add discriminating scenarios in those families, since
-   the current split cannot separate models elsewhere.
-
-7. **Errors are mostly mislabelling and over-claiming, not blindness.** The models
-   generally see the right lines and the right movement, then choose the wrong
-   taxonomy word, or add a spurious second finding on top of a correct one. Decomposing
-   false alarms as `FP − misses` shows 3.8 invents 31 of its 69 false alarms (the rest
-   are mislabels), while 3.6 invents only 6 of 50 — 3.6's errors are almost purely
-   nomenclature.
-
-8. **Two of the "failures" are not model failures at all.** `sc-d72b95`'s missing unit
-   is **statistically undetectable** (fitted slope +0.0253/yr, standard error 0.0251,
-   t = 1.01; minimum detectable slope at 80 % power is +0.088 against a planted 0.05),
-   and `sc-f520e5` is **genuinely ambiguous** (the line carries both real volatility
-   and a real level excursion, so its alternative reading is defensible). These should
-   be reclassified as bad units rather than counted against the models.
-
----
-
----
+1. **The two models are differently shaped, not ranked.** 3.8 has the higher recall, 3.6
+   the better precision, and neither dominates. Which one to use depends on whether a
+   missed anomaly or a false alarm costs more where you intend to use it (§1.4).
+2. **Without a harness Qwen3.8-27B is not usable for this task:** almost two thirds of its
+   claims are false alarms. The harness is worth about 24 points of precision to it, and
+   that is the most robust finding in the study (§3.2).
+3. **Qwen3.6-27B is already well behaved without a harness** and never falsely accused the
+   clean book; its deficiency is recall (§3.2).
+4. **Harness optimisation does not transfer between models.** An apparent +8.3-point
+   transfer at 9 scenarios decayed to −1 at 23, so the claim was withdrawn as a negative
+   result (§3.2).
+5. **The optimisation split overstates held-out performance by about 30 points for both
+   models.** Tuning scores rank models; they do not predict unseen data (§3.6).
+6. **The task's difficulty is concentrated.** Four of eight families are saturated for both
+   models and two carry nearly all the signal. A revision should add scenarios to
+   `systemic`, `noise_trap` and `mixed` (§1.5, §3.1).
+7. **Errors are mostly mislabelling and over-claiming, not blindness.** The models see the
+   right line and the right movement, then pick the wrong pattern word or add a spurious
+   second finding. 3.8 invents; 3.6 misnames (§3.7).
+8. **Two of the "failures" are not model failures at all:** one planted drift is
+   statistically undetectable at this sample size and one volatility is genuinely
+   ambiguous. Both are reclassified as bad units, not counted against a model (§3.10).
 
 # 2 · Methodology
 
-Expands §1.1 to §1.4: the task, how the data were made, what the harness is, how it was grown, how it was evaluated.
+The task, how the data were made, what the harness is, how it was grown, how it was measured, and how the exam was kept honest.
 
 ## 2.1 The task and the research question
 
@@ -421,9 +290,70 @@ Two limits of this method, stated plainly:
 
 ---
 
+## 2.7 The two metrics in full
+
+**Accuracy (recall)** — *did the model find what was there?*
+
+```
+accuracy = strict hits / units        units = planted controls × runs
+```
+
+A **unit** is one (run, control) pair. A planted control is matched **strictly** only
+if the finding agrees on **benefit line + pattern type + window overlap + direction**.
+Pattern agreement is exact: a *drift* reported as a *shock* does **not** match.
+
+**FP/claim (false alarm rate)** — *is the model trustworthy when it speaks?*
+
+```
+FP/claim = false positives / claims emitted
+         = false positives / (strict hits + false positives)
+precision = 1 − FP/claim
+```
+
+A **false positive** is any reported finding that does not strictly match a planted
+control. This includes near-misses, and includes findings on CLEAN books (which have
+no controls at all, so any claim is a false alarm).
+
+**Why both, and why FP/claim specifically.** Accuracy alone can be gamed: a model
+that floods plausible claims raises recall while degrading the output. `FP/run`
+(the older diagnostic, false alarms per answer) shows absolute noise but not that the
+noise has come to dominate. FP/claim is normalised by what the model actually said,
+so it cannot be inflated that way. The two metrics also have **different
+denominators** (opportunities vs claims) and therefore do **not** sum — accuracy +
+FP/claim above 100 % is not an error.
+
+**A note on cost of error.** One wrongly-labelled pattern costs *twice*: the control
+is missed **and** the wrong claim is a false alarm. This is why the two metrics move
+together for mislabels but independently for omissions (a missed control with no
+claim) and inventions (a claim with no corresponding control).
+
+## 2.8 Keeping the exam honest
+
+Two rules made the four background questions answerable, and both are kept visibly in
+the repo.
+
+- **The answer key is fixed and out of reach.** Truth is generated, never hand-labelled.
+  The model sees only opaque `sc-<6hex>` ids; names and manifests live in a separate
+  folder. A byte-level leak scan runs at build time and again before the first prompt.
+  `dataset.json` hashes every model-facing file, so "both models saw the same exam" is
+  provable rather than assumed.
+- **Tuning must not touch the reported number.** Tuning used the 23-scenario optimization
+  split; the reported number comes from the 24-scenario held-out split, scored once. The
+  frozen harnesses scored **97.7 %** and **95.5 %** on tuning, and **69.1 %** and
+  **64.2 %** on held-out data — an optimism gap of about 30 points for *both* models
+  (§3.6). A sign-off based on tuning scores would have been wrong by that much. For the
+  same reason, `sc-e6ffa4` is published as a **recorded failure** rather than quietly fixed.
+
+The machinery behind those rules: `data/truth/seal.json` freezes the answer key, matching
+is strict so a vague or mislabelled answer scores nothing, wall clock and token usage are
+recorded on every run, and every corpus stores the exact harness bytes and prompt that
+produced it (`results/<corpus>/harness_snapshot/`).
+
+---
+
 # 3 · Results
 
-Expands §1.5 to §1.7: what the models found, what the harness changed, and every table behind the headline.
+Everything behind the headline: what the models found, what the harness changed, and every table.
 
 ## 3.1 Can a model find the insight?
 
@@ -444,17 +374,85 @@ Two design notes carry beyond this dataset:
   Extending to those means a new scenario family and a new section in `stats_pack.py`. It
   does not mean a new benchmark, a new scorer or a new governance argument.
 
+The same six configurations, broken down by the type of anomaly planted. Families
+are the benchmark's "question types": **drift** (sustained multi-year move), **shock**
+(abrupt single-year change), **volatility** (dispersion with flat level), **recovery**
+(IP termination recovery), **systemic** (coordinated multi-line event), **mixed**,
+**noise_trap** (a lookalike — the line *looks* like drift/spike but the truth is
+volatility), and **CLEAN** (nothing planted).
+
+**Cell = accuracy | FP/claim.**
+
+| family | 3.6 no harness | 3.8 no harness | 3.6 + own | 3.8 + own |
+|---|---|---|---|---|
+| **systemic** | 41 \| 52 | 54 \| 66 | 44 \| 51 | **56 \| 51** |
+| **shock** | 75 \| 25 | 67 \| 72 | **100 \| 8** | **100 \| 8** |
+| **drift** | 67 \| 25 | 67 \| 70 | 67 \| 33 | 67 \| 40 |
+| **mixed** | **93 \| 7** | 80 \| 48 | 87 \| 24 | 87 \| 28 |
+| **recovery** | 100 \| 0 | 100 \| 55 | **100 \| 0** | **100 \| 0** |
+| **volatility** | **100 \| 0** | 100 \| 60 | 100 \| 57 | 100 \| 60 |
+| **noise_trap** | 0 \| 100 | 17 \| 92 | **50 \| 62** | 50 \| 70 |
+| **CLEAN** | silent ✓ | **falsely accused** | silent ✓ | silent ✓ |
+
+**The four findings that matter:**
+
+1. **`systemic` is the only family where recall genuinely varies.** Three families
+   (drift, recovery, volatility) sit at 100 % accuracy for every harnessed
+   configuration — both models find everything there. The entire recall difference
+   between the models lives in systemic (44 % vs 56 %) and noise_trap (both 50 %).
+   **The benchmark's discriminating power is concentrated in a minority of families.**
+
+2. **The models' character difference is sharpest in `systemic` and `volatility`.**
+   On systemic, 3.8 finds 12 points more; on mixed, 3.6 actually leads (93 % vs 80 %).
+   There is no family where one model dominates on both metrics.
+
+3. **`noise_trap` is the hardest family for both.** Best case 50 % accuracy. Without a
+   harness, 3.6 scores **0 % accuracy with 100 % FP/claim** — it claimed anomalies and
+   got every one wrong. The trap works: the planted truth is *volatility* while the
+   line contains a lookalike spike or drift, and models report the lookalike.
+
+4. **CLEAN honesty separates the models without a harness.** With a harness, both
+   correctly stay silent on the clean book. Without one, **3.8 falsely accused it**,
+   while 3.6 did not.
+
 ## 3.2 What the harness is worth, and whether it transfers
 
-This is the measurement the project exists to make. The two campaigns are the experiment and
-the table below is its result: the held-out split, the same 23 scenarios in every cell, cells
-written as **accuracy | FP/claim** (definitions and arithmetic in README §3). `sc-e6ffa4` is
-excluded from every cell because it never finished under one configuration (INDEX §8).
+This is the measurement the project exists to make. The two campaigns are the experiment
+and the table below is its result: the held-out split, the same 23 scenarios in every row
+(`sc-e6ffa4` excluded, since it never finished under one configuration — INDEX §8).
+Definitions and arithmetic in README §3.
 
-| model | no harness | its own tuned harness | the *other* model's harness |
-|---|---|---|---|
-| Qwen3.6-27B | 59.5 \| 40.0 | **65.8 \| 38.7** | 64.9 \| 43.3 |
-| Qwen3.8-27B | 64.0 \| 65.7 | **71.2 \| 41.9** | 70.3 \| 43.1 |
+All figures on the **same 23 books** (the one book that failed is treated separately
+in §1.7, so every row is like-for-like). **Cell = accuracy | FP/claim.**
+
+| # | configuration | accuracy | FP/claim | precision |
+|---|---|---|---|---|
+| 1 | **Qwen3.6-27B, no harness** | 59.5 % | **40.0 %** | 60.0 % |
+| 2 | **Qwen3.8-27B, no harness** | 64.0 % | **65.7 %** | 34.3 % |
+| 3 | Qwen3.6-27B + Qwen3.8's harness | 64.9 % | 43.3 % | 56.7 % |
+| 4 | **Qwen3.6-27B + own harness** | **65.8 %** | **38.7 %** | **61.3 %** |
+| 5 | Qwen3.8-27B + Qwen3.6's harness | 70.3 % | 43.1 % | 56.9 % |
+| 6 | **Qwen3.8-27B + own harness** | **71.2 %** | 41.9 % | 58.1 % |
+**Reading the progression:**
+
+* **Without a harness, 3.8 finds more but is far less reliable.** It leads 3.6 on
+  accuracy (64.0 % vs 59.5 %) but emits false alarms at **65.7 %** — meaning **almost
+  two thirds of everything it says without a harness is wrong.** 3.6 sits at 40.0 %.
+* **The harness helps 3.8 enormously on trustworthiness and 3.6 on recall.** For 3.8
+  it cuts FP/claim 65.7 % → 41.9 % (precision 34.3 % → 58.1 %) while adding only ~7
+  points of accuracy. For 3.6 it adds ~6 points of accuracy (59.5 % → 65.8 %) and
+  improves FP/claim only marginally (40.0 % → 38.7 %).
+* **Each model performs best on its own harness.** 3.8: 71.2 % own vs 70.3 % on
+  3.6's. 3.6: 65.8 % own vs 64.9 % on 3.8's. The harness does **not** transfer
+  between models.
+* **The final ranking is a trade, not a win.** 3.8 leads on **recall** (71.2 % vs
+  65.8 %, a 5.4-point gap); 3.6 leads on **precision** (61.3 % vs 58.1 %, a 3.2-point
+  gap). Which model is "better" depends on whether a missed anomaly or a false alarm
+  costs more in the intended deployment.
+
+**A striking individual result:** 3.8 *without* a harness (64.0 % accuracy) is nearly
+as accurate as 3.6 *with* a full harness (65.8 %) — but at **34.3 % precision versus
+61.3 %**. Comparable recall, radically different trustworthiness.
 
 Both subjects are 27 B models, on one llama.cpp slot, with identical samplers. The
 difference between them is not architecture. It is behaviour that reinforcement learning
@@ -503,7 +501,7 @@ isolates one cause.
 
 ## 3.4 Full held-out results (24 books, where available)
 
-§1.5 is on the common 23 books so every row is like-for-like. The table below is the full
+§1.4 is on the common 23 books so every row is like-for-like. The table below is the full
 24-book view, where a configuration completed the whole exam.
 
 | configuration | accuracy | FP/claim | precision | FP/run |
@@ -659,8 +657,27 @@ block that describes this book exactly ("several lines swinging together across
 CONSECUTIVE years … report it for EVERY affected line"). Under-instructed, 3.8 falls
 back to computation; 3.6 never uses tools, so it simply answers.
 
-**Impact:** 12 units, counted as a total miss. 70.3 % (exclude) vs 63.4 % (count).
-FP/claim unchanged. **No conclusion in this report moves.**
+| treatment | what it means | accuracy | FP/claim |
+|---|---|---|---|
+| **Exclude** (23 books) | "how did it do on what it attempted?" | **70.3 %** | 43.1 % |
+| **Count as failure** (24 books) | the book scores 0/12 | **63.4 %** | 43.1 % |
+
+**The failure costs 6.9 accuracy points and leaves FP/claim untouched.** That
+asymmetry is substantive, not arithmetic: the aborted runs emitted **no claims at
+all**, so the book adds 12 to the denominator of accuracy and nothing to either side
+of the FP/claim fraction. A book that cannot answer is penalised as a total miss, not
+as noise.
+
+**Effect on conclusions: none.** The reference point is what 3.8 scored on this book
+under its own harness — **6/12** — which would put the true figure near **68 %**,
+between the two bounds. Every conclusion in §1.7 has a margin far larger than
+±7 points: the recall gap is 5.4, the precision gap 3.2, and 3.8's unharnessed
+precision sits 24 points below its harnessed figure. None of them move.
+
+**Decision recorded:** the underlying parser defect was **deliberately not patched**.
+A defect that exists only as a documented failure remains auditable; one that has
+been patched away becomes a silent gap. `sc-e6ffa4` must always be reported as
+**failed**, never as absent or excluded.
 
 ---
 
