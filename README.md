@@ -409,7 +409,7 @@ number:
 | axis | question | answered in |
 |---|---|---|
 | **subject** | can Qwen3.6-27B / Qwen3.8-27B find what was planted without inventing? | [the report](docs/MODEL_AND_HARNESS_EVOLUTION.md), INDEX §6 |
-| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | [report §1.2](docs/MODEL_AND_HARNESS_EVOLUTION.md#12-background--what-someone-signing-this-off-needs); INDEX §3, §5–6 |
+| **harness** | how much of that comes from the evidence pack, rules block and prompt, and does it transfer? | [report §1.2](docs/MODEL_AND_HARNESS_EVOLUTION.md#12-background); INDEX §3, §5–6 |
 | **cost** | what does one answer cost, and did the harness pay for itself? | report §3.8 — run time, reasoning volume, tokens, throughput |
 
 ### What This Proves
