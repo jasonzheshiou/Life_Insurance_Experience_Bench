@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Coding, With Receipts — an LLM experience-study exam, measured</title>
+<style>
+:root{
+  --bg:#0b1017; --bg2:#0f1620; --panel:#141d29; --panel2:#18232f;
+  --line:#243244; --line2:#2f4055;
+  --ink:#e8eef6; --ink2:#a9bacd; --ink3:#7f94ab;
+  --teal:#4fd1c5; --amber:#f6ad3c; --red:#f0616d; --green:#5bd08a; --violet:#9c8cff;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+body{overflow:hidden}
+#stage-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;background:
+  radial-gradient(1200px 600px at 15% -10%,#16283a 0%,transparent 60%),
+  radial-gradient(900px 500px at 110% 110%,#1a2130 0%,transparent 55%),var(--bg);
+  border:1px solid #1d2b3d;border-radius:14px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;padding:0;display:none;opacity:0;overflow:hidden}
+.fitbox{position:absolute;left:64px;right:64px;top:44px;bottom:56px;display:flex;flex-direction:column;
+  transform-origin:top center;overflow:visible}
+.slide.active{display:flex;opacity:1;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- type ---------- */
+h1{font-size:56px;line-height:1.06;margin:0 0 14px;letter-spacing:-.02em;font-weight:760}
+h2{font-size:38px;line-height:1.12;margin:0 0 6px;letter-spacing:-.015em;font-weight:700}
+h3{font-size:21px;margin:22px 0 8px;color:var(--ink);font-weight:680}
+p{margin:0 0 12px;font-size:19px;line-height:1.45;color:var(--ink2)}
+strong{color:var(--ink);font-weight:680}
+em{color:var(--teal);font-style:normal;font-weight:600}
+.small{font-size:16px;line-height:1.4;color:var(--ink3)}
+.tiny{font-size:13.5px;line-height:1.4;color:var(--ink3)}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.kicker{display:flex;align-items:center;gap:14px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:16px;font-weight:600}
+.kicker .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+.rule{height:3px;width:78px;background:linear-gradient(90deg,var(--teal),transparent);margin:12px 0 22px;border-radius:2px}
+.grow{flex:1;min-height:0}
+.row{display:flex;gap:26px}
+.col{flex:1;min-width:0}
+.h60{height:60%} .h50{height:50%} .h40{height:40%} .h70{height:70%}
+.center{display:flex;flex-direction:column;justify-content:center;height:100%}
+
+/* ---------- building blocks ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.card h4{margin:0 0 8px;font-size:16px;letter-spacing:.02em;text-transform:uppercase;color:var(--teal);font-weight:700}
+.card.acc-amber{border-left:4px solid var(--amber)} .card.acc-teal{border-left:4px solid var(--teal)}
+.card.acc-red{border-left:4px solid var(--red)} .card.acc-green{border-left:4px solid var(--green)}
+.card.acc-violet{border-left:4px solid var(--violet)}
+.kpi{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-align:left}
+.kpi .v{font-size:40px;font-weight:780;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1}
+.kpi .l{font-size:13.5px;color:var(--ink3);margin-top:8px;line-height:1.35}
+.kpi.t .v{color:var(--teal)} .kpi.a .v{color:var(--amber)} .kpi.r .v{color:var(--red)} .kpi.g .v{color:var(--green)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.g23{grid-template-columns:2fr 3fr} .g32{grid-template-columns:3fr 2fr} .g13{grid-template-columns:1fr 3fr}
+
+table{width:100%;border-collapse:collapse;font-size:16.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink3);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;border-bottom:1px solid var(--line2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:15.5px}
+tr.hl td{background:rgba(79,209,197,.09)}
+tr.hl2 td{background:rgba(246,173,60,.09)}
+tr.dim td{color:var(--ink3)}
+table.compact{font-size:15px} table.compact th,table.compact td{padding:6px 10px}
+
+pre{margin:0;background:#0a1017;border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+  font-family:var(--mono);font-size:14px;line-height:1.5;color:#cfe0f0;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+pre.big{font-size:15.5px} pre.small{font-size:12.5px;line-height:1.45}
+code{font-family:var(--mono);font-size:.94em;color:#bfe3ee;background:rgba(79,209,197,.09);padding:1px 5px;border-radius:4px}
+.q{border-left:3px solid var(--violet);padding:10px 0 10px 16px;color:var(--ink);font-size:17.5px;line-height:1.45}
+.q .who{display:block;font-size:12.5px;color:var(--ink3);margin-top:6px;letter-spacing:.04em}
+.hit{color:var(--green);font-weight:700} .fp{color:var(--red);font-weight:700} .miss{color:var(--amber);font-weight:700}
+.pill{display:inline-block;font-size:12.5px;padding:2px 9px;border-radius:99px;border:1px solid var(--line2);color:var(--ink2);
+  font-family:var(--mono);letter-spacing:.02em;white-space:nowrap}
+.pill.t{border-color:rgba(79,209,197,.5);color:var(--teal);background:rgba(79,209,197,.09)}
+.pill.a{border-color:rgba(246,173,60,.5);color:var(--amber);background:rgba(246,173,60,.09)}
+.pill.r{border-color:rgba(240,97,109,.5);color:var(--red);background:rgba(240,97,109,.09)}
+.pill.g{border-color:rgba(91,208,138,.5);color:var(--green);background:rgba(91,208,138,.09)}
+ul{margin:0;padding-left:20px} li{font-size:18px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+ul.tight li{font-size:16.5px;margin-bottom:6px}
+ol{margin:0;padding-left:22px} ol li{margin-bottom:9px}
+.foot{position:absolute;left:64px;right:64px;bottom:18px;display:flex;justify-content:space-between;
+  font-size:12.5px;color:#5f7near;color:#5f7590;letter-spacing:.03em;border-top:1px solid var(--line);padding-top:9px}
+.src{font-size:12.5px;color:var(--ink3);font-family:var(--mono)}
+
+/* ---------- quiz ---------- */
+.qbox{background:linear-gradient(180deg,#17242f,#131c26);border:1px solid #2b4055;border-radius:14px;padding:18px 22px}
+.qbox .ask{font-size:23px;line-height:1.3;font-weight:680;color:#fff;letter-spacing:-.01em}
+.qbox .ask span{color:var(--amber)}
+button.rv{margin-top:12px;background:#12303c;color:var(--teal);border:1px solid #2c5b6b;border-radius:9px;
+  padding:9px 16px;font-size:15px;font-family:var(--sans);font-weight:660;cursor:pointer;letter-spacing:.02em}
+button.rv:hover{background:#17414f}
+.reveal{display:none} .reveal.on{display:block;animation:fade .3s ease}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:16px;align-items:start;margin-top:6px}
+.verdict .lab{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding-top:3px;white-space:nowrap}
+
+/* ---------- charts ---------- */
+.chart{width:100%;height:100%;display:block}
+.chart .axis{stroke:#33465e;stroke-width:1}
+.chart .grid-l{stroke:#1e2c3c;stroke-width:1}
+.chart .band{fill:rgba(79,209,197,.10)}
+.chart .mark{fill:rgba(246,173,60,.13);stroke:rgba(246,173,60,.5);stroke-dasharray:3 3}
+.chart .ln{fill:none;stroke:var(--teal);stroke-width:2.6}
+.chart .ln2{fill:none;stroke:#7d93ad;stroke-width:2;stroke-dasharray:4 3}
+.chart .pt{fill:var(--teal)} .chart .pt2{fill:#7d93ad}
+.chart text{fill:var(--ink3);font-size:11px;font-family:var(--mono)}
+.chart text.ann{fill:var(--amber);font-size:11.5px;font-weight:600}
+.chart .one{stroke:#4a6076;stroke-width:1;stroke-dasharray:2 4}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--ink3);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+/* ---------- data table (A/E) ---------- */
+table.ae{font-family:var(--mono);font-size:14.5px}
+table.ae td,table.ae th{padding:5px 8px;border-bottom:1px solid #1b2836}
+table.ae th{font-size:11.5px;letter-spacing:.05em}
+table.ae td.hi{background:rgba(246,173,60,.16);color:#fff;font-weight:700}
+table.ae td.warn{background:rgba(240,97,109,.14);color:#ffd7db;font-weight:700}
+table.ae td.good{background:rgba(91,208,138,.13);color:#d6f5e2;font-weight:700}
+
+/* ---------- misc ---------- */
+.loop{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.loop .st{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 14px;position:relative}
+.loop .st .n{position:absolute;top:-11px;left:12px;background:var(--teal);color:#052026;font-weight:800;font-size:12px;
+  border-radius:99px;padding:2px 9px}
+.loop .st b{display:block;font-size:15.5px;color:#fff;margin:6px 0 5px}
+.loop .st span{font-size:13.5px;color:var(--ink3);line-height:1.4;display:block}
+.bar{height:9px;border-radius:5px;background:#1c2836;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.stack{display:flex;flex-direction:column;gap:9px}
+.hbar{display:grid;grid-template-columns:190px 1fr 74px;gap:12px;align-items:center;font-size:15.5px}
+.hbar .t{color:var(--ink2)} .hbar .v{font-family:var(--mono);text-align:right;font-size:15px}
+.heat td{text-align:center;font-family:var(--mono);font-size:14px}
+.heat td.a{background:rgba(91,208,138,.20)} .heat td.b{background:rgba(91,208,138,.10)}
+.heat td.c{background:rgba(246,173,60,.16)} .heat td.d{background:rgba(240,97,109,.20)}
+.heat td.e{background:rgba(127,148,171,.06);color:var(--ink3)}
+
+/* ---------- chrome ---------- */
+#bar{position:absolute;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--teal),#3aa0c9);width:0;transition:width .2s;z-index:9}
+#hud{position:absolute;right:18px;bottom:14px;font-family:var(--mono);font-size:12px;color:#5f7590;z-index:9;
+  display:flex;gap:14px;align-items:center}
+#hud b{color:var(--teal);font-weight:600}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:#070b10;border-top:1px solid #223244;
+  padding:16px 28px;font-size:15px;line-height:1.5;color:#c4d3e2;display:none;z-index:40}
+#notes.on{display:block}
+#notes .nt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+#overview{position:absolute;inset:0;background:rgba(7,11,16,.97);display:none;padding:26px 40px;overflow:auto;z-index:30}
+#overview.on{display:block}
+#overview ol{columns:3;column-gap:34px;padding-left:20px}
+#overview li{font-size:14px;color:var(--ink2);margin-bottom:7px;cursor:pointer;break-inside:avoid}
+#overview li:hover{color:var(--teal)}
+#help{position:absolute;inset:0;background:rgba(7,11,16,.96);display:none;align-items:center;justify-content:center;z-index:31}
+#help.on{display:flex}
+#help .box{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:26px 34px;min-width:520px}
+#help h3{margin:0 0 14px}
+#help div.k{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;font-size:16px;color:var(--ink2)}
+#help kbd{font-family:var(--mono);background:#0a1017;border:1px solid var(--line2);border-radius:6px;padding:2px 8px;font-size:13px;color:var(--teal)}
+.hint{position:absolute;right:18px;bottom:34px;font-size:11.5px;color:#4d6480;z-index:9;font-family:var(--mono)}
+@media print{
+  .fitbox{position:static!important;transform:none!important;left:auto;right:auto;top:auto;bottom:auto;padding:34px 56px}
+  body{overflow:visible;background:#fff}
+  #stage{transform:none!important;border:none;box-shadow:none;width:100%;height:auto}
+  .slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:720px}
+  #bar,#hud,#notes,#overview,#help,.hint{display:none!important}
+  .reveal{display:block!important}
+}
+</style>
+</head>
+<body>
+<div id="stage-wrap"><div id="stage">
+<!-- ══════════════ ACT 0 ══════════════ -->
+<section class="slide" data-title="Title" data-notes="0:00–1:00 — Set the contract: this is the concrete example you asked for. Everything on screen is from one repo: a synthetic life-insurance experience bench, two 27B models, one harness that a model grew. No vendor claims, no demos — measured numbers, and the failures too.">
+<div class="center">
+  <div class="kicker"><span class="dot"></span> Actuarial data science · 40 minutes</div>
+  <h1>Agentic coding, <span style="color:var(--teal)">with receipts</span></h1>
+  <div class="rule" style="width:180px"></div>
+  <p style="font-size:24px;max-width:900px;color:var(--ink)">Last time I described agentic coding in the abstract. Today I bring the artefacts: a real exam, real numbers, and what a language model actually got right — and wrong — on A/E data.</p>
+  <div class="grid g3" style="margin-top:34px;max-width:1000px">
+    <div class="kpi t"><div class="v">47</div><div class="l">synthetic books · 250 000 policies each · Death, CI, TPD, IP · 2015–2024</div></div>
+    <div class="kpi a"><div class="v">2 × 2</div><div class="l">two Qwen 27B models × (no harness | own harness) · 3 runs each</div></div>
+    <div class="kpi g"><div class="v">500+</div><div class="l">scored answers on disk, with the exact prompt and harness bytes behind each one</div></div>
+  </div>
+</div>
+<div class="foot"><span>Life Insurance Experience Bench · data_pipeline_arena</span><span>ask me to slow down at any point</span></div>
+</section>
+
+<section class="slide" data-title="Where we left off" data-notes="1:00–2:30 — Name the gap honestly: the previous talk was conceptual. Point out that 'agentic' is easy to say and hard to evidence — so today each claim has a number or a quote next to it. Read the four promises aloud; they are the agenda.">
+<div class="kicker"><span class="dot"></span> Recap · the missing piece</div>
+<h2>Previously: agentic coding, no worked example</h2>
+<div class="rule"></div>
+<div class="row grow">
+  <div class="col">
+    <p>I talked about the <strong>shape</strong> of the thing: a model that reads files, runs code, reads the result, edits, retries. Useful vocabulary — zero evidence.</p>
+    <p>The honest objection I got was the right one: <em>"fine — show me one where you can tell me what it actually got right."</em></p>
+    <p>So this project exists to answer that. It is deliberately small enough that every claim can be pointed at a file on disk.</p>
+  </div>
+  <div class="col">
+    <div class="card acc-teal" style="height:100%">
+      <h4>What I owe you today</h4>
+      <ul class="tight" style="margin-top:6px">
+        <li><b>1 ·</b> Three real cases — easy, medium, hard — <em>you</em> call the insight before I show the answer key.</li>
+        <li><b>2 ·</b> The methodology that turns a model's answer into a number you can defend.</li>
+        <li><b>3 ·</b> The results: the literal wording that scores, what the model found, and what it invented.</li>
+        <li><b>4 ·</b> Why an actuary should care, and what a synthetic benchmark can and cannot do for you.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>Route · 40 min: open 2 → cases 14 → methodology 8 → results 8 → why it matters 4 → benchmarks &amp; synthetic 3 → close 1</span><span>2 / 34</span></div>
+</section>
+
+<!-- ══════════════ ACT 1 — CASES ══════════════ -->
+<section class="slide" data-title="How to read a case" data-notes="2:30–4:00 — Explain the answer contract before the quiz, otherwise the reveals make no sense. Stress the four-way strict agreement: this is exactly how an experience-study conclusion must be stated — line, pattern, years, direction. Emphasise that a vague answer scores nothing.">
+<div class="kicker"><span class="dot"></span> Act 1 · Three cases — you are the marker</div>
+<h2>The answer I am asking you for</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.15">
+    <p>One book, ten years, four benefit lines. Every answer has to say four things, or it does not count:</p>
+<pre class="big">{
+  "benefit":   "Death",
+  "years":     [2018, 2024],
+  "pattern":   "drift",        <span style="color:#5f7590">// drift | shock | volatility | recovery</span>
+  "direction": "increase",
+  "magnitude": "+0.15/yr, A/E 0.66 -&gt; 1.31",
+  "evidence":  ["ae_death_by_year.csv: monotone rise, CI unchanged"],
+  "recommended_action": "refer Death frequency to pricing and reserving"
+}</pre>
+    <p class="small" style="margin-top:10px"><strong>Scoring is strict:</strong> benefit + pattern + window + direction must all agree with the planted truth. One wrong pattern word = a miss <em>and</em> a false alarm. Duplicates ignored, and on a clean book any claim at all is a false alarm.</p>
+  </div>
+  <div class="col">
+    <div class="grid" style="grid-template-columns:1fr;gap:12px">
+      <div class="card acc-teal"><h4>drift</h4><p style="margin:0;font-size:16.5px">a sustained year-over-year move across 2+ years. May revert at the end — still drift.</p></div>
+      <div class="card acc-amber"><h4>shock</h4><p style="margin:0;font-size:16.5px">an abrupt level change with no build-up: flat-topped or a single year.</p></div>
+      <div class="card acc-red"><h4>volatility</h4><p style="margin:0;font-size:16.5px">more year-to-year scatter, level unchanged. The one everybody calls a spike.</p></div>
+      <div class="card acc-violet"><h4>recovery</h4><p style="margin:0;font-size:16.5px">IP termination rate for one diagnosis moves; incidence untouched.</p></div>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>contract verified against data/prompts/system_v2_baseline.txt</span><span>3 / 34</span></div>
+</section>
+
+<!-- CASE 1 -->
+<section class="slide" data-title="Case 1 — easy" data-notes="4:00–6:00 — Do not rush this. Let people read the numbers. Ask for a show of hands on which pattern word they'd use and where the window starts. The trap in the easy case is subtle: the drift does NOT start in 2015 — the pre-2018 level is already low, and the window matters.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 1 — labeled <span class="num">easy</span></div>
+<h2>Book <span class="num">sc-f69eea</span> · what do you report?</h2>
+<div class="rule"></div>
+<div class="row grow">
+  <div class="col" style="flex:1.3">
+    <table class="ae">
+      <tr><th>Year</th><th class="n">2015</th><th class="n">2016</th><th class="n">2017</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th></tr>
+      <tr><td><b>Death</b> A/E</td><td class="n">0.626</td><td class="n">0.701</td><td class="n">0.637</td><td class="n">0.660</td><td class="n">0.784</td><td class="n">0.983</td><td class="n">1.063</td><td class="n">1.113</td><td class="n">1.261</td><td class="n">1.307</td></tr>
+      <tr><td>CI A/E</td><td class="n">1.006</td><td class="n">1.004</td><td class="n">0.965</td><td class="n">1.048</td><td class="n">1.024</td><td class="n">1.024</td><td class="n">0.971</td><td class="n">1.045</td><td class="n">1.012</td><td class="n">1.021</td></tr>
+      <tr><td>TPD A/E</td><td class="n">0.986</td><td class="n">1.041</td><td class="n">1.025</td><td class="n">1.029</td><td class="n">1.010</td><td class="n">0.963</td><td class="n">1.013</td><td class="n">1.007</td><td class="n">1.018</td><td class="n">0.985</td></tr>
+      <tr><td>IP A/E</td><td class="n">1.023</td><td class="n">1.029</td><td class="n">0.996</td><td class="n">0.999</td><td class="n">0.997</td><td class="n">0.999</td><td class="n">0.978</td><td class="n">1.004</td><td class="n">0.998</td><td class="n">1.012</td></tr>
+    </table>
+    <div id="c1chart" style="height:270px;margin-top:6px"></div>
+    <div class="legend"><span><i style="background:var(--teal)"></i>Death A/E, actual ÷ expected</span><span><i style="background:#7d93ad;height:2px"></i>expected = 1.00</span><span><i style="background:rgba(79,209,197,.35)"></i>Poisson noise band, ±1/√E</span></div>
+  </div>
+  <div class="col" style="flex:.62">
+    <div class="qbox">
+      <div class="ask">Name the finding.<br><span>benefit · pattern word · years · direction</span></div>
+      <p class="tiny" style="margin-top:10px">Other three lines: CI 0.96–1.05, TPD 0.96–1.04, IP 0.98–1.03 over all ten years. Expected Death claims grow 240 → 826 a year, so early years are noisier than late ones.</p>
+      <button class="rv" data-rv="c1a">Reveal the answer key →</button>
+    </div>
+    <div class="reveal" id="c1a">
+      <div class="card acc-green" style="margin-top:12px">
+        <h4>Planted truth</h4>
+        <div class="verdict">
+          <span class="lab">benefit</span><b>Death</b>
+          <span class="lab">pattern</span><b>drift, increase</b>
+          <span class="lab">window</span><b class="num">2018–2024</b>
+          <span class="lab">size</span><span class="num">planted factor +0.15/yr · observed A/E 0.66 → 1.31 (fitted +0.108/yr)</span>
+        </div>
+        <p class="tiny" style="margin:10px 0 0">CI, TPD and IP were left untouched. Nothing else is in the file.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>data/eval/optimization/sc-f69eea · truth manifest drift_death_up_2018_2024</span><span>4 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Case 1 — what they said" data-notes="6:00–7:00 — Both models found it — as expected. The interesting part is the run where 3.8 without a harness wrote out the three clean lines as findings ('No anomaly. A/E 0.965-1.048…') and was scored 3 false alarms. Restraint is a scored behaviour, not good manners. Also flag the window sloppiness: they said 2015-2024 and still got credit, because the rule is window overlap, not window equality.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 1 · the answer key says</div>
+<h2>Everyone sees the easy one. Two of them still failed it.</h2>
+<div class="rule"></div>
+<table class="compact">
+  <tr><th style="width:24%">configuration</th><th>what the answer said (verbatim)</th><th class="n">strict</th><th class="n">FP</th></tr>
+  <tr><td><b>3.6</b>, no harness</td><td>3/3 runs: <i>"Death drift, ~+0.065/yr, A/E rises from 0.63 to 1.31"</i> — one finding, nothing invented</td><td class="n hit">3/3</td><td class="n">0</td></tr>
+  <tr class="hl2"><td><b>3.8</b>, no harness</td><td>run 1 and 3: same finding. <b>run 2</b>: the same finding <i>plus</i> three entries reading <i>"CI — no anomaly. A/E 0.965–1.048, flat around 1.0"</i> …</td><td class="n hit">3/3</td><td class="n fp">3</td></tr>
+  <tr><td><b>3.8</b> + its harness <span class="tiny">(one tuning pass)</span></td><td><i>"~+0.084/yr; total A/E rise from ~0.63 to ~1.31, Δ≈+0.68 over 10 years"</i> — clean</td><td class="n hit">1/1</td><td class="n">0</td></tr>
+</table>
+<div class="grid g3" style="margin-top:20px">
+  <div class="card acc-teal"><h4>The insight was never the problem</h4><p style="margin:0;font-size:16px">A monotone climb from 0.66 to 1.31 is unmistakable. Recall on this family is 100 % for every harnessed configuration.</p></div>
+  <div class="card acc-red"><h4>Restraint is scored</h4><p style="margin:0;font-size:16px">Writing down that a line is <em>fine</em>, as its own finding, is a false alarm. 3.8 did it <b>13 times</b> on the held-out exam alone (23 across the whole corpus) without a harness; 3.6 never did it once. The rulebook clause exists because of exactly this.</p></div>
+  <div class="card acc-amber"><h4>The window is loose, on purpose</h4><p style="margin:0;font-size:16px">They all said 2015–2024 and the scorer accepted it: window <em>overlap</em>, not equality. A planted 2018 start inside a claimed 2015 start still counts. Read this as generous, not as an error.</p></div>
+</div>
+<div class="foot"><span>results/xam_v5 · xam_q36 · harness_opt_p7 — scored by score_xam.py v3</span><span>5 / 34</span></div>
+</section>
+
+<!-- CASE 2 -->
+<section class="slide" data-title="Case 2 — medium" data-notes="7:00–9:30 — This is the one that makes actuaries uncomfortable. Let them commit to 'shock 2022-2023' first — nearly everyone does. Then reveal: the planted answer is volatility, i.e. pure noise amplification. The whole 2022 spike is a coin-flip that landed high. Ask: how would you know from the data? That question is the entire talk in miniature.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 2 — labeled <span class="num">medium</span></div>
+<h2>Book <span class="num">sc-0ce4d6</span> · CI line, one big number</h2>
+<div class="rule"></div>
+<div class="row grow">
+  <div class="col" style="flex:1.3">
+    <table class="ae">
+      <tr><th>CI</th><th class="n">2015</th><th class="n">2016</th><th class="n">2017</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th></tr>
+      <tr><td>A/E</td><td class="n">0.910</td><td class="n">0.908</td><td class="n">0.947</td><td class="n">0.818</td><td class="n">0.925</td><td class="n">0.824</td><td class="n">0.882</td><td class="n warn">1.412</td><td class="n warn">1.237</td><td class="n">0.891</td></tr>
+      <tr><td>actual</td><td class="n">543</td><td class="n">654</td><td class="n">793</td><td class="n">788</td><td class="n">1015</td><td class="n">1021</td><td class="n">1222</td><td class="n">2186</td><td class="n">2126</td><td class="n">1687</td></tr>
+      <tr><td>expected</td><td class="n">596</td><td class="n">720</td><td class="n">837</td><td class="n">963</td><td class="n">1097</td><td class="n">1239</td><td class="n">1386</td><td class="n">1548</td><td class="n">1719</td><td class="n">1893</td></tr>
+    </table>
+    <div id="c2chart" style="height:250px;margin-top:4px"></div>
+    <p class="tiny">Death, TPD and IP in this same book are flat (0.94–1.15 / 0.98–1.04 / 1.00–1.26). This is the whole exhibit.</p>
+  </div>
+  <div class="col" style="flex:.62">
+    <div class="qbox">
+      <div class="ask">2022 lands 41 % above expected, 2023 24 % above, then it collapses back. Name the finding.<span></span></div>
+      <p class="tiny" style="margin-top:10px">Poisson z on 2022 is <b class="num">+16.2</b> — the largest single-year z in the deck so far. Is that evidence, or is it a trap?</p>
+      <button class="rv" data-rv="c2a">Reveal the answer key →</button>
+    </div>
+    <div class="reveal" id="c2a">
+      <div class="card acc-red" style="margin-top:12px">
+        <h4>Planted truth — and it is not what you said</h4>
+        <div class="verdict">
+          <span class="lab">benefit</span><b>CI</b>
+          <span class="lab">pattern</span><b>volatility, dispersion</b>
+          <span class="lab">window</span><b class="num">2017–2023</b>
+          <span class="lab">size</span><span class="num">σ = 0.3 injected on the counts</span>
+        </div>
+        <p class="tiny" style="margin:10px 0 0">No shock was planted. The generator multiplied the year-to-year noise. The 2022 spike is amplified sampling scatter: <b>the biggest number on the page is not the finding</b>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>data/eval/heldout/sc-0ce4d6 · family = noise_trap · truth trap_noise_drift_lookalike_b</span><span>6 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Case 2 — what they said" data-notes="9:30–11:00 — Walk the three rows left to right. 3.6 alone: 0/3, confidently wrong every time, conf 0.9. 3.6 with harness: 3/3 hits, and it names the overdispersion. 3.8 with harness: gets the hit every run but also keeps reporting the 2022 shock, so it pays a false alarm each time — the rulebook tells it to put both readings on the record when the evidence cannot separate them. Cost of hedging, on the record.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 2 · the answer key says</div>
+<h2>Same book, three behaviours</h2>
+<div class="rule"></div>
+<table class="compact">
+  <tr><th style="width:23%">configuration</th><th>what it said</th><th class="n">hit</th><th class="n">FP</th></tr>
+  <tr class="hl2"><td><b>3.6</b>, no harness</td><td>3/3 runs, same answer, high confidence: <i>"CI shock 2022–2023 — A/E jumps to 1.41 in 2022 and 1.24 in 2023, then reverts to 0.89"</i> — confidence 0.8, 0.9, 0.95 across the three runs</td><td class="n fp">0/3</td><td class="n fp">3</td></tr>
+  <tr><td><b>3.8</b>, no harness</td><td>run 1 got it by hedging — <i>"CI volatility 2015–2024: empirical SD ~0.19 versus ~0.02–0.04 implied"</i> <b>and</b> <i>"CI shock 2022–2023"</i>. Runs 2–3 dropped the volatility entry: <i>"persistent below-baseline A/E"</i></td><td class="n miss">1/3</td><td class="n fp">5</td></tr>
+  <tr><td><b>3.6</b> + its harness</td><td><i>"CI volatility, dispersion — empirical SD ~0.24 vs Poisson ~0.03 (×8 overdispersion)"</i> — named first, 3/3 runs. Two runs still add the shock as a second entry</td><td class="n hit">3/3</td><td class="n miss">2</td></tr>
+  <tr><td><b>3.8</b> + its harness</td><td>names volatility 3/3 <i>and</i> keeps a separate shock entry every run — the rulebook explicitly tells it to put both readings on the record when the evidence cannot separate them</td><td class="n hit">3/3</td><td class="n fp">3</td></tr>
+</table>
+<div class="row" style="margin-top:16px">
+  <div class="col">
+    <h3 style="margin-top:0">What moved the needle was not the model — it was the evidence</h3>
+    <p>Without a harness the model has to invent the dispersion test itself, and 3.6 never did: it read the spike and called it a shock, three times, at conf 0.9. With a harness the test is computed <em>before</em> the model is called and handed to it:</p>
+<pre class="small">YoY sd: empirical 0.2435 vs Poisson 0.0305 -&gt; overdispersion x7.97
+       (Poisson null INVALID on this line)
+evidence profile: scatter-dominant: the largest single-year move
+       exceeds the net level change ... if this scatter is the
+       finding, say so for THIS line and give the years</pre>
+  </div>
+  <div class="col" style="flex:.7">
+    <div class="card acc-amber"><h4>The hedge has a price</h4><p style="margin:0;font-size:16px">3.8 with a harness scores the hit <em>and</em> the false alarm on every run of this book. It is more often right and still less trustworthy. That tension is the whole precision-vs-recall story, visible in one scenario.</p></div>
+    <div class="card acc-teal" style="margin-top:12px"><h4>Family score, noise_trap</h4><p style="margin:0;font-size:16px">Best case across both models and both harnesses: <b class="num">50 %</b> accuracy. This family is where the benchmark still bites in 2026.</p></div>
+  </div>
+</div>
+<div class="foot"><span>published pack text from results/harness_final/zero_shot/sc-0ce4d6_prompt.md</span><span>7 / 34</span></div>
+</section>
+
+<!-- CASE 3 -->
+<section class="slide" data-title="Case 3 — hard" data-notes="11:00–13:30 — Four findings, two lines, three of them invisible. Let the audience find the 2020 Death shock first (everyone does), then ask what else is in there. This is the slide where the noise arithmetic matters: 0.05/yr drift against ±0.045 Poisson noise on four points — I computed t = 2.0 on the four observed points. Nothing human or machine can sign that off.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 3 — labeled <span class="num">hard</span></div>
+<h2>Book <span class="num">sc-c9d78b</span> · four findings are planted here</h2>
+<div class="rule"></div>
+<div class="row grow">
+  <div class="col" style="flex:1.35">
+    <table class="ae">
+      <tr><th>Year</th><th class="n">2015</th><th class="n">2016</th><th class="n">2017</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th></tr>
+      <tr><td><b>Death</b> A/E</td><td class="n">1.027</td><td class="n">0.925</td><td class="n">0.996</td><td class="n">1.070</td><td class="n">1.030</td><td class="n warn">1.294</td><td class="n">1.009</td><td class="n">0.893</td><td class="n">0.913</td><td class="n">0.970</td></tr>
+      <tr><td><b>IP</b> A/E</td><td class="n">0.979</td><td class="n">1.017</td><td class="n">1.020</td><td class="n">1.025</td><td class="n">1.045</td><td class="n warn">1.127</td><td class="n">0.967</td><td class="n">0.965</td><td class="n">0.969</td><td class="n">0.946</td></tr>
+      <tr class="dim"><td>CI A/E</td><td class="n">1.006</td><td class="n">1.004</td><td class="n">0.965</td><td class="n">1.048</td><td class="n">1.024</td><td class="n">1.024</td><td class="n">0.971</td><td class="n">1.045</td><td class="n">1.012</td><td class="n">1.021</td></tr>
+      <tr class="dim"><td>TPD A/E</td><td class="n">0.986</td><td class="n">1.041</td><td class="n">1.025</td><td class="n">1.029</td><td class="n">1.010</td><td class="n">0.963</td><td class="n">1.013</td><td class="n">1.007</td><td class="n">1.018</td><td class="n">0.985</td></tr>
+    </table>
+    <div id="c3chart" style="height:240px;margin-top:4px"></div>
+  </div>
+  <div class="col" style="flex:.6">
+    <div class="qbox">
+      <div class="ask">Four separate planted findings. Two of them are obvious.<span>Can you name the other two?</span></div>
+      <p class="tiny" style="margin-top:10px">Hint worth giving you: expected Death claims are 240–830 a year, so one year of Death A/E carries a Poisson sd of roughly <b class="num">±0.05</b>. CI and TPD are untouched.</p>
+      <button class="rv" data-rv="c3a">Reveal the answer key →</button>
+    </div>
+    <div class="reveal" id="c3a">
+      <div class="card acc-red" style="margin-top:12px">
+        <h4>Planted truth — 4 units</h4>
+        <div class="verdict">
+          <span class="lab">1</span><b>Death drift</b> <span class="num">+0.05/yr, 2016–2019</span>
+          <span class="lab">2</span><b>IP drift</b> <span class="num">+0.03/yr, 2016–2019</span>
+          <span class="lab">3</span><b>Death shock</b> <span class="num">2020 ×1.3</span>
+          <span class="lab">4</span><b>IP shock</b> <span class="num">2020 ×1.2</span>
+        </div>
+        <p class="tiny" style="margin:10px 0 0">One coordinated event across two lines: a four-year ramp, then a one-year hit. The Death drift fitted from the data gives slope <b class="num">+0.039/yr</b>, SE <b class="num">0.0195</b>, <b class="num">t = 2.0</b> on 2 degrees of freedom. It is not detectable. Neither is the IP drift at +0.03 against ±0.026.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>data/eval/heldout/sc-c9d78b · family = systemic · truth sys_cascade_drift_shock_2018 · regression fitted by me from the shipped CSV</span><span>8 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Case 3 — what they said" data-notes="13:30–15:00 — Every configuration lands on 2/4 — that is the honest ceiling given three findings sit inside the noise. Point at run 3 of 3.8 with harness: five claims for four truths, and three false alarms. That is the shape of over-claiming: not stupidity, generosity. Then the kicker: the Death drift was never recovered — claims aimed at 2022-2024 or 2015-2020 miss the planted 2016-2019 window.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 3 · the answer key says</div>
+<h2>2 out of 4 — every single time</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.25">
+    <table class="compact">
+      <tr><th>configuration</th><th class="n">per run</th><th>typical answer</th></tr>
+      <tr><td>3.8 + own harness</td><td class="n">2/4</td><td>run 1 names both shocks exactly (<i>z</i> +6.6 / +5.0). Runs 2–3 trade the IP shock for an accidental IP drift, and run 3 piles on three extra claims</td></tr>
+      <tr><td>3.6 + own harness</td><td class="n">2/4</td><td>run 2 is the cleanest answer in the deck: two entries, both shocks, zero noise, zero FP</td></tr>
+      <tr><td>3.8, no harness</td><td class="n">2/4</td><td>Death shock + an IP drift ending in 2020 (it only lands because the window overlaps), <i>plus</i> an invented IP recovery read off a pooled termination A/E of 0.955 and two entries that literally say <i>"No anomaly"</i></td></tr>
+      <tr><td>3.6, no harness</td><td class="n">1.7/4</td><td>runs 1 and 3 are spotless: two entries, zero FP. <b>Run 2</b> files Death 2020 as <i>volatility 2015–2024</i> instead of a shock and loses it</td></tr>
+    </table>
+    <div class="card acc-red" style="margin-top:14px">
+      <h4>The most instructive answer in the corpus</h4>
+      <p style="margin:0;font-size:16.5px">3.8, own harness, run 3 — five findings for four planted units, <b>three of them false alarms</b>: <i>"Death drift 2022–2024, ~+0.038/yr, R² 0.93, a below-baseline level recovering toward 1.0"</i> and <i>"Death volatility 2020–2024, ×3.23 overdispersion"</i>.</p>
+      <p style="margin:8px 0 0;font-size:16.5px">Every number it quotes is <em>correct</em>. The finding is still wrong: that late rebound is the give-back after the 2020 shock, not a second event. <b>Accurate arithmetic, false claim.</b></p>
+    </div>
+  </div>
+  <div class="col" style="flex:.8">
+    <h3 style="margin-top:0">Why 2/4 is the honest ceiling here</h3>
+    <div class="stack">
+      <div class="hbar"><span class="t">Death shock 2020</span><span class="bar"><i style="width:100%;background:var(--green)"></i></span><span class="v">6/6</span></div>
+      <div class="hbar"><span class="t">IP shock 2020</span><span class="bar"><i style="width:33%;background:var(--amber)"></i></span><span class="v">2/6</span></div>
+      <div class="hbar"><span class="t">IP drift 2016–19</span><span class="bar"><i style="width:67%;background:var(--amber)"></i></span><span class="v">4/6</span></div>
+      <div class="hbar"><span class="t">Death drift 2016–19</span><span class="bar"><i style="width:3%;background:var(--red)"></i></span><span class="v">0/12</span></div>
+    </div>
+    <p class="small" style="margin-top:12px">Bars are the six harnessed runs. The Death shock is 6.6 Poisson sd and nobody misses it. The IP shock (5.0 sd) is the one that gets absorbed: whenever the model files the whole line as one drift, the drift scores and the shock inside it disappears — one event, one entry, one unit short. The IP drift was only ever recovered by accident: the claims that landed aimed at <span class="num">2015–2020</span> or <span class="num">2016–2024</span> and survived because the scorer asks for window <em>overlap</em>. Every one of the six harnessed runs scored <b>exactly 2/4</b>, and <b>the Death drift was never recovered in twelve runs</b>.</p>
+    <p class="small"><b>Read it as a ceiling, not a failure.</b> Three of the four planted findings were not recoverable from the exhibit — a human actuary given the same file would score the same 2/4.</p>
+  </div>
+</div>
+<div class="foot"><span>per-control verdicts from results/harness_final/scores.json and results/harness_q36_final/scores.json</span><span>9 / 34</span></div>
+</section>
+
+<!-- CASE 4 — clean book -->
+<section class="slide" data-title="Case 4 — the clean book" data-notes="15:00–17:00 — The most important case for a governance audience. One book in the exam has nothing planted. 3.6 stayed silent six times out of six. 3.8 without a harness accused the book in 2 of 3 runs, and the year it picked is a genuine +2.8 z — the kind of wobble an ordinary book produces several times a decade. With a harness both models go quiet. Silence is a capability.">
+<div class="kicker"><span class="dot"></span> Act 1 · Case 4 — the one with nothing in it</div>
+<h2>Book <span class="num">sc-12be68</span> · the answer is "nothing"</h2>
+<div class="rule"></div>
+<div class="row grow">
+  <div class="col" style="flex:1.3">
+    <table class="ae">
+      <tr><th>Year</th><th class="n">2015</th><th class="n">2016</th><th class="n">2017</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th></tr>
+      <tr><td><b>Death</b> A/E</td><td class="n">0.944</td><td class="n hi">1.163</td><td class="n">0.966</td><td class="n">0.973</td><td class="n">1.010</td><td class="n">0.999</td><td class="n">0.980</td><td class="n">1.015</td><td class="n">1.019</td><td class="n">0.990</td></tr>
+      <tr><td>CI A/E</td><td class="n">1.006</td><td class="n">1.004</td><td class="n">0.965</td><td class="n">1.048</td><td class="n">1.024</td><td class="n">1.024</td><td class="n">0.971</td><td class="n">1.045</td><td class="n">1.012</td><td class="n">1.021</td></tr>
+      <tr><td>TPD A/E</td><td class="n">0.986</td><td class="n">1.041</td><td class="n">1.025</td><td class="n">1.029</td><td class="n">1.010</td><td class="n">0.963</td><td class="n">1.013</td><td class="n">1.007</td><td class="n">1.018</td><td class="n">0.985</td></tr>
+      <tr><td>IP A/E</td><td class="n">1.023</td><td class="n">1.029</td><td class="n">0.996</td><td class="n">0.999</td><td class="n">0.997</td><td class="n">0.999</td><td class="n">0.978</td><td class="n">1.004</td><td class="n">0.998</td><td class="n">1.012</td></tr>
+    </table>
+    <div id="c4chart" style="height:240px;margin-top:4px"></div>
+  </div>
+  <div class="col" style="flex:.62">
+    <div class="qbox">
+      <div class="ask">Forty line-years. Nothing planted anywhere. What do you write in the commentary?</div>
+      <button class="rv" data-rv="c4a">Reveal →</button>
+    </div>
+    <div class="reveal" id="c4a">
+      <div class="card acc-green" style="margin-top:12px">
+        <h4>The answer key is empty</h4>
+        <p style="margin:6px 0 0;font-size:16.5px">Zero controls. Any finding at all is a false alarm.</p>
+      </div>
+      <div class="card acc-red" style="margin-top:12px">
+        <h4>And 3.8 could not keep quiet</h4>
+        <p style="margin:6px 0 0;font-size:16.5px">No harness:</p>
+        <div class="q" style="font-size:16px;margin-top:6px">"Death · shock · 2016 · ~+0.16 A/E; 337 actual vs 290 expected deaths, +47 claims" <span class="who">confidence 0.65 — reported in 2 of 3 runs; 3.6 stayed silent in all six of its runs</span></div>
+        <p style="margin:8px 0 0;font-size:15.5px">The arithmetic is right: <b class="num">z = +2.78</b>. But across 40 line-years the chance that <em>some</em> cell reaches ±2.8 is about <b class="num">20 %</b>. Ordinary books do this. The rulebook clause that fixed it: <em>"a single-year excursion around z 3 is the kind of thing ordinary books produce, so leave it out."</em></p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>data/eval/heldout/sc-12be68 · family = CLEAN (noop_neutral_controls, bit-identical to baseline)</span><span>10 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What the cases taught" data-notes="17:00–17:45 — Bridge slide. Say it plainly: the model's eye is decent; what fails is judgement about what deserves to be written down. That reframes the next three acts — we are measuring a system that turns a judgement into a number.">
+<div class="center">
+  <div class="kicker"><span class="dot"></span> Act 1 · the pattern behind the four cases</div>
+  <h2 style="font-size:44px;max-width:1000px">Seeing is not the hard part.<br><span style="color:var(--teal)">Deciding what deserves to be written down is.</span></h2>
+  <div class="rule" style="width:140px"></div>
+  <div class="grid g3" style="margin-top:28px;max-width:1050px">
+    <div class="card acc-green"><h4>Big things are found</h4><p style="margin:0;font-size:16.5px">Shock family: <b class="num">100 %</b> accuracy and 8 % false-alarm rate for both harnessed models. A 7-sigma year is not missed.</p></div>
+    <div class="card acc-amber"><h4>Small things are missed</h4><p style="margin:0;font-size:16.5px">Drift sits at <b class="num">67 %</b> for every configuration — because in several books the drift is arithmetically undetectable, not because the model is blind.</p></div>
+    <div class="card acc-red"><h4>Nothing is invented out of thin air — mostly</h4><p style="margin:0;font-size:16.5px">Under 3.8's harness, <b class="num">31 of 69</b> false alarms had no corresponding miss at all: pure invention. Under 3.6's: <b class="num">6 of 50</b>.</p></div>
+  </div>
+  <p class="small" style="margin-top:26px;max-width:1000px">Which raises the question an actuary actually has: <b>who decided that was a hit?</b> That is the methodology in Act 2 — and it is where agentic coding earns its place.</p>
+</div>
+<div class="foot"><span>family rates: held-out split, 23 books × 3 runs, sc-e6ffa4 excluded (see Act 3)</span><span>11 / 34</span></div>
+</section>
+
+<!-- ══════════════ ACT 2 — METHODOLOGY ══════════════ -->
+<section class="slide" data-title="Act 2 opener" data-notes="17:45–18:00 — Transition: methodology is not bureaucracy; it is what makes the sentence 'the model is 71 % accurate' defensible. Flag that this act is the agentic-coding part they asked for — the loop where a model improved the system around itself.">
+<div class="center">
+  <div class="kicker"><span class="dot"></span> Act 2 · Methodology</div>
+  <h2 style="font-size:46px">How a judgement becomes a number<br>you are allowed to quote</h2>
+  <div class="rule" style="width:140px"></div>
+  <div class="grid g4" style="margin-top:26px;max-width:1080px">
+    <div class="card acc-teal"><h4>1 · Data</h4><p style="margin:0;font-size:16px">generated, not curated — so the answer key exists and never leaks</p></div>
+    <div class="card acc-teal"><h4>2 · Instrument</h4><p style="margin:0;font-size:16px">evidence pack + rulebook + pinned prompt = the <b>harness</b></p></div>
+    <div class="card acc-teal"><h4>3 · Growth</h4><p style="margin:0;font-size:16px">a third model edits the harness on recorded failures, one hypothesis at a time</p></div>
+    <div class="card acc-teal"><h4>4 · Marking</h4><p style="margin:0;font-size:16px">strict scorer, two ledgers, frozen gate, one spent held-out exam</p></div>
+  </div>
+  <p style="margin-top:26px;font-size:20px;max-width:1000px">This is where the agentic part lives. Not a chatbot with a spreadsheet — <em>a loop that edits code against a test set it is not allowed to peek at.</em></p>
+</div>
+<div class="foot"><span>docs/MODEL_AND_HARNESS_EVOLUTION.md §2 · docs/HARNESS_GROWTH.md</span><span>12 / 34</span></div>
+</section>
+
+<section class="slide" data-title="The data factory" data-notes="18:00–19:15 — Emphasise the three points an actuary cares about: determinism (same seed, same bytes), the answer key is generated so nobody hand-labelled anything, and the model-facing tree is opaque and leak-scanned. Mention the two repos: generator is a data tool, this repo is the exam built on it.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · data</div>
+<h2>Ground truth you can hand to a stranger</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.25">
+<pre>git clone Synthetic_Life_Insurance_Data_Generator   <span style="color:#5f7590"># separate public repo</span>
+python3 scripts/generate_scenarios.py --scale full   <span style="color:#5f7590"># ~1 h, seed 42, 250 000 policies</span></pre>
+    <table class="compact" style="margin-top:14px">
+      <tr><th>zone</th><th>what is in it</th><th>who may see it</th></tr>
+      <tr><td class="num">data/eval/…</td><td>47 books, opaque ids <span class="num">sc-&lt;6hex&gt;</span>, A/E CSVs + PNGs</td><td>the model</td></tr>
+      <tr><td class="num">data/truth/…</td><td>manifests, id map, <span class="num">seal.json</span></td><td>the scorer only</td></tr>
+    </table>
+    <ul class="tight" style="margin-top:14px">
+      <li><strong>Baselines are ≈1.0 by construction.</strong> A control edits the <em>actuals</em> only, inside a date window — expected is never touched, so an A/E shift is the planted signal and nothing else.</li>
+      <li><strong>Deterministic.</strong> Same scenario id, same bytes. Reproducible from a commit pin (<span class="num">66a73d0</span>) plus seed 42.</li>
+      <li><strong>The split is disjoint</strong> by benefit × control type × window × factor: 23 books to tune on, 24 never touched until the exam. A test set that rhymes with the practice set is not a test set.</li>
+      <li><strong>Leak-gated.</strong> A byte-level scan runs at build time and again before the first API call; the pack must not contain the taxonomy words. It once refused to start a run because the word "volatility" had slipped into my own rulebook.</li>
+    </ul>
+  </div>
+  <div class="col" style="flex:.85">
+    <h3 style="margin-top:0">The eight families = the eight question types</h3>
+    <table class="compact">
+      <tr><th>family</th><th>planted</th><th class="n">held-out</th></tr>
+      <tr><td>drift</td><td>sustained multi-year move</td><td class="n">3</td></tr>
+      <tr><td>shock</td><td>abrupt level change</td><td class="n">3</td></tr>
+      <tr><td>volatility</td><td>more scatter, flat level</td><td class="n">2</td></tr>
+      <tr><td>recovery</td><td>IP termination rate by diagnosis</td><td class="n">3</td></tr>
+      <tr><td><b>systemic</b></td><td>one event, 2–4 lines at once</td><td class="n">8</td></tr>
+      <tr><td>mixed</td><td>two unrelated events</td><td class="n">2</td></tr>
+      <tr><td><b>noise_trap</b></td><td>looks like drift or a spike; truth is volatility</td><td class="n">2</td></tr>
+      <tr><td><b>CLEAN</b></td><td>nothing — any claim is a false alarm</td><td class="n">1</td></tr>
+    </table>
+    <p class="small" style="margin-top:12px">The trap families are the point. A benchmark of only findable signals measures nothing you do not already know — four of the eight families are now saturated for both models.</p>
+  </div>
+</div>
+<div class="foot"><span>config/scenarios.yaml · scripts/generate_scenarios.py · scripts/leakcheck.py</span><span>13 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What the model is fed" data-notes="19:15–20:15 — The smallness of the feed is the surprise: about 130 numbers. Everything else is a path it may choose to read. Point out that this is a text exam — the PNGs are listed but the model is not shown them in these campaigns.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · the question</div>
+<h2>One turn, one scenario, about 130 numbers</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.15">
+<pre class="small">Scenario: sc-c9d78b
+
+Files available (paths are relative to the scenario folder):
+  - artifacts/ae_death_by_year.csv
+  - artifacts/ae_death_age_gender.csv          <span style="color:#5f7590">· listed only —</span>
+  - artifacts/ae_death_by_year.png             <span style="color:#5f7590">· readable via a</span>
+  - death_claims.csv                            <span style="color:#5f7590">· sandboxed call</span>
+  - artifacts/summary.json
+  … 33 paths
+
+summary.json (overall A/E per benefit, claim counts):
+{ "Death": {"overall_ae": 1.004, "claims": 5020}, … }
+
+artifacts/ae_death_by_year.csv — yearly (Actual, Expected, AE):
+  2015: Actual=246  Expected=240  AE=1.027
+  2016: Actual=268  Expected=290  AE=0.925
+  2017: Actual=336  Expected=337  AE=0.996
+  …</pre>
+  </div>
+  <div class="col">
+    <div class="grid g2">
+      <div class="kpi t"><div class="v">~2.7k</div><div class="l">prompt tokens bare — no harness. Four yearly series, ten rows each, plus the file list.</div></div>
+      <div class="kpi a"><div class="v">~6.6k</div><div class="l">the same exam once the computed evidence pack is appended</div></div>
+    </div>
+    <h3>What is deliberately <em>not</em> in the feed</h3>
+    <ul class="tight">
+      <li>the scenario name — <span class="num">sys_cascade_drift_shock_2018</span> would print the answer</li>
+      <li>the manifest, the id map, anything under <span class="num">data/truth/</span></li>
+      <li>the charts: listed by path, not shown. This is a numbers exam, not a vision exam.</li>
+    </ul>
+    <div class="card acc-amber" style="margin-top:6px">
+      <h4>Why this matters to you</h4>
+      <p style="margin:0;font-size:16px">A model given 130 numbers has no excuse for arithmetic slips, and neither do you for a verdict that cannot be traced to a row. Every published run keeps its exact prompt — <span class="num">sc-c9d78b_prompt.md</span> is on disk, 20 409 bytes, with a SHA-256.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>verbatim from results/harness_final/zero_shot/sc-c9d78b_prompt.md</span><span>14 / 34</span></div>
+</section>
+
+<section class="slide" data-title="The harness" data-notes="20:15–21:15 — Define 'harness' once, plainly: deterministic evidence + rules + prompt, wrapped around the model. Stress that nothing differs between arms except the harness — same model weights, endpoint, sampler, one turn. This is the 2x2 that everything else rests on.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · the instrument</div>
+<h2>The harness: three parts, one variable</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <div class="card acc-teal" style="margin-bottom:12px">
+      <h4>1 · Evidence pack <span class="pill">stats_pack.py</span></h4>
+      <p style="margin:0;font-size:16px">Deterministic statistics computed from the same CSVs <em>before</em> the call: trend gradient and R², best step, non-overlapping excursion windows, onset ratio, longest run, 3-year smoothed series, tail segment, per-line overdispersion, cross-line swing coordination. It shows <b>evidence, not verdicts</b> — and says so.</p>
+    </div>
+    <div class="card acc-amber">
+      <h4>2 · Rulebook <span class="pill">HARNESS_RULES · 5 021 chars</span></h4>
+      <p style="margin:0;font-size:16px">The taxonomy, the output schema, and discipline clauses about what does <b>not</b> count: mild overdispersion is normal texture; a z of 3 in one year is ordinary; a small age cell is not evidence; anything you are not claiming must not appear as its own entry.</p>
+    </div>
+    <div class="card acc-violet" style="margin-top:12px">
+      <h4>3 · Pinned system prompt + up to 4 sandboxed calls</h4>
+      <p style="margin:0;font-size:16px">Prompt lives in a file so it can be versioned without touching the runner. The model may run <span class="num">python -I -c</span> against the scenario folder — 10 s, 4 000 chars of output.</p>
+    </div>
+  </div>
+  <div class="col" style="flex:1.1">
+    <div class="card">
+      <h4>the 2 × 2 design — nothing else varies</h4>
+      <table style="margin-top:4px">
+        <tr><th></th><th>no harness</th><th>own harness</th></tr>
+        <tr><td><b>Qwen3.6-27B</b></td><td>59.5 % acc · 40.0 % FP</td><td class="hit">65.8 % · 38.7 %</td></tr>
+        <tr><td><b>Qwen3.8-27B</b></td><td>64.0 % acc · 65.7 % FP</td><td class="hit">71.2 % · 41.9 %</td></tr>
+      </table>
+      <p class="small" style="margin:10px 0 0">Same weights, same endpoint, same sampler (<span class="num">temp 1.0, top_p 0.95, top_k 20</span>), one generation at a time on one llama.cpp slot, three runs each. Both subjects share the 27 B architecture — so every difference between them is <b>behaviour</b>, not capacity.</p>
+    </div>
+    <div class="card acc-red" style="margin-top:12px">
+      <h4>The sandbox is advisory, not enforced — we say so out loud</h4>
+      <p style="margin:0;font-size:16px"><span class="num">run_sandboxed_python()</span> has a timeout and an output cap and sets the working directory. There is <b>no rlimit, no network block, no filesystem jail</b>. A direct probe showed model-authored code <em>could</em> enumerate the truth manifests. All 97 tool calls the campaigns recorded stayed inside <span class="num">artifacts/</span> — because the model chose to. If you rebuild this, put a real jail in before you run anything untrusted.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>scripts/stats_pack.py · HARNESS_RULES in scripts/run_zero_shot.py · README §2</span><span>15 / 34</span></div>
+</section>
+
+<section class="slide" data-title="The loop (agentic)" data-notes="21:15–23:15 — This is the heart of the agentic-coding story. Say it in one line: I did not write the harness. A third model edited it, against recorded failures, under rules that stop it cheating. Emphasise one hypothesis per pass — that is a constraint the compute forced, and it is also what makes the result auditable. Note the honesty: it does not set the agenda, a human picked which failures to chase.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · the agentic part</div>
+<h2>A model grew the harness. Under rules.</h2>
+<div class="rule"></div>
+<div class="loop" style="margin-top:6px">
+  <div class="st"><span class="n">1</span><b>Run</b><span>the frozen harness over the 23 <b>optimization</b> books. Keep the corpus: prompt, answer, tool log, per-unit scorer diff.</span></div>
+  <div class="st"><span class="n">2</span><b>Read the wreckage</b><span>for each failed unit, say <em>why</em> it failed. Evidence, not vibes: the recorded prompt, the answer, the diff.</span></div>
+  <div class="st"><span class="n">3</span><b>One hypothesis, one edit</b><span>a new block in <span class="num">stats_pack.py</span>, one discipline clause, or a new pinned prompt. Never two at once.</span></div>
+  <div class="st"><span class="n">4</span><b>Validate offline first</b><span>regenerate all 23 packs and diff them; confirm the CLEAN book and every solved book are untouched; run the leak preflight. <b>Zero API calls.</b></span></div>
+  <div class="st"><span class="n">5</span><b>Re-run that one book ×3</b><span>a single-book run costs ~10–40 min; a full 23-book pass costs 2 h (3.6) to 7 h (3.8).</span></div>
+  <div class="st"><span class="n">6</span><b>Keep or revert</b><span>against a pre-registered bar. A failed edit is <b>reverted</b>, not massaged. Three edits died this way in the 3.6 campaign.</span></div>
+  <div class="st"><span class="n">7</span><b>Snapshot the bytes</b><span>code <em>and</em> prompt copied into <span class="num">harness_snapshot/</span> with hashes before the next run, so any number can be traced to the instrument that made it.</span></div>
+  <div class="st" style="border-color:#3b5a6e"><span class="n" style="background:var(--amber);color:#241606">✕</span><b>Never</b><span>never tune against <span class="num">heldout</span>; never let a held-out result influence an edit. The held-out split is mounted once and spent.</span></div>
+</div>
+<div class="row" style="margin-top:16px">
+  <div class="col"><p style="margin:0"><strong>Who typed the code?</strong> The loop was driven by a <em>third</em> model — DeepSeek V4.1 Flash, deliberately not one of the two subjects, so no subject tuned the exam it later sat. It produced <b>7 harness versions</b> for 3.8 (v1.0 → v1.6e) from <b>307 per-scenario diary entries</b>, 268 of which involved reviewing or editing the harness; two kept edits for 3.6 from the same base.</p></div>
+  <div class="col" style="flex:.75">
+    <div class="card acc-amber"><h4>The two limits I will not hide</h4>
+      <p style="margin:0;font-size:15.5px">A human chose which failures to chase — the model proposed and applied, it did not set the agenda. And the frozen bytes prove <em>which harness produced which numbers</em>, not who typed each line. The runbooks narrate that; the narrative is not the evidence.</p></div>
+  </div>
+</div>
+<div class="foot"><span>docs/MODEL_AND_HARNESS_EVOLUTION.md §2.5 · docs/HARNESS_GROWTH.md Parts 2 and 3</span><span>16 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Edits that survived" data-notes="23:15–24:15 — Concrete code edits — this is what 'agentic coding' actually looks like at the file level. Best story: the tail block, added because the model's own prose said the right thing and the schema lost it; it recovered two units and cost two others, and produced +9 false alarms the write-up owns. Mention the declined fix: they found a better wording after passing the gate and refused to apply it because that is how you overfit a tuning set.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · what the loop actually shipped</div>
+<h2>Seven versions, four kept edits, three reverts</h2>
+<div class="rule"></div>
+<table class="compact">
+  <tr><th style="width:31%">the edit</th><th style="width:30%">what it was for</th><th>outcome, measured</th></tr>
+  <tr><td><b>smoothed-window labelling</b><br><span class="tiny">the 3-yr moving average labelled its windows one-sidedly, so a smoothed shape looked like it stopped two years before the data did</span></td><td>a drift being reported as a shock</td><td class="hit">kept — part of the +4-unit gain at pass 2</td></tr>
+  <tr><td><b>onset caution</b><br><span class="tiny">names a competing sustained-run reading when the onset ratio was measured against too narrow a window</span></td><td>one systemic book</td><td class="hit">kept with guard · <b class="num">0/3 → 3/3</b></td></tr>
+  <tr><td><b>coordination guard</b></td><td>the caution above broke a different book</td><td class="hit">kept · <b class="num">4/4 → 11/12</b>, pack byte-identical elsewhere</td></tr>
+  <tr class="hl2"><td><b>the TAIL block</b><br><span class="tiny">the final three years' gradient, fit and level vs the years before, because a late rise was being cancelled in the whole-window fit</span></td><td>two late drifts the pack made invisible</td><td class="miss">net <b>0</b>: recovered 2 units, cost 2 (the model now read a shock line as drift) — and false alarms went <b class="num">0.52 → 0.91</b> per answer because my own wording invited a second entry</td></tr>
+  <tr><td><b>rule 3c sharpened</b><br><span class="tiny">"one entry per affected line; naming the largest line and mentioning the others in prose counts as finding only the largest"</span></td><td>the model's prose said "coordinated with IP" and then emitted one line</td><td class="hit">+1 unit · a rule-following failure, not a knowledge failure</td></tr>
+  <tr class="dim"><td>GIVE-BACK scoping · clause-3b efficiency rewrite · TAIL rebound guard</td><td>three further ideas</td><td>reverted — no change, inert, or <em>worse</em> (3/6 vs 4/6)</td></tr>
+</table>
+<div class="row" style="margin-top:14px">
+  <div class="col"><div class="card acc-green" style="margin:0"><h4>The declined fix</h4><p style="margin:0;font-size:16px">After the freeze gate passed, a better wording was found ("extend the same finding's window into the tail" instead of "add a second finding"). It was <b>deliberately not applied</b> — editing the instrument right after it passes the bar it just certified is precisely how a tuning set gets overfitted.</p></div></div>
+  <div class="col"><div class="card acc-red" style="margin:0"><h4>The idea that failed four times</h4><p style="margin:0;font-size:16px">A dispersion floor low enough to catch the planted-unsteadiness books fires on <b class="num">28</b> lines, of which <b class="num">4</b> are right, and 16 of the false ones are shocks the model currently gets right 15/15. Trading a real skill for a proxy is not an improvement. The ×6 rule stayed.</p></div></div>
+</div>
+<div class="foot"><span>docs/HARNESS_GROWTH.md Parts 3–4 · report §3.3 · the loop fixed more in 25 minutes than four full optimisation passes had</span><span>17 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Marking discipline" data-notes="24:15–26:00 — Two things: the two-ledger arithmetic (do not blend recall and false alarms — they have different denominators) and the freeze gate (pre-registered stopping rule, so 'done' is not a matter of taste). Land the optimism gap hard: tuning said 97.7 %, the exam said 69.1 %. That 30-point hole is the single most transferable finding in the whole project for a risk audience.">
+<div class="kicker"><span class="dot"></span> Act 2 · Methodology · the marking</div>
+<h2>Two ledgers, and a gate fixed in advance</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.1">
+    <table class="compact">
+      <tr><th>metric</th><th>formula</th><th>the question</th></tr>
+      <tr><td><b>accuracy</b> <span class="tiny">(strict recall)</span></td><td class="num">hits ÷ units</td><td>did it find what was there?</td></tr>
+      <tr><td><b>FP/claim</b></td><td class="num">false alarms ÷ claims</td><td>when it spoke, how often was it wrong?</td></tr>
+      <tr><td><b>precision</b></td><td class="num">hits ÷ claims = 1 − FP/claim</td><td>how far can you trust it out loud?</td></tr>
+    </table>
+    <div class="card" style="margin-top:14px">
+      <h4>Worked example — 3.8 with its own harness</h4>
+      <div class="row" style="gap:18px;align-items:center">
+        <div class="num" style="font-size:15px;line-height:1.9;white-space:nowrap">
+        units&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;111<br>
+        strict hits&nbsp;&nbsp;&nbsp;<b>79</b><br>
+        false alarms&nbsp;<b>57</b><br>
+        claims&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>79 + 57 = 136</b>
+        </div>
+        <div class="num" style="font-size:15px;line-height:1.9">
+        accuracy = 79 ÷ 111 = <b class="hit">71.2 %</b><br>
+        FP/claim = 57 ÷ 136 = <b class="fp">41.9 %</b><br>
+        precision = 79 ÷ 136 = <b>58.1 %</b>
+        </div>
+      </div>
+      <p class="small" style="margin:10px 0 0">A <em>unit</em> is one planted control in one run; a book-wide control expands to one unit per benefit line. Accuracy and FP/claim never add to 100 % — different denominators. In the units ledger accuracy + miss = 100 %; in the findings ledger precision + FP/claim = 100 %. <b>Reporting one of the two hides half of what happens.</b></p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-teal">
+      <h4>The freeze gate — agreed before any tuning</h4>
+      <ul class="tight" style="margin-top:4px">
+        <li>strict recall <b class="num">≥ 80 %</b></li>
+        <li>false alarms <b class="num">≤ 1.0 per answer</b></li>
+        <li>zero anomalies claimed on the CLEAN book</li>
+        <li>zero unparseable answers, zero errored runs</li>
+        <li>no regression on the two drift strata vs the zero-shot reference <span class="tiny">— this is the clause that stops a harness buying recall by trading away a real skill</span></li>
+      </ul>
+      <p class="small" style="margin:8px 0 0">Exit status 0 or 1. Nothing in the gate calls the LLM. A human did later choose to lift the 3-pass cap — legitimate, but only because the held-out books stayed unread.</p>
+    </div>
+    <div class="card acc-red" style="margin-top:12px">
+      <h4>The most transferable number in the whole project</h4>
+      <table style="margin-top:2px">
+        <tr><th></th><th class="n">tuning split</th><th class="n">held-out exam</th><th class="n">gap</th></tr>
+        <tr><td>Qwen3.8</td><td class="n">97.7 %</td><td class="n">69.1 %</td><td class="n fp">−28.6</td></tr>
+        <tr><td>Qwen3.6</td><td class="n">95.5 %</td><td class="n">63.4 %</td><td class="n fp">−32.1</td></tr>
+      </table>
+      <p class="small" style="margin:8px 0 0">A sign-off based on the tuned numbers would have been wrong by <b>about 30 points</b> — for both models. An optimisation split is a ranking device. It is not a forecast.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>scripts/score_xam.py v3 · scripts/harness_gate.py · report §2.7, §2.8, §3.6</span><span>18 / 34</span></div>
+</section>
+
+<!-- ══════════════ ACT 3 — RESULTS ══════════════ -->
+<section class="slide" data-title="Act 3 opener + headline" data-notes="26:00–27:15 — Six rows, same 23 books, three runs each — every row like-for-like. Say the punchline twice: accuracy ranks 3.8 first; precision reverses it. And note the fourth row: 3.8 with no harness is nearly as accurate as 3.6 with a full harness, at 34 % precision instead of 61 %. Same recall, radically different trustworthiness.">
+<div class="kicker"><span class="dot"></span> Act 3 · The results</div>
+<h2>One exam, six configurations, 69 answers each</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.25">
+    <table>
+      <tr><th>configuration</th><th class="n">accuracy</th><th class="n">FP/claim</th><th class="n">precision</th></tr>
+      <tr class="hl"><td><b>Qwen3.8 + its own harness</b></td><td class="n hit">71.2 %</td><td class="n">41.9 %</td><td class="n">58.1 %</td></tr>
+      <tr class="hl"><td><b>Qwen3.6 + its own harness</b></td><td class="n">65.8 %</td><td class="n hit">38.7 %</td><td class="n hit">61.3 %</td></tr>
+      <tr class="dim"><td>Qwen3.8 + <em>3.6's</em> harness</td><td class="n">70.3 %</td><td class="n">43.1 %</td><td class="n">56.9 %</td></tr>
+      <tr class="dim"><td>Qwen3.6 + <em>3.8's</em> harness</td><td class="n">64.9 %</td><td class="n">43.3 %</td><td class="n">56.7 %</td></tr>
+      <tr class="hl2"><td>Qwen3.8, no harness</td><td class="n">64.0 %</td><td class="n fp">65.7 %</td><td class="n fp">34.3 %</td></tr>
+      <tr class="hl2"><td>Qwen3.6, no harness</td><td class="n">59.5 %</td><td class="n">40.0 %</td><td class="n">60.0 %</td></tr>
+    </table>
+    <p class="small" style="margin-top:12px">Held-out split, 23 common books × 3 runs. <span class="num">sc-e6ffa4</span> is excluded from every cell so the rows are like-for-like — it is accounted for separately, on its own slide. <b>Green = best in column.</b></p>
+  </div>
+  <div class="col">
+    <div class="grid g2" style="gap:12px">
+      <div class="kpi t"><div class="v">+5.4</div><div class="l">points of accuracy for 3.8 — the recall lead</div></div>
+      <div class="kpi g"><div class="v">+3.2</div><div class="l">points of precision for 3.6 — the trust lead</div></div>
+    </div>
+    <div class="card acc-amber" style="margin-top:14px">
+      <h4>The ranking reverses on the second metric</h4>
+      <p style="margin:0;font-size:16.5px">Accuracy alone crowns 3.8. Precision crowns 3.6. Neither is wrong: <b>3.8 finds more and invents more; 3.6 finds less and lies less.</b> Which is "better" is a question about <em>your</em> cost of a miss versus your cost of a false alarm — not a question about models.</p>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h4>And the row nobody expects</h4>
+      <p style="margin:0;font-size:16.5px">3.8 with <b>no</b> harness (64.0 % accuracy) nearly matches 3.6 with a <b>full</b> harness (65.8 %) — at <b class="fp">34.3 %</b> precision instead of <b class="hit">61.3 %</b>. Comparable recall. Radically different trustworthiness. Recall alone would have called those two the same model.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>results/harness_final · harness_q36_final · harness_q36_final_v16e · xam_v5 · xam_q36 — recomputed from the run records, matches published</span><span>19 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What the harness is worth" data-notes="27:15–28:15 — Three sentences: the same wrapper is worth 24 points of precision to one model and 6 points of accuracy to the other; it does not transfer; a new model version inherits an unproven harness, not a working one. The withdrawn claim is the credibility moment here — say it plainly: we published +8.3, the sample grew, it became −1, we withdrew it.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · the instrument</div>
+<h2>The same wrapper is worth different things to different models</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <h3 style="margin-top:0">Harness, subtracted: before → after</h3>
+    <div class="stack">
+      <div class="hbar"><span class="t">3.8 precision</span><span class="bar"><i style="width:34.3%;background:#4a6076"></i><i style="width:23.8%;background:var(--green)"></i></span><span class="v">34.3 → 58.1</span></div>
+      <div class="hbar"><span class="t">3.8 accuracy</span><span class="bar"><i style="width:64%;background:#4a6076"></i><i style="width:7.2%;background:var(--teal)"></i></span><span class="v">64.0 → 71.2</span></div>
+      <div class="hbar"><span class="t">3.6 accuracy</span><span class="bar"><i style="width:59.5%;background:#4a6076"></i><i style="width:6.3%;background:var(--teal)"></i></span><span class="v">59.5 → 65.8</span></div>
+      <div class="hbar"><span class="t">3.6 precision</span><span class="bar"><i style="width:60%;background:#4a6076"></i><i style="width:1.3%;background:var(--teal)"></i></span><span class="v">60.0 → 61.3</span></div>
+    </div>
+    <p class="small" style="margin-top:14px"><b>3.8's problem was asserting</b>, and the harness fixed asserting: <b class="num">+23.8</b> points of precision. <b>3.6 never had that problem</b>, so the same clause pack bought <b class="num">+1.3</b> precision and gave recall instead. Two harnesses, one starting point, different destinations — because they lacked different things.</p>
+  </div>
+  <div class="col" style="flex:.85">
+    <div class="card acc-red">
+      <h4>A harness does not transfer</h4>
+      <p style="margin:0 0 8px;font-size:16px">Every cross-loaded cell scored below the tuned one. The one clean controlled comparison — 3.6 handed 3.8's exact bytes — is worth <b class="num">5.7</b> accuracy points to 3.8 and nothing at all on precision:</p>
+      <table style="margin:0">
+        <tr><td>3.6 on 3.8's instrument</td><td class="n">78/123 = 63.4 %</td><td class="n">55.3 % prec</td></tr>
+        <tr><td>3.8 on 3.8's instrument</td><td class="n">85/123 = 69.1 %</td><td class="n">55.2 % prec</td></tr>
+      </table>
+    </div>
+    <div class="card acc-amber" style="margin-top:12px">
+      <h4>We published a claim and then withdrew it</h4>
+      <p style="margin:0;font-size:16px">Early, on 9 scenarios: <b>"+8.3 points of harness transfer."</b> At 23 scenarios the same comparison came out at <b>−1</b>. The claim is gone from the repo, and the withdrawal is recorded in the runbook. <em>A harness is part of a model's deployment, not infrastructure you qualify once.</em></p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>report §3.2, §3.5 · identical instrument = stats_pack 16e53e0ef0b097ab, run_zero_shot a4b967de975625f9, 3866-char prompt</span><span>20 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Where the difficulty lives" data-notes="28:15–29:15 — The family table is the most useful slide for anyone designing their own eval: four of eight families are saturated, so they cannot discriminate; nearly all the signal is in systemic and noise_trap. If your benchmark has no traps and no clean books, it measures enthusiasm.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · by question type</div>
+<h2>Four of the eight families are saturated. Two carry the signal.</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.15">
+    <table class="heat compact">
+      <tr><th>family</th><th class="n">3.6 raw</th><th class="n">3.8 raw</th><th class="n">3.6 harnessed</th><th class="n">3.8 harnessed</th></tr>
+      <tr><td>systemic</td><td class="c">41 | 52</td><td class="c">54 | 66</td><td class="c">44 | 51</td><td class="a">56 | 51</td></tr>
+      <tr><td>shock</td><td class="b">75 | 25</td><td class="c">67 | 72</td><td class="a">100 | 8</td><td class="a">100 | 8</td></tr>
+      <tr><td>drift</td><td class="c">67 | 25</td><td class="c">67 | 70</td><td class="c">67 | 33</td><td class="c">67 | 40</td></tr>
+      <tr><td>mixed</td><td class="a">93 | 7</td><td class="b">80 | 48</td><td class="b">87 | 24</td><td class="b">87 | 28</td></tr>
+      <tr><td>recovery</td><td class="a">100 | 0</td><td class="a">100 | 55</td><td class="a">100 | 0</td><td class="a">100 | 0</td></tr>
+      <tr><td>volatility</td><td class="a">100 | 0</td><td class="a">100 | 60</td><td class="a">100 | 57</td><td class="a">100 | 60</td></tr>
+      <tr><td>noise_trap</td><td class="d">0 | 100</td><td class="d">17 | 92</td><td class="c">50 | 62</td><td class="c">50 | 70</td></tr>
+      <tr><td>CLEAN</td><td class="a">silent</td><td class="d">cried wolf</td><td class="a">silent</td><td class="a">silent</td></tr>
+    </table>
+    <p class="small" style="margin-top:10px">Cell = <b>accuracy | FP/claim</b>, %. Green = strong, amber = middling, red = bad.</p>
+  </div>
+  <div class="col">
+    <ul class="tight">
+      <li><strong>drift, recovery and volatility saturate at 100 %</strong> recall for every harnessed configuration. They can no longer separate two models — they are now regression tests, not exams.</li>
+      <li><strong>systemic is where models actually differ</strong> (44 % vs 56 %): several lines moving for one shared cause. That is the closest thing in the set to a real experience-study finding, and it is also the hardest.</li>
+      <li><strong>noise_trap is the ceiling for everyone: 50 % at best.</strong> Unharnessed, 3.6 scored <b class="num">0 % accuracy with 100 % false alarms</b> — it claimed anomalies and got every single one wrong.</li>
+      <li><strong>CLEAN honesty is a behaviour, not a score.</strong> Both models go quiet once the harness says "a z of 3 in one year is ordinary". Unharnessed, 3.8 could not.</li>
+    </ul>
+    <div class="card acc-teal" style="margin-top:8px">
+      <h4>The design lesson for your own eval</h4>
+      <p style="margin:0;font-size:16px">If every question is answerable, accuracy measures how often the model bothers to answer. The discriminating power of this benchmark lives almost entirely in <b>traps, clean books and multi-line events</b> — the things a first draft of any eval never includes.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>report §3.1 · held-out split, three runs per family</span><span>21 / 34</span></div>
+</section>
+
+<section class="slide" data-title="The actual words" data-notes="29:15–30:45 — This is the slide the user asked for by name — the literal words that score. Contrast the two answers, both from the same book, both confident. The winning answer is short and uses the vocabulary; the losing answer is longer, quotes correct arithmetic, and is still wrong. Also flag the schema's honesty channel: evidence and recommended_action are recorded but NOT scored, because grading free-text advice is unsolved.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · the actual words that score</div>
+<h2>Same book, same confidence, opposite verdicts</h2>
+<div class="rule"></div>
+<p class="small" style="margin-bottom:10px">Both answers are from <span class="num">sc-c9d78b</span> — the four-finding book from Act 1, where the planted truth is two 2020 shocks on Death and IP.</p>
+<div class="row">
+  <div class="col">
+    <div class="card acc-green" style="margin:0">
+      <h4>✓ Scores · 3.6, own harness, run 2 — 2/4, zero false alarms</h4>
+<pre class="small">{ "benefit": "Death", "years": [2020,2020],
+  "pattern": "shock", "direction": "increase",
+  "magnitude": "spike to A/E 1.29 (~+0.27 over baseline),
+                Poisson z ~ 6.6", "confidence": 0.95 }
+{ "benefit": "IP",   "years": [2020,2020],
+  "pattern": "shock", "direction": "increase",
+  "magnitude": "spike to A/E 1.13 (~+0.13 over baseline),
+                Poisson z ~ 5.0", "confidence": 0.9 }</pre>
+      <p class="small" style="margin:8px 0 0"><b>Two entries. Both planted controls. Nothing else written.</b> Line, pattern word, years and direction all agree, so both count. The whole answer is four fields.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-red" style="margin:0">
+      <h4>✗ Costs you twice · 3.8, own harness, run 3 — 2/4, three false alarms</h4>
+<pre class="small">{ "benefit": "Death", "years": [2022,2024], "pattern": "drift",
+  "direction": "increase", "confidence": 0.5,
+  "magnitude": "~+0.038/yr (0.893 -&gt; 0.913 -&gt; 0.970, R2 0.93);
+     a below-baseline level (window mean ~-0.125 vs pre-2022)
+     recovering toward 1.0" }
+{ "benefit": "Death", "years": [2020,2024], "pattern": "volatility",
+  "direction": "dispersion", "confidence": 0.4,
+  "magnitude": "YoY sd 0.154 vs Poisson 0.048 (x3.23 overdispersion);
+     onset ratio 2.07 (max 1yr move 0.285 &gt; net excursion)" }</pre>
+      <p class="small" style="margin:8px 0 0"><b>Every number in those two entries is correct.</b> The drift and the overdispersion are real. But nothing was planted there — so each entry is a miss on the unit it failed to describe <em>and</em> a false alarm in the findings ledger. One wrong judgement, two places on the scoreboard.</p>
+    </div>
+  </div>
+</div>
+<div class="row" style="margin-top:14px">
+  <div class="col"><div class="card" style="margin:0"><h4>What the vocabulary buys</h4><p style="margin:0;font-size:16px">The four pattern words are the whole contract. A finding that describes the right line and the right years with the <em>wrong pattern word</em> scores nothing: <b>pattern agreement is exact</b>. Vocabulary is not decoration — it is the score.</p></div></div>
+  <div class="col"><div class="card" style="margin:0"><h4>What is deliberately not marked</h4><p style="margin:0;font-size:16px"><span class="num">recommended_action</span> is required in every answer and <b>recorded in every corpus — and never scored</b>. Grading free-text professional advice is a separate unsolved problem, and pretending to grade it would make the whole number less trustworthy, not more.</p></div></div>
+</div>
+<div class="foot"><span>verbatim from results/harness_q36_final/zero_shot/sc-c9d78b_run02.json · harness_final/…run03.json</span><span>22 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What it falsely claimed" data-notes="30:45–32:00 — Two failure shapes with different remedies — this is the punchline for a governance audience. Over-claiming needs discipline; mislabelling needs vocabulary. Applying the wrong medicine was tested and confirmed to fail. Use my recount caveat out loud: these pattern shares are my own recount of unmatched findings, so they include a couple of duplicates the official scorer discards.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · what it invented</div>
+<h2>The false-alarm pile changed <em>shape</em>, not just size</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.1">
+    <table class="compact">
+      <tr><th>claimed pattern of the false alarm</th><th class="n">3.8 no harness</th><th class="n">3.8 harnessed</th><th class="n">3.6 harnessed</th></tr>
+      <tr><td><i>"other"</i> — often literally the words <i>"no anomaly"</i></td><td class="n fp">51</td><td class="n">1</td><td class="n">0</td></tr>
+      <tr><td>shock</td><td class="n">50</td><td class="n">42</td><td class="n">31</td></tr>
+      <tr><td>drift</td><td class="n">12</td><td class="n">13</td><td class="n">11</td></tr>
+      <tr><td>volatility</td><td class="n">9</td><td class="n">13</td><td class="n">8</td></tr>
+      <tr><td>recovery <span class="tiny">— invented from a pooled age/diagnosis cell</span></td><td class="n fp">23</td><td class="n">0</td><td class="n">0</td></tr>
+    </table>
+    <p class="small" style="margin-top:10px">Shape of the false-alarm pile, recomputed for this talk from the published run records: every finding a strict match did not claim, on the 24-book held-out split, 3 runs each (my recount: 145 → 69 for 3.8, 50 for 3.6; the official scorer discards a couple of duplicates).</p>
+    <div class="card acc-green" style="margin-top:10px">
+      <h4>Two clauses, two failure modes deleted</h4>
+      <p style="margin:0;font-size:16px"><em>"listing an observation you are not claiming is scored as a false alarm"</em> — entries whose magnitude literally reads "No anomaly" go <b>13 → 0</b>.<br><em>"small cells are not evidence"</em> — invented recoveries read off a pooled 0.955 termination A/E go <b>23 → 0</b>. Two clauses, two entire failure modes deleted; what is left is genuine disagreement about <em>which</em> pattern it was.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-red" style="margin:0">
+      <h4>Over-claim ≠ mislabel — and the remedies are opposite</h4>
+<pre style="font-size:14px">false alarms = mislabels (a control was also missed)
+             + over-claims (nothing was missed — it is invented)
+
+3.8 own harness : 69 false alarms, 38 misses  -&gt;  <span class="fp">+31 inventions</span>
+3.6 own harness : 50 false alarms, 44 misses  -&gt;  <span class="hit">+6 inventions</span></pre>
+      <p style="margin:8px 0 0;font-size:16px">3.8 emits <b>157 claims for 123 planted units</b> — 28 % more findings than there is anything to find. 3.6 emits 129 for 123 and its errors are almost entirely <b>mislabels</b>: right line, wrong word.</p>
+    </div>
+    <div class="card acc-amber" style="margin-top:12px">
+      <h4>We tested giving the wrong medicine</h4>
+      <p style="margin:0;font-size:16px">Over-claiming needs <em>restraint</em> clauses; mislabelling needs <em>vocabulary</em> work. Trying to make 3.6 report less did nothing — its numbers did not move. The edits that worked for 3.6 taught it pattern words. Same instrument, opposite prescription, both measured.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>report §3.7 · pattern shares recounted for this talk from the published run records</span><span>23 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Cost beside the score" data-notes="32:00–32:45 — Cost changes the ranking, so it is never a footnote. 3.6 reaches 93 % of 3.8's accuracy for about a third of the time and tokens, with better precision. Then the tool asymmetry: one model used the sandbox in a quarter of runs, the other never once in 144 runs — a behaviour, not a defect, and it is exactly what the harness has to be tuned around.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · the other axis</div>
+<h2>What one answer costs, printed next to what it bought</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <table>
+      <tr><th>one 72-call held-out exam</th><th class="n">tokens</th><th class="n">wall clock</th><th class="n">acc</th><th class="n">prec</th></tr>
+      <tr><td>3.6 + own harness</td><td class="n">0.89 M</td><td class="n">5.9 h</td><td class="n">65.8 %</td><td class="n hit">61.3 %</td></tr>
+      <tr><td>3.8 + own harness</td><td class="n">1.95 M</td><td class="n">21.9 h</td><td class="n hit">71.2 %</td><td class="n">58.1 %</td></tr>
+    </table>
+    <p class="small" style="margin-top:10px">Every API call actually made in those two corpora, retries included, on one llama.cpp slot at ~17.5 tokens/s, at equal 72-call exams.</p>
+    <div class="card acc-teal" style="margin-top:10px"><h4>The finding</h4><p style="margin:0;font-size:17px">3.6 reaches <b>93 % of 3.8's accuracy</b> on <b>a quarter of the wall clock</b> (5.9 h vs 21.9 h) and <b>46 % of the tokens</b> — with better precision. Cost-adjusted, the "weaker" model wins on three axes out of four.</p></div>
+  </div>
+  <div class="col">
+    <div class="card" style="margin:0">
+      <h4>Median per answer</h4>
+      <table style="margin:0">
+        <tr><th></th><th class="n">wall</th><th class="n">reasoning</th><th class="n">compl. tokens</th></tr>
+        <tr><td>3.6 held-out</td><td class="n">4.8 min</td><td class="n">15.6 k chars</td><td class="n">5 719</td></tr>
+        <tr><td>3.8 held-out</td><td class="n">13.5 min</td><td class="n">33.9 k chars</td><td class="n">13 763</td></tr>
+        <tr><td>3.8 no harness</td><td class="n">16.4 min</td><td class="n">43.1 k chars</td><td class="n">16 227</td></tr>
+      </table>
+    </div>
+    <div class="card acc-amber" style="margin-top:12px">
+      <h4>Tool use is a behaviour, not a feature flag</h4>
+      <div class="stack" style="margin-top:6px">
+        <div class="hbar"><span class="t">3.8 ran python</span><span class="bar"><i style="width:24%;background:var(--amber)"></i></span><span class="v">~24 %</span></div>
+        <div class="hbar"><span class="t">3.6 ran python</span><span class="bar"><i style="width:1.5%;background:var(--red)"></i></span><span class="v">0 / 144</span></div>
+      </div>
+      <p style="margin:8px 0 0;font-size:16px">3.6 never once used the sandbox — after two dedicated attempts to make it, including mandatory-use wording. It correctly judges the pack already contains the arithmetic. Dormant, and <b>that asymmetry is exactly what a harness has to be tuned around</b>: the only hard failure in this study was a malformed tool request, which 3.6 structurally cannot produce.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>report §3.8, §3.9 · corpora totals include every retry actually made</span><span>24 / 34</span></div>
+</section>
+
+<section class="slide" data-title="The failure we published" data-notes="32:45–34:00 — Two governance-flavoured stories. Left: the aborted scenario — the honest handling is 'report it as failed, both bounds, show the conclusions do not move', and deliberately not patching the parser so it stays auditable. Right: two units that are not the model's fault — sc-d72b95's planted drift is half the size of what four annual observations can resolve, so 3.6 is at ceiling on everything identifiable. Some portion of every benchmark score is the benchmark's fault.">
+<div class="kicker"><span class="dot"></span> Act 3 · Results · the parts that flatter nobody</div>
+<h2>A failure kept on the record, and two misses that were not the model's</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <div class="card acc-red" style="margin:0">
+      <h4><span class="num">sc-e6ffa4</span> — never answered, never deleted</h4>
+      <p style="margin:0 0 6px;font-size:16.5px">All four lines volatile. Six or more attempts, one running 2 h 25 min, zero usable answers. What was on disk instead of an answer:</p>
+<pre style="font-size:13px">{"tool": "python", "code": "import csv\nfrom collections import…
+parse error: Invalid \escape: line 1 column 2108 (char 2107)</pre>
+      <p style="margin:6px 0 0;font-size:16px">Model-authored code inside a bad JSON escape; the tool never executed; the validator rejected the answer too; a misleading <span class="num">TruncatedStream</span> label made it retry forever. Three conditions had to co-occur — and the harness was one of them (the volatility guidance block that describes this book exactly was absent from that prompt).</p>
+      <table style="margin-top:8px">
+        <tr><td>excluded (23 books)</td><td class="n">70.3 %</td><td>"how did it do on what it attempted?"</td></tr>
+        <tr><td>counted as 0/12 (24 books)</td><td class="n fp">63.4 %</td><td>the honest worst case</td></tr>
+      </table>
+      <p class="small" style="margin:8px 0 0"><b>Costs 6.9 accuracy points, leaves FP/claim untouched</b> — an aborted run emits no claims at all. Conclusions unaffected: every gap in Act 3 is bigger than ±7. And the parser defect was <b>deliberately not patched</b>: a documented failure stays auditable; a patched one becomes a silent gap. It must always be reported as failed.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-amber" style="margin:0">
+      <h4>Some of the miss rate is the exam's fault</h4>
+      <p style="margin:0 0 6px;font-size:16.5px"><b><span class="num">sc-d72b95</span></b> — a Death drift planted at +0.05/yr over 2021–2024. Fitted from the file: slope <b class="num">+0.0253/yr</b>, SE <b class="num">0.0251</b>, <b class="num">t = 1.01</b> where four points need <b class="num">|t| &gt; 4.30</b> at 2 df. The 95 % interval <span class="num">[−0.083, +0.133]</span> contains zero <em>and</em> the planted value. Resolving +0.025/yr at 80 % power needs roughly <b class="num">nine years</b> of data at this noise level, not four.</p>
+      <p style="margin:0;font-size:16.5px">3.6 finds <b>all three identifiable controls</b> in that book — it is at ceiling on everything the data support, and the scoreboard still counts the fourth as a miss.</p>
+      <p style="margin:8px 0 0;font-size:16.5px"><b><span class="num">sc-f520e5</span></b> — the planted truth is volatility (variance ratio <b class="num">F = 17.1</b> against a critical 5.41), but the same Death line also swings 0.95 → 1.34 → 0.80, a mean of 1.102 inside the window against 0.943 outside. The model's alternative "drift" reading is <b>defensible from the data</b>. Edits that pushed it toward the truth made the score <em>worse</em>, because they asked it to ignore a real feature.</p>
+    </div>
+    <div class="card acc-teal" style="margin-top:12px">
+      <h4>The line to remember</h4>
+      <p style="margin:0;font-size:17px">Before you fire the model, check whether the exhibit could have supported the answer you wanted. <b>Identifiability comes before accuracy</b> — in a benchmark and in a real experience study.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>report §3.10, §3.11</span><span>25 / 34</span></div>
+</section>
+
+<!-- ══════════════ ACT 4 — WHY THIS MATTERS ══════════════ -->
+<section class="slide" data-title="Act 4 · the pair" data-notes="34:00–35:15 — The governance core: what you deploy is a model AND the deterministic thing wrapped around it. Two facts from this study force it: behaviour moved between 3.6 and 3.8 with no architecture change, and the harness was worth different things to each. Use the ORSA / model-change-control language deliberately — this audience lives in it.">
+<div class="kicker"><span class="dot"></span> Act 4 · Why this matters</div>
+<h2>You do not govern a model. You govern the pair.</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.15">
+    <p style="font-size:21px;color:var(--ink)">Before anyone signs an LLM off for experience work, four questions have to be answered — and <strong>one convincing demo answers none of them</strong>:</p>
+    <div class="grid g2" style="gap:12px">
+      <div class="card acc-teal"><h4>1 · How good is it?</h4><p style="margin:0;font-size:16px">how much of what is really in the data does it find — on books nobody tuned on</p></div>
+      <div class="card acc-teal"><h4>2 · What does it miss, and what does it invent?</h4><p style="margin:0;font-size:16px">two different failures, priced differently, fixed differently — they cannot be averaged into one score</p></div>
+      <div class="card acc-teal"><h4>3 · What does one answer cost?</h4><p style="margin:0;font-size:16px">time and tokens, printed beside the result they bought, never in an appendix</p></div>
+      <div class="card acc-teal"><h4>4 · Is the pipeline around it right?</h4><p style="margin:0;font-size:16px">and <em>on what evidence</em> would you say the wrapper is still fit for purpose</p></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-amber">
+      <h4>Why the pair, and not the model</h4>
+      <p style="margin:0 0 8px;font-size:16.5px">3.6 and 3.8 share a 27 B architecture — parameter count, weight size, compute graph, same serving slot, same sampler. <b>Everything that differs is behaviour.</b> How eagerly it asserts. How much it checks before speaking. Whether it reaches for a tool at all.</p>
+      <p style="margin:0;font-size:16.5px">So when a vendor ships a new version, what changes is exactly the thing your harness was compensating for. <em>Behaviour moves when a model is retrained even when its architecture does not.</em></p>
+    </div>
+    <div class="card acc-red" style="margin-top:12px">
+      <h4>The sentence to refuse</h4>
+      <p style="margin:0;font-size:18px"><i>"We upgraded the model."</i> That is a notice, not an assessment. A new version inherits an <b>unproven</b> harness, not a working one — and here the tuned harness was worth <b class="num">+23.8</b> precision points to one version and <b class="num">+1.3</b> to the next.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>the four questions are report §1.2 · the pair argument is report §1.5</span><span>26 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What this changes Monday" data-notes="35:15–36:15 — Make it concrete: precision 58 % is not 'bad', it is a specific operating model — triage, not verdict. Ask the room to price a miss vs a false alarm in their own work: that ratio is the whole calibration. Note the 13.5-min-per-answer latency means this is a batch overnight tool, not a chat tool.">
+<div class="kicker"><span class="dot"></span> Act 4 · Why this matters · operating model</div>
+<h2>58 % precision is not a verdict on the model. It is a design constraint.</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.05">
+    <table class="compact">
+      <tr><th>if you let it…</th><th>then at 58 % precision</th><th>and</th></tr>
+      <tr><td><b>file the commentary</b></td><td>2 of every 5 escalated findings are wrong</td><td class="fp">unusable</td></tr>
+      <tr class="hl"><td><b>triage the review queue</b></td><td>it surfaces the 71 % of real movements it sees; a human confirms in minutes instead of screening 40 line-years</td><td class="hit">this is the one</td></tr>
+      <tr><td><b>rank by its own confidence</b></td><td>confidences were 0.4–0.95 and did not track correctness well enough to bank on</td><td class="miss">not measured here</td></tr>
+    </table>
+    <div class="card acc-amber" style="margin-top:12px">
+      <h4>Priced the way you already price things</h4>
+      <p style="margin:0;font-size:16.5px">A <b>miss</b> is a deterioration nobody looks at — the error that ends up in a reserve. A <b>false alarm</b> is a quarter of an analyst's morning and a bit of credibility for whoever repeats it. Your ratio between those two <em>is</em> the model choice: 3.8 (finds more) if a miss dominates, 3.6 (invents less) if a false alarm does. That is an actuarial judgement, not a technology one.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card acc-teal" style="margin:0">
+      <h4>The workflow the numbers actually support</h4>
+      <ol class="tight" style="margin:4px 0 0">
+        <li>harness computes the evidence pack overnight — deterministic, no model, no cost</li>
+        <li>model returns structured findings against a schema <span class="tiny">(~13.5 min/answer at 3.8 — a batch job, not a chat window)</span></li>
+        <li>every finding carries the file and rows it relied on, so a human checks <b>the claim, not the reasoning</b></li>
+        <li>the reviewer's verdict is logged — that log is next year's regression test</li>
+      </ol>
+      <p class="small" style="margin:10px 0 0">Note what is <b>not</b> automated: the pattern judgement stays with the model only because we could verify it here. Where there is no answer key, this is a drafting aid, full stop.</p>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h4>Why the schema matters more than the IQ</h4>
+      <p style="margin:0;font-size:16.5px">Four fields, four allowed pattern words, one rule about what must not appear. That contract is what made this measurable at all — and it is the part you can copy into your own stack this quarter without buying anything.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>precision figures from the held-out exam · latency medians from the run records</span><span>27 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Governance checklist" data-notes="36:15–37:00 — Fast slide — it's the one people photograph. Each line is a control they already operate for cat models and IFRS 17 models, restated for an LLM plus its pipeline. Invite pushback: 'what would convince you the wrapper is still fit for purpose' is the question worth taking back.">
+<div class="kicker"><span class="dot"></span> Act 4 · Why this matters · the control list</div>
+<h2>The same five controls you already run — restated for a model and its pipeline</h2>
+<div class="rule"></div>
+<table>
+  <tr><th style="width:24%">control you already operate</th><th style="width:38%">what it means here</th><th>what this repo can hand an auditor</th></tr>
+  <tr><td><b>Independent validation</b></td><td>the validator is not the builder — and the harness was not tuned by the model that sat the exam</td><td>a third model drove the loop; both subjects scored by one frozen scorer</td></tr>
+  <tr><td><b>Version change control</b></td><td>a model version <em>and</em> a prompt/stat-pack version are the unit of change</td><td><span class="num">harness_snapshot/</span> with SHA-256 per corpus; pinned prompt files</td></tr>
+  <tr><td><b>Input data integrity</b></td><td>every model-facing file hashed; the answer key provably out of reach</td><td><span class="num">dataset.json</span> hashes, <span class="num">seal.json</span>, byte-level leak scan at build and before run 1</td></tr>
+  <tr><td><b>Performance monitoring</b></td><td>two ledgers, on unseen books, three runs, cost beside the score</td><td>per-run records: prompt, answer, tool log, scorer diff, tokens, wall clock</td></tr>
+  <tr><td><b>Documented limitations</b></td><td>failures and undecidable tests are published, not removed</td><td>the aborted book, the withdrawn transfer claim, the two unidentifiable units, the reverted edits</td></tr>
+</table>
+<div class="card acc-amber" style="margin-top:18px">
+  <h4>The question worth taking back to your next model-risk committee</h4>
+  <p style="margin:0;font-size:19px"><i>"When the model underneath our pipeline changes, what tells us the pipeline is still right — and who is accountable for asking?"</i> &nbsp;If the answer is "the vendor's blog post", you have an unmonitored dependency in a regulated process.</p>
+</div>
+<div class="foot"><span>mapped to the guarantees in README "Locked guarantees" and BENCHMARK_IMPLEMENTATION_GUIDE §2</span><span>28 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What is honest to claim" data-notes="37:00–37:45 — Do not skip this — it buys the credibility of everything before it. Five limits, stated plainly: two subjects; synthetic; no answer key in real work; the exam is spent; and a benchmark number is a ranking device, not a forecast. Say which ones I'd fix first: more subjects, fresh held-out set.">
+<div class="kicker"><span class="dot"></span> Act 4 · Why this matters · the limits</div>
+<h2>What is honest to claim from this, and what is not</h2>
+<div class="rule"></div>
+<div class="grid g2" style="gap:16px">
+  <div class="card acc-red"><h4>Two subjects, one serving stack</h4><p style="margin:0;font-size:16.5px">"The harness must be re-derived per model" is a real signal at real replication cost — but it is <b>two models</b>, both Qwen-lineage 27 B, one llama.cpp slot. It is not a general theory of harness portability. Two more subjects on a different stack would change what I am willing to say out loud.</p></div>
+  <div class="card acc-red"><h4>Synthetic, by construction</h4><p style="margin:0;font-size:16.5px">Real books have mix shifts, system changes, reinsurance distortions and cohort effects that a planted control does not reproduce. The skill measured here is <em>"is this gap signal"</em> — the same move as real work, on data whose difficulty I controlled and whose realism I did not.</p></div>
+  <div class="card acc-red"><h4>A hit here is not good judgement</h4><p style="margin:0;font-size:16.5px">These patterns are planted, so a hit means recovering a known signal. A real experience study is a judgement call with no answer key — is this deterioration worth a pricing review — and <b>this benchmark cannot measure that</b>, no matter how many scenarios I add.</p></div>
+  <div class="card acc-red"><h4>This exam is spent, and that is by design</h4><p style="margin:0;font-size:16.5px">The 24 held-out books are published with their answers, so they can never serve as an unseen test for anything that reads this repo. A new exam means generating new books with fresh controls. <b>Benchmarks rot</b>: four families are already saturated.</p></div>
+</div>
+<p style="margin-top:20px;font-size:19px;max-width:1060px">And the one I would repeat in any board paper: <strong>a tuning-split score is a ranking device, not a forecast.</strong> It overstated real performance by about 30 points here, for both models.</p>
+<div class="foot"><span>README "Limitations &amp; Assumptions" · report §3.6</span><span>29 / 34</span></div>
+</section>
+
+<!-- ══════════════ ACT 5 — BENCH + SYNTHETIC ══════════════ -->
+<section class="slide" data-title="Act 5 · what a bench buys" data-notes="37:45–38:45 — Reframe: a benchmark is not a leaderboard, it's a test fixture for a pipeline. List the five things it buys, each with the concrete instance from this project. Emphasise 'comparable across time and vendors' — the thing no one-off demo can give you.">
+<div class="kicker"><span class="dot"></span> Act 5 · What a benchmark is for</div>
+<h2>A benchmark is not a leaderboard. It is a test fixture.</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <div class="stack">
+      <div class="card acc-teal" style="margin:0"><h4>1 · An answer key that cannot be argued with</h4><p style="margin:0;font-size:16px">Truth is <b>generated</b>, never hand-curated. Nobody's judgement is buried in the labels, so a disagreement is about the model, not about who labelled the file.</p></div>
+      <div class="card acc-teal" style="margin:0"><h4>2 · Comparability across time and vendors</h4><p style="margin:0;font-size:16px">Same 123 units, same scorer, same books, every configuration ever run. "Is the new model better for us?" becomes arithmetic instead of vibes.</p></div>
+      <div class="card acc-teal" style="margin:0"><h4>3 · Regression detection on your own pipeline</h4><p style="margin:0;font-size:16px">Every harness edit here was validated by regenerating all 23 evidence packs and diffing them. That is a unit test for a prompt — the thing most teams have never built.</p></div>
+      <div class="card acc-teal" style="margin:0"><h4>4 · Difficulty you can dial</h4><p style="margin:0;font-size:16px">Undetectable drifts, lookalike traps, clean books, coordinated multi-line events — set on demand, at a chosen distance from the noise floor.</p></div>
+      <div class="card acc-teal" style="margin:0"><h4>5 · Cost and quality on the same slide</h4><p style="margin:0;font-size:16px">Tokens and wall clock are recorded per run, so the tool can be priced per experience study instead of described as "cheap".</p></div>
+    </div>
+  </div>
+  <div class="col" style="flex:.72">
+    <div class="card acc-amber" style="margin:0">
+      <h4>The one property nothing else gives you</h4>
+      <p style="margin:0;font-size:17px">With a fixture you can answer <b>"would anything have noticed?"</b></p>
+      <p style="margin:8px 0 0;font-size:16.5px">The 30-point optimism gap, the withdrawn transfer claim, the 18→0 chatter clause, the <span class="num">sc-e6ffa4</span> failure — none of those are discoverable from a demo. They are discoverable only because the same exam was re-run under a changed instrument and the difference was arithmetic.</p>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h4>What the fixture cost</h4>
+      <ul class="tight" style="margin:4px 0 0">
+        <li>stdlib-only stack, Python ≥ 3.11 — scorer, pack, gate, leak scan all run offline, no API key</li>
+        <li>a full 23-book pass: <b class="num">~2 h</b> (3.6) to <b class="num">~7 h</b> (3.8) on one consumer slot</li>
+        <li>every published number reproducible from the clone: <b class="num">~135 MB</b>, largest file 0.41 MB</li>
+        <li>the expensive part was never compute. It was <b>the discipline to keep the exam clean</b>.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>docs/EXPERIMENT_INDEX.md §7 · replication commands in README Quick Start</span><span>30 / 34</span></div>
+</section>
+
+<section class="slide" data-title="What synthetic data buys" data-notes="38:45–39:45 — The heart: synthetic data's superpower is not volume or privacy, it is that the truth is knowable. Walk the four columns of the table — these are things you literally cannot do with real portfolios: plant an undetectable signal and see it missed; plant a lie and see it believed; plant nothing and see if it confesses; set the noise floor and measure identifiability. Then admit the realism debt.">
+<div class="kicker"><span class="dot"></span> Act 5 · Synthetic data</div>
+<h2>The superpower is not volume or privacy. It is a knowable truth.</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col" style="flex:1.2">
+    <table class="compact">
+      <tr><th>what synthetic lets you do</th><th>impossible with real data</th><th>what it measured here</th></tr>
+      <tr><td><b>plant a signal below the noise floor</b></td><td>you never know if it was missed or absent</td><td>found the 2 unidentifiable units → reclassified as exam defects, not model failures</td></tr>
+      <tr><td><b>plant a lookalike</b> (volatility that reads as a spike)</td><td>a false alarm is unprovable — was anything really there?</td><td>noise_trap: <b class="num">0 %</b> accuracy at <b class="num">100 %</b> false alarms for one unharnessed configuration</td></tr>
+      <tr><td><b>plant nothing at all</b></td><td>"the model was right to stay silent" is unverifiable</td><td>CLEAN book: the only test of restraint I know how to build</td></tr>
+      <tr><td><b>move the noise floor on purpose</b></td><td>the noise is whatever your portfolio happens to be</td><td>±0.045 Poisson sd vs a +0.05/yr drift: identifiability, measured</td></tr>
+      <tr><td><b>re-run the identical book forever</b></td><td>portfolios mutate; your test set ages in place</td><td>seed 42 + commit pin: byte-identical packs, so a diff is attributable to the harness alone</td></tr>
+      <tr><td><b>generate a brand-new exam in an hour</b></td><td>a fresh unseen set of real books takes a year to accumulate</td><td>the answer to a spent held-out split: new controls, new books, same scorer</td></tr>
+    </table>
+  </div>
+  <div class="col" style="flex:.62">
+    <div class="card acc-teal" style="margin:0">
+      <h4>And the practical benefits</h4>
+      <ul class="tight" style="margin:4px 0 0">
+        <li>no policyholder data — publishable, shippable, testable in CI</li>
+        <li>a benchmark you can make <b>public</b> is one a stranger can disprove</li>
+        <li>same bytes for both models, so "they saw the same exam" is provable</li>
+      </ul>
+    </div>
+    <div class="card acc-red" style="margin-top:12px">
+      <h4>The debt you owe back</h4>
+      <p style="margin:0;font-size:16.5px">Synthetic difficulty is <b>not</b> real difficulty. A generator that cannot express mix shift, system changes or reinsurance will teach you a clean version of a messy job. Every number I have shown you is measured on data whose <em>hardness I chose</em>.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>generator: Synthetic_Life_Insurance_Data_Generator · baseline A/E ≈ 1.0 by construction; controls edit actuals only</span><span>31 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Build your own" data-notes="39:45–40:45 — Close the loop: this is transferable, and here is the recipe in six moves with the traps already annotated. Land the point about traps and clean books being non-negotiable, and the point that the discipline is the cost, not the compute. Offer to share the checklist afterwards.">
+<div class="kicker"><span class="dot"></span> Act 5 · Steal this</div>
+<h2>Six moves to build one for your own work</h2>
+<div class="rule"></div>
+<div class="grid g3" style="gap:14px">
+  <div class="card acc-teal"><h4>1 · Pick a task with a planted truth</h4><p style="margin:0;font-size:16px">Something where you can <em>manufacture</em> the answer: A/E anomalies, lapse distortions, reserving outliers, mis-scaled exposures, a policy-coding error in a cohort. If nobody can say what the right answer is, it is not benchable yet.</p></div>
+  <div class="card acc-teal"><h4>2 · Two zones, and a leak scan</h4><p style="margin:0;font-size:16px">Model-facing files get opaque ids; the answer key lives elsewhere and is hashed. Scan the question for answer-bearing words automatically, before any call. <b>It will catch your own mistakes before it catches the model's.</b></p></div>
+  <div class="card acc-teal"><h4>3 · Families, and a trap set</h4><p style="margin:0;font-size:16px">Easy cases will saturate within one model version. Budget for lookalikes and at least one <b>nothing-is-wrong</b> case, or your accuracy number is measuring how often the model bothers to answer.</p></div>
+  <div class="card acc-teal"><h4>4 · A contract before a prompt</h4><p style="margin:0;font-size:16px">Small schema, closed vocabularies, strict matching, and an explicit rule that an unclaimed observation is a false alarm. A malformed answer is a miss. This is what makes marking mechanical.</p></div>
+  <div class="card acc-teal"><h4>5 · Two ledgers, three runs, cost logged</h4><p style="margin:0;font-size:16px">Recall <em>and</em> FP/claim, never blended. Three runs: single runs cannot separate a consistent failure from an unlucky one — several findings here reversed when the sample grew from 9 books to 23.</p></div>
+  <div class="card acc-teal"><h4>6 · Freeze a gate before you tune</h4><p style="margin:0;font-size:16px">Write the stopping rule first, tune on a split you will never report, mount the held-out exam once, and keep a byte snapshot of the instrument behind every number.</p></div>
+</div>
+<div class="card acc-amber" style="margin-top:18px">
+  <h4>Where this project would go next — and where yours should start</h4>
+  <p style="margin:0;font-size:17.5px">New families for the surfaces where this move recurs: <b>lapse and persistency</b>, <b>expense A/E</b>, <b>morbidity</b>, <b>reserve-adequacy deltas</b>. Each is a new scenario family and a new section of the evidence pack — not a new benchmark, not a new scorer, not a new governance argument. The skill being tested was never "reads A/E tables". It is <em>deciding whether a gap between actual and expected is signal.</em></p>
+</div>
+<div class="foot"><span>docs/dataset-usage.md · adding a scenario is one registry entry plus a regenerate</span><span>32 / 34</span></div>
+</section>
+
+<!-- ══════════════ CLOSE ══════════════ -->
+<section class="slide" data-title="Five things to remember" data-notes="40:45–41:30 — Slow down. Read each line; do not elaborate — the room has had a lot. Then: 'the receipts are in the repo, ask me anything.' Leave this slide up for questions.">
+<div class="kicker"><span class="dot"></span> Close</div>
+<h2>Five things to remember</h2>
+<div class="rule"></div>
+<div class="stack" style="max-width:1060px;margin-top:6px">
+  <div class="card acc-teal" style="margin:0"><h4>1 · Agentic coding is only real when it is measured</h4><p style="margin:0;font-size:17px">A loop that edits code against a test it cannot peek at, keeps or reverts on evidence, and snapshots the bytes behind every number. That is the version worth building — and the only version anyone will let you deploy.</p></div>
+  <div class="card acc-teal" style="margin:0"><h4>2 · The model found a lot and invented a lot</h4><p style="margin:0;font-size:17px">71 % of what was planted, at 58 % precision — with 31 pure inventions and a false accusation on a book that had nothing in it. Great eyes; needs a rulebook about what deserves to be written down.</p></div>
+  <div class="card acc-teal" style="margin:0"><h4>3 · The wrapper is part of the system</h4><p style="margin:0;font-size:17px">Worth +24 points of precision to one model, +6 points of recall to another, and it did not transfer either way. Re-measure the pair after every model change.</p></div>
+  <div class="card acc-teal" style="margin:0"><h4>4 · Two failures, two remedies</h4><p style="margin:0;font-size:17px">Misses and false alarms have different denominators, different costs and different fixes. Which model is better is an actuarial decision about pricing those two errors — never a technology decision.</p></div>
+  <div class="card acc-teal" style="margin:0"><h4>5 · Synthetic data's gift is a knowable truth</h4><p style="margin:0;font-size:17px">That is what makes measurement possible at all — and the realism debt is the price. Plant the traps, plant the empty book, and publish the failures.</p></div>
+</div>
+<div class="foot"><span>one file, no dependencies: charts drawn from the shipped CSVs, every number recomputed from the published run records</span><span>33 / 34</span></div>
+</section>
+
+<section class="slide" data-title="Sources &amp; questions" data-notes="41:30 onward — Q&A. Keep this slide up. Useful answers in my pocket: the 30-point gap (tuning vs held-out); the identifiability audit method (fit the slope, compare to the minimum detectable slope); why three runs (temp 1.0 spread was ±3 units of 44 — a single run would have let me fool myself); why the sandbox is only advisory and what a real jail needs (rlimits or a container, --network none, read-only mount); what I would do first (more subjects, a fresh held-out split, and the lapse family).">
+<div class="kicker"><span class="dot"></span> Where the receipts live</div>
+<h2>Sources, and the questions I hope you ask</h2>
+<div class="rule"></div>
+<div class="row">
+  <div class="col">
+    <table class="compact">
+      <tr><th>if you want</th><th>path</th></tr>
+      <tr><td>the four questions and the whole argument</td><td class="num">docs/MODEL_AND_HARNESS_EVOLUTION.md</td></tr>
+      <tr><td>every corpus, table and replication command</td><td class="num">docs/EXPERIMENT_INDEX.md</td></tr>
+      <tr><td>the harness, version by version, with the reverts</td><td class="num">docs/HARNESS_GROWTH.md</td></tr>
+      <tr><td>one scenario, exactly as the model saw it</td><td class="num">results/harness_final/zero_shot/sc-c9d78b_prompt.md</td></tr>
+      <tr><td>the scorer, the pack, the freeze gate</td><td class="num">scripts/score_xam.py · stats_pack.py · harness_gate.py</td></tr>
+      <tr><td>the data generator (separate public repo)</td><td class="num">Synthetic_Life_Insurance_Data_Generator</td></tr>
+    </table>
+  </div>
+  <div class="col">
+    <div class="card acc-teal" style="margin:0">
+      <h4>Questions worth asking</h4>
+      <ul class="tight" style="margin:4px 0 0">
+        <li>How did you stop the tuning split leaking into the reported number?</li>
+        <li>What is the <b>minimum detectable</b> drift in your own books — before you blame the analyst, or the model?</li>
+        <li>What did a false alarm cost you last quarter, and a missed deterioration?</li>
+        <li>If your vendor shipped a new model version next month, what would tell you the pipeline still works?</li>
+        <li>Why three runs and not one? <span class="tiny">Because temperature-1.0 noise here was about ±3 units of 44 — a single run would have let me believe anything.</span></li>
+      </ul>
+    </div>
+    <div class="card acc-amber" style="margin-top:12px">
+      <h4>The one-line version of today</h4>
+      <p style="margin:0;font-size:18.5px">I went and built an exam so that "the model is good at experience studies" became a sentence with a denominator. <b>It is a triage tool with a rulebook</b>, worth about 24 points of trustworthiness on one model version and none on the next — and every number of that, you can now audit.</p>
+    </div>
+  </div>
+</div>
+<div class="foot"><span>thank you · slides are one HTML file · numbers recomputed against the published corpora on the day of this talk</span><span>34 / 34</span></div>
+</section>
+
+<div id="bar"></div>
+<div id="hud"><span id="sec"></span><span><b id="cur">1</b> / <span id="tot">1</span></span><span id="clock"></span></div>
+<div class="hint">→ next · R reveal · S notes · O contents · F fullscreen · ? keys</div>
+<div id="overview"><h2 style="margin-bottom:18px">Contents</h2><ol id="ovl"></ol><p class="small" style="margin-top:20px">Press <b>O</b> again to return.</p></div>
+<div id="help"><div class="box"><h3>Keys</h3>
+<div class="k"><span><kbd>→</kbd> <kbd>←</kbd></span><span>next / previous slide</span>
+<span><kbd>R</kbd></span><span>reveal the answer on a quiz slide</span>
+<span><kbd>S</kbd></span><span>speaker notes (with the time budget)</span>
+<span><kbd>O</kbd></span><span>contents · click a title to jump</span>
+<span><kbd>F</kbd></span><span>fullscreen &nbsp; <kbd>Home</kbd>/<kbd>End</kbd> first/last</span>
+<span><kbd>?</kbd></span><span>this panel</span></div>
+<p class="small" style="margin-top:18px">Everything is in this one file: charts are drawn from the scenario CSVs shipped in the repo, and every number on the result slides is a recount of the published run records.</p>
+</div></div>
+</div></div>
+<div id="notes"></div>
+<script>
+/* ═══════════════ real data, from the scenario CSVs shipped in the repo ═══════════════ */
+const DATA={"sc-f69eea":{"DEATH":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[150,203,215,257,350,500,612,726,927,1080],"e":[240,290,337,390,447,508,576,652,735,826],"ae":[0.626,0.701,0.637,0.66,0.784,0.983,1.063,1.113,1.261,1.307]},"CI":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[600,723,808,1009,1124,1269,1346,1618,1740,1934],"e":[596,720,837,963,1097,1239,1386,1548,1719,1893],"ae":[1.006,1.004,0.965,1.048,1.024,1.024,0.971,1.045,1.012,1.021]}}};
+DATA["sc-0ce4d6"]={"CI":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[543,654,793,788,1015,1021,1222,2186,2126,1687],"e":[596,720,837,963,1097,1239,1386,1548,1719,1893],"ae":[0.91,0.908,0.947,0.818,0.925,0.824,0.882,1.412,1.237,0.891]}};
+DATA["sc-c9d78b"]={"DEATH":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[246,268,336,417,460,658,581,582,671,801],"e":[240,290,337,390,447,508,576,652,735,826],"ae":[1.027,0.925,0.996,1.07,1.03,1.294,1.009,0.893,0.913,0.97]},"IP":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[991,1161,1266,1375,1505,1741,1599,1707,1818,1872],"e":[1013,1142,1241,1342,1441,1545,1653,1768,1876,1980],"ae":[0.979,1.017,1.02,1.025,1.045,1.127,0.967,0.965,0.969,0.946]}};
+DATA["sc-12be68"]={"DEATH":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[226,337,326,379,451,508,564,662,749,818],"e":[240,290,337,390,447,508,576,652,735,826],"ae":[0.944,1.163,0.966,0.973,1.01,0.999,0.98,1.015,1.019,0.99]},"CI":{"y":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"a":[600,723,808,1009,1124,1269,1346,1618,1740,1934],"e":[596,720,837,963,1097,1239,1386,1548,1719,1893],"ae":[1.006,1.004,0.965,1.048,1.024,1.024,0.971,1.045,1.012,1.021]}};
+
+/* deterministic A/E line chart with a Poisson noise band around 1.0 */
+function aeChart(el, series, opts){
+  opts=opts||{}; const box=document.getElementById(el); if(!box) return;
+  const W=box.clientWidth||560, H=box.clientHeight||260, L=44, R=14, T=16, B=24;
+  const all=[], allE=[];
+  series.forEach(s=>{s.ae.forEach(v=>all.push(v)); s.e.forEach(v=>allE.push(v));});
+  let lo=Math.min(...all,1)*0.97, hi=Math.max(...all,1)*1.03;
+  if(opts.pad){lo-=opts.pad;hi+=opts.pad}
+  const x=i=>L+(W-L-R)*i/9, y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
+  let g="";
+  for(let k=0;k<5;k++){const v=lo+(hi-lo)*k/4, yy=y(v).toFixed(1);
+    g+=`<line class="grid-l" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/><text x="${L-7}" y="${+yy+3.5}" text-anchor="end">${v.toFixed(2)}</text>`;}
+  for(let i=0;i<10;i+=opts.xstep||2){g+=`<text x="${x(i)}" y="${H-7}" text-anchor="middle">${series[0].y[i]}</text>`;}
+  let path=`M ${L} ${y(1).toFixed(1)} L ${W-R} ${y(1).toFixed(1)}`;
+  let body="";
+  series.forEach(s=>{
+    let up=[],dn=[];
+    s.ae.forEach((v,i)=>{const z=1/Math.sqrt(s.e[i]);up.push(y(v+z));dn.push(y(v-z))});
+    body+=`<polygon class="band" points="${s.ae.map((v,i)=>x(i).toFixed(1)+","+up[i].toFixed(1)).join(" ")} ${s.ae.map((v,i)=>x(9-i).toFixed(1)+","+dn[9-i].toFixed(1)).join(" ")}"/>`;
+    body+=`<polyline class="ln" points="${s.ae.map((v,i)=>x(i).toFixed(1)+","+y(v).toFixed(1)).join(" ")}"/>`;
+    body+=s.ae.map((v,i)=>`<circle class="pt" cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3"><title>${s.name} ${s.y[i]}: A/E ${v} (${s.a[i]} actual vs ${s.e[i]} expected)</title></circle>`).join("");
+  });
+  let marks="";
+  (opts.marks||[]).forEach(m=>{const x1=x(m.a)-13,x2=x(m.b)+13;
+    marks+=`<rect class="mark" x="${x1.toFixed(1)}" y="${T}" width="${(x2-x1).toFixed(1)}" height="${H-T-B}"/>`;
+    if(m.label)marks+=`<text class="ann" x="${((x1+x2)/2).toFixed(1)}" y="${T+12}" text-anchor="middle">${m.label}</text>`;});
+  box.innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="one" x1="${L}" y1="${y(1).toFixed(1)}" x2="${W-R}" y2="${y(1).toFixed(1)}"/>${g}${marks}${body}</svg>`;
+}
+function drawCase(id,key,lines,opts){
+  const s=DATA[key]; aeChart(id, lines.map(l=>({name:l,y:s[l].y,a:s[l].a,e:s[l].e,ae:s[l].ae})), opts||{});
+}
+
+/* ═══════════════ deck engine ═══════════════ */
+const slides=[...document.querySelectorAll('.slide')];
+/* content wrapper + auto-fit so nothing ever clips on a projector */
+slides.forEach(s=>{
+  const foot=s.querySelector('.foot');
+  const box=document.createElement('div'); box.className='fitbox';
+  const kids=[...s.childNodes].filter(n=>n!==foot&&n.parentNode===s);
+  kids.forEach(n=>box.appendChild(n));
+  s.insertBefore(box, foot||null);
+  s._fit=box;
+});
+function fit(s){
+  const b=s._fit; if(!b) return;
+  b.style.transform='none';
+  const bb=b.getBoundingClientRect(), have=b.clientHeight||1;
+  const sc=bb.height/have||1;                       // stage scale, so measurements are layout-space
+  let bottom=0;
+  for(const c of b.children){ const r=c.getBoundingClientRect(); if(r.bottom>bottom) bottom=r.bottom; }
+  const need=Math.max((bottom-bb.top)/sc, b.scrollHeight);
+  if(need>have+1){ const k=Math.max(0.60,(have/need)*0.995); b.style.transform=`scale(${k.toFixed(4)})`; }
+}
+function fitStage(){
+  const st=document.getElementById('stage');
+  const k=Math.min(innerWidth/1300, innerHeight/740, 1.35);
+  st.style.transform=`scale(${k.toFixed(4)})`;
+  slides.forEach(s=>{ if(s.classList.contains('active')) fit(s); });
+}
+fitStage();
+addEventListener('resize',fitStage);
+const bar=document.getElementById('bar'),curEl=document.getElementById('cur'),totEl=document.getElementById('tot'),
+      secEl=document.getElementById('sec'),notesEl=document.getElementById('notes'),ov=document.getElementById('overview');
+let i=+(location.hash.slice(1)||0); if(!(i>=0&&i<slides.length)) i=0;
+totEl.textContent=slides.length;
+const ovl=document.getElementById('ovl');
+slides.forEach((s,n)=>{const li=document.createElement('li');li.innerHTML=`<b>${n+1}.</b> ${s.dataset.title||''}`;
+  li.onclick=()=>{go(n);ov.classList.remove('on')};ovl.appendChild(li)});
+
+function go(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+  bar.style.width=((i+1)/slides.length*100)+'%';
+  curEl.textContent=i+1; secEl.textContent=(slides[i].dataset.title||'');
+  notesEl.innerHTML=slides[i].dataset.notes?`<div class="nt">notes · slide ${i+1} · ${slides[i].dataset.title||''}</div>${slides[i].dataset.notes}`:'';
+  history.replaceState(null,'','#'+(i+1));
+  paintCharts(); requestAnimationFrame(()=>fit(slides[i]));
+}
+function paintCharts(){
+  const t=i+1;
+  if(t===4) drawCase('c1chart','sc-f69eea',['DEATH'],{marks:rev['c1a']?[{a:3,b:9,label:'planted drift window'}]:[]});
+  if(t===6) drawCase('c2chart','sc-0ce4d6',['CI'],{pad:.03,marks:rev['c2a']?[{a:2,b:8,label:'planted: volatility'}]:[]});
+  if(t===8) drawCase('c3chart','sc-c9d78b',['DEATH','IP'],{marks:rev['c3a']?[{a:1,b:4,label:'drifts 2016-19'},{a:5,b:5,label:'shock 2020'}]:[]});
+  if(t===10) drawCase('c4chart','sc-12be68',['DEATH'],{marks:rev['c4a']?[{a:1,b:1,label:'the z=+2.8 wobble'}]:[]});
+}
+const rev={};
+document.querySelectorAll('button.rv').forEach(b=>b.addEventListener('click',()=>{
+  const id=b.dataset.rv, el=document.getElementById(id);
+  rev[id]=true; el.classList.add('on'); b.style.display='none'; paintCharts(); fit(slides[i]);
+}));
+
+
+const clock=document.getElementById('clock'); let t0=Date.now();
+setInterval(()=>{const s=(Date.now()-t0)/1000|0;clock.textContent=`${String(s/60|0).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`},1000);
+
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey) return;
+  const k=e.key;
+  if(k==='?'||(k==='/'&&e.shiftKey)){document.getElementById('help').classList.toggle('on');return}
+  if(k==='Escape'){document.getElementById('help').classList.remove('on');ov.classList.remove('on');return}
+  if(k==='o'||k==='O'){ov.classList.toggle('on');return}
+  if(k==='s'||k==='S'){notesEl.classList.toggle('on');return}
+  if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();return}
+  if(k==='r'||k==='R'){const b=slides[i].querySelector('button.rv');if(b)b.click();return}
+  if(['ArrowRight',' ','PageDown','ArrowDown'].includes(k)){go(i+1);e.preventDefault()}
+  if(['ArrowLeft','PageUp','ArrowUp'].includes(k)){go(i-1);e.preventDefault()}
+  if(k==='Home'){go(0)} if(k==='End'){go(slides.length-1)}
+});
+slides.forEach(s=>s.addEventListener('click',e=>{
+  if(e.target.closest('button')||e.target.closest('a'))return;
+  const sel=window.getSelection&&String(window.getSelection()); if(sel&&sel.length>1)return;
+  const r=s.getBoundingClientRect(); if(e.clientX-r.left>r.width*0.30) go(i+1);
+}));
+go(i);
+</script>
+
+</body>
+</html>
