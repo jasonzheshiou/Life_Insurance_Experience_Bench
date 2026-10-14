@@ -6,8 +6,7 @@ conventions that future scenarios must follow.
 
 **Related docs:** [architecture](architecture.md) (design) ·
 [assumptions-reference](assumptions-reference.md) (ground-truth schema) ·
-[review-and-results](review-and-results.md) (test plan) ·
-[implementation guide](../BENCHMARK_IMPLEMENTATION_GUIDE.md) (arena plan)
+[review-and-results](review-and-results.md) (test plan)
 
 ---
 

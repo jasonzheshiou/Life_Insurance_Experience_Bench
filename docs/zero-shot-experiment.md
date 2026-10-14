@@ -8,7 +8,7 @@ This is the manual, open-ended version of **Stage 1** (guide §6). It uses only
 chat completions: no code execution, no sandbox. When M3 lands, the same idea is
 formalised with the strict `Verdict` schema and automatic scoring.
 
-**Related docs:** [implementation guide §6](../BENCHMARK_IMPLEMENTATION_GUIDE.md) ·
+**Related docs:**
 [Dataset usage](dataset-usage.md) (the leak-free dataset layout) ·
 [M0 handover plan](m0-handover.md) (where this becomes formal)
 

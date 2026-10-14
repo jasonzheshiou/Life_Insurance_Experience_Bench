@@ -538,7 +538,6 @@ This is the shipped tree.
 ```
 data_pipeline_arena/
 ├── README.md                           # this file
-├── BENCHMARK_IMPLEMENTATION_GUIDE.md   # the pre-experiment plan, annotated — guide context
 ├── config/
 │   └── scenarios.yaml                  # the 47-scenario registry — single source of truth for the dataset
 ├── scripts/                            # 30 modules: generator driver, stats pack, runner, scorer, gate, drivers
@@ -662,9 +661,6 @@ scenarios; [architecture](docs/architecture.md) covers the design.
 
 **Historical / planning documents** — accurate as records, superseded as instructions:
 
-- [Implementation guide](BENCHMARK_IMPLEMENTATION_GUIDE.md) — the plan written before the
-  first experiment ran, annotated section by section with what actually shipped. Guide
-  context only: read it to see how the design was decided, not to get instructions.
 - [Usage guide](docs/usage.md) — the planned `abench` CLI and `experiment.yaml` design
 - [M0 handover](docs/m0-handover.md), [zero-shot experiment](docs/zero-shot-experiment.md),
   [handover: run scenarios](docs/HANDOFF_RUN_SCENARIOS.md),

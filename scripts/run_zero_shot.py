@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Ad-hoc zero-shot "insights" experiment runner for the Data Pipeline Arena.
 
-Stage-1-style probe (BENCHMARK_IMPLEMENTATION_GUIDE.md §6), run manually before
+Stage-1-style probe, run manually before
 M3 formalizes it: give an LLM ONLY the model-facing scenario artifacts and a goal,
 and ask it to identify anomalies — where they are, what kind, and what to do.
 

@@ -1,9 +1,8 @@
 # Usage — Data Pipeline Arena
 
-How to set up, configure, and run the benchmark. The design behind every
-command is specified in the [implementation guide](../BENCHMARK_IMPLEMENTATION_GUIDE.md)
-(§10); the command surface below is the **planned** interface that milestone
-M0 wires up.
+How to set up, configure, and run the benchmark. The command surface below is
+the **planned** interface that milestone M0 wires up; the modules in `scripts/`
+are what runs today.
 
 > **Generating the scenario dataset** (the arena's Stage-0 input) is already
 > implemented — see the [Dataset usage guide](dataset-usage.md) for the CLI,

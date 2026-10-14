@@ -284,7 +284,7 @@ python3 scripts/leakcheck.py          # full workspace byte scan (~2-3 min)
 - Repo layout: `scripts/` (runner, leakcheck, score_xam, report_xam,
   generate_scenarios), `data/eval/` (model-facing), `data/truth/`
   (scorer-side), `results/` (experiment outputs + dossiers), `docs/`,
-  `config/scenarios.yaml`, `BENCHMARK_IMPLEMENTATION_GUIDE.md`.
+  `config/scenarios.yaml`.
 - Files authored by the previous session:
   - `scripts/run_zero_shot.py` v0.4.0 (patched: samplers, streaming,
     pooled termination, circuit breaker, resume, payload capture)

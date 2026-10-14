@@ -5,8 +5,7 @@ fit together, the invariants that must never be broken, and the extension
 points for future work.
 
 **Related docs:** [dataset-usage](dataset-usage.md) (operations) ·
-[assumptions-reference](assumptions-reference.md) (schemas) ·
-[implementation guide](../BENCHMARK_IMPLEMENTATION_GUIDE.md) (arena plan)
+[assumptions-reference](assumptions-reference.md) (schemas)
 
 ---
 

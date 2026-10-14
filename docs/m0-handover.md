@@ -1,9 +1,9 @@
 # M0 Handover Plan — Deterministic Arena Core
 
-> **Audience:** the next LLM/engineer implementing milestone **M0** of
-> `BENCHMARK_IMPLEMENTATION_GUIDE.md` (§13) in this repository.
+> **Audience:** the next LLM/engineer implementing milestone **M0** of the
+> arena plan.
 > **Read this whole file first.** It pins the current state and the exact
-> contracts; the guide is the strategy, this file is the tactical spec.
+> contracts; this file is the tactical spec.
 
 ---
 

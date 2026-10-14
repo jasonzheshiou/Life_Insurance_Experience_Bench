@@ -1188,7 +1188,7 @@ So when a vendor releases a new version, the thing that changes is exactly the t
 
 **Card — The question to take back to your next model-risk committee:** "When the model under our pipeline changes, what tells us the pipeline is still right? Who is responsible for asking?" If the answer is "the vendor's blog post", you have an unmonitored dependency inside a regulated process.
 
-**Source line:** mapped to the guarantees in README "Locked guarantees" and BENCHMARK_IMPLEMENTATION_GUIDE §2
+**Source line:** mapped to the guarantees in README "Locked guarantees"
 **Speaker notes:** 36:15–37:00 — Fast slide; it is the one people photograph. Each line is a control they already operate for cat models and IFRS 17 models, restated for an LLM plus its pipeline. Invite pushback: "what would convince you the wrapper is still fit for purpose" is the question worth taking back.
 
 ---

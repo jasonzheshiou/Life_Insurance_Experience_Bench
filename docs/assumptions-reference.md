@@ -1,8 +1,8 @@
 # Assumptions Reference — Data Pipeline Arena
 
 Everything the benchmark *assumes* about ground truth, contracts, and scoring.
-The [implementation guide](../BENCHMARK_IMPLEMENTATION_GUIDE.md) is the source
-of truth; this page is the quick reference.
+The code in `scripts/` and the registry in `config/scenarios.yaml` are the
+source of truth; this page is the quick reference.
 
 ---
 

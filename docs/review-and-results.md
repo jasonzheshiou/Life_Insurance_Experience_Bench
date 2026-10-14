@@ -1,9 +1,8 @@
 # Review & Results — Data Pipeline Arena
 
 The test plan, the current project status, and where measured results land.
-The authoritative test plan is §12 of the
-[implementation guide](../BENCHMARK_IMPLEMENTATION_GUIDE.md); this page tracks
-what has been done and what the runs produce.
+This page is the live test plan: it tracks what has been
+done and what the runs produce.
 
 ---
 
@@ -11,7 +10,7 @@ what has been done and what the runs produce.
 
 | Milestone | Scope | Status |
 |---|---|---|
-| Plan | `BENCHMARK_IMPLEMENTATION_GUIDE.md` (locked decisions, schemas, guards) | ✅ Done |
+| Plan | locked decisions, schemas and guards (design doc retired) | ✅ Done |
 | **Dataset (Stage 0)** | Scenario registry (47 scenarios), `generate_scenarios.py`, sanity gate, split/manifests/hashes | ✅ Done — see [Dataset usage](dataset-usage.md) |
 | **M0** | Skeleton + deterministic core: `manifest.py`, `verdict.py`, `datasets.py`, `scoring.py`, classical detector, stub "model", `report.py` | ⬜ Not started (recommended next) |
 | **M1** | Sandboxed runner (`runner.py` Tier 1) + one real LLM emitting Stage-2 code against the optimization set | ⬜ Not started |
